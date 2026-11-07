@@ -79,6 +79,11 @@ const TOOLS=[
  {key:'t6',name:'QuillBot',by:'writing',one:'Fix grammar. <b>Rewrite</b> anything.',acc:'#22E06F',tint:'#22E06F'},
  {key:'t7',name:'Consensus',by:'research',one:'Answers from <b>research papers</b>',acc:'#22E06F',tint:'#0E7A3C'},
 ];
+const LOGO={t1:'logos/notebooklm.svg',t2:'logos/perplexity-color.svg',t3:'logos/gamma.svg',t4:'logos/napkin.svg',t5:'logos/otter-ai.svg',t6:'logos/quillbot.svg',t7:'logos/consensus.svg'};
+const HAVE=window.__LOGOS__||{};
+function logo(T,size,r){const src=LOGO[T.key];const pad=Math.round(size*.17);
+  if(HAVE[T.key]) return `<span class="lg" style="width:${size}px;height:${size}px;border-radius:${r}px;background:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none;padding:${pad}px;box-shadow:0 10px 30px rgba(0,0,0,.4)"><img src="${src}" style="width:100%;height:100%;object-fit:contain"></span>`;
+  return `<span class="lg" style="width:${size}px;height:${size}px;border-radius:${r}px;background:#fff;color:#030403;display:inline-flex;align-items:center;justify-content:center;flex:none;font:900 ${Math.round(size*.52)}px Mont;box-shadow:0 10px 30px rgba(0,0,0,.4)">${T.name[0]}</span>`;}
 const scenesEl=$('#scenes');
 function mk(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
 
@@ -91,12 +96,12 @@ const hook=mk(`<div class="scene" id="s-hook">
   <div class="abs" id="h-7" style="top:300px;left:0;right:0;text-align:center;font-family:Mont;font-weight:900;font-size:560px;line-height:1;letter-spacing:-.06em;background:linear-gradient(180deg,#fff 30%,#22E06F);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 20px 80px rgba(34,224,111,.35))">7</div>
   <div class="abs title" id="h-t1" style="top:860px;left:0;right:0;text-align:center;font-size:118px">FREE AI TOOLS</div>
   <div class="abs" id="h-t2" style="top:990px;left:0;right:0;text-align:center;font-family:ISerif;font-size:92px;color:#D8E0DA">every student needs</div>
-  <div class="abs" id="h-list" style="top:1150px;left:70px;right:70px;display:flex;flex-wrap:wrap;justify-content:center;gap:18px"></div>
-  <div class="abs pill" id="h-save" style="top:1330px;left:50%;margin-left:-160px;width:320px;justify-content:center;background:var(--lime);color:#030403;font-size:34px;font-weight:900">
+  <div class="abs" id="h-list" style="top:1140px;left:40px;right:40px;display:flex;flex-wrap:wrap;justify-content:center;gap:14px"></div>
+  <div class="abs pill" id="h-save" style="top:1400px;left:50%;margin-left:-160px;width:320px;justify-content:center;background:var(--lime);color:#030403;font-size:34px;font-weight:900">
     <svg width="30" height="36" viewBox="0 0 30 36"><path d="M3 2h24v32l-12-8-12 8z" fill="#030403"/></svg> SAVE THIS</div>
 </div>`);
 scenesEl.appendChild(hook);
-TOOLS.forEach((T,i)=>{const p=mk(`<div class="pill" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.16);font-size:32px"><i style="width:14px;height:14px;border-radius:50%;background:${T.acc};box-shadow:0 0 12px ${T.acc}"></i>${T.name}</div>`);$('#h-list').appendChild(p);});
+TOOLS.forEach((T,i)=>{const p=mk(`<div class="pill" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.16);font-size:29px;padding:8px 22px 8px 8px;gap:10px">${logo(T,46,23)}${T.name}</div>`);$('#h-list').appendChild(p);});
 
 // TOOL scenes
 const CARD_TOP=760, CARD_H=640;
@@ -104,7 +109,8 @@ function toolScene(T,i){
   const s=mk(`<div class="scene" id="s-${T.key}">
     
     <div class="abs mono s-idx" style="top:230px;left:90px;font-size:32px;color:${T.acc}">TOOL ${String(i+1).padStart(2,'0')} / 07</div>
-    <div class="abs title s-name" style="top:290px;left:84px">${T.name}</div>
+    <div class="abs s-logo" style="top:292px;left:90px">${logo(T,132,34)}</div>
+    <div class="abs title s-name" style="top:300px;left:252px;font-size:112px">${T.name}</div>
     <div class="abs s-by" style="top:430px;left:90px;display:flex;gap:16px;align-items:center">
       <span class="pill" style="background:${T.acc};color:#030403;font-size:28px;padding:10px 22px;font-weight:900">FREE</span>
       <span class="mono" style="font-size:30px;color:var(--muted)">${T.by.toUpperCase()}</span></div>
@@ -197,7 +203,7 @@ const cta=mk(`<div class="scene" id="s-cta">
   <svg class="abs" id="c-cur" style="top:1352px;left:700px" width="70" height="80" viewBox="0 0 70 80"><path d="M6 4 L6 62 L22 48 L34 74 L46 68 L34 43 L56 43 Z" fill="#fff" stroke="#000" stroke-width="4" stroke-linejoin="round"/></svg>
 </div>`);
 scenesEl.appendChild(cta);
-TOOLS.forEach((T,i)=>{$('#c-grid').appendChild(mk(`<div class="c-g" style="border-radius:28px;padding:26px 30px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14);display:flex;align-items:center;gap:20px${i===6?';grid-column:1/3;justify-content:center':''}"><span class="mono" style="font-size:28px;color:${T.acc}">0${i+1}</span><span style="font:800 38px Inter">${T.name}</span></div>`));});
+TOOLS.forEach((T,i)=>{$('#c-grid').appendChild(mk(`<div class="c-g" style="border-radius:28px;padding:18px 26px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14);display:flex;align-items:center;gap:20px${i===6?';grid-column:1/3;justify-content:center':''}">${logo(T,64,18)}<span style="font:800 38px Inter">${T.name}</span></div>`));});
 
 /* ---------- timeline ---------- */
 const S=D.segs, segBy=Object.fromEntries(S.map(s=>[s.key,s]));
@@ -261,7 +267,7 @@ function renderHook(t,el){
 }
 function renderTool(i,t,el){
   const T=TOOLS[i];
-  rise($('.s-idx',el),t,.0,.35,30);
+  rise($('.s-idx',el),t,.0,.35,30); pop($('.s-logo',el),t,.02,.45,.3);
   const pn=eo5(P(t,.0,.45)); st($('.s-name',el),{opacity:clamp(pn*2),transform:`translateX(${(1-pn)*-80}px)`,clipPath:`inset(0 ${(1-pn)*100}% 0 0)`});
   rise($('.s-by',el),t,.15,.4,30);
   rise($('.s-one',el),t,.3,.45,40);

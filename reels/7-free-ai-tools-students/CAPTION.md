@@ -1,6 +1,6 @@
 # 7 Free AI Tools Every Student Needs
 
-**Length:** 34s · 1080x1920 · 30fps · -14 LUFS
+**Length:** 36s · 1080x1920 · 30fps · -14 LUFS
 
 ## On-screen tools
 1. NotebookLM: turns notes into a podcast + quizzes
