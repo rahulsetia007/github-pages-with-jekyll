@@ -6,15 +6,15 @@
 @font-face{font-family:Mono;src:url(file:///root/.claude/skills/effects/fonts/SpaceMono-Bold.ttf)}
 @font-face{font-family:ISerif;src:url(file:///root/.claude/skills/effects/fonts/InstrumentSerif-Italic.ttf);font-style:normal;font-weight:400}
 :root{
-  --ink:#06070D; --ink2:#0E1020; --line:rgba(255,255,255,.08);
-  --text:#F4F6FF; --muted:#8C92AB; --lime:#C8FF3E; --violet:#7C5CFF; --cyan:#3EE6FF; --pink:#FF4FA3;
+  --ink:#030403; --ink2:#0A0D0B; --line:rgba(255,255,255,.08);
+  --text:#F5F8F6; --muted:#8A938C; --lime:#22E06F; --violet:#0E7A3C; --cyan:#22E06F; --pink:#0E7A3C;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ink)}
 body{font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
 #stage{position:absolute;inset:0;overflow:hidden}
 .bg{position:absolute;inset:-200px}
-.blob{position:absolute;border-radius:50%;filter:blur(120px);opacity:.55}
+.blob{position:absolute;border-radius:50%;filter:blur(140px);opacity:.42}
 .grid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:90px 90px;-webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 45%,#000 30%,transparent 80%);opacity:.55}
 .vig{position:absolute;inset:0;background:radial-gradient(ellipse 85% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.65) 100%);pointer-events:none}
 .scene{position:absolute;inset:0;will-change:transform,filter,opacity}
@@ -30,7 +30,7 @@ body{font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antia
 .pill{display:inline-flex;align-items:center;gap:12px;padding:14px 26px;border-radius:999px;font-weight:700;font-size:30px}
 .num{font-family:Mont;font-weight:900;font-size:300px;line-height:.8;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:3px rgba(255,255,255,.22)}
 .title{font-family:Mont;font-weight:900;font-size:128px;line-height:.92;letter-spacing:-.035em}
-.sub{font-size:44px;font-weight:500;color:#C9CDE0;line-height:1.25}
+.sub{font-size:44px;font-weight:500;color:#C8D0CA;line-height:1.25}
 .sub b{color:var(--lime);font-weight:800}
 .bar{height:22px;border-radius:12px;background:rgba(255,255,255,.14)}
 /* captions */
@@ -42,7 +42,7 @@ body{font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antia
 <body><div id="stage">
   <div class="bg" id="bg">
     <div class="blob" id="b1" style="width:900px;height:900px;background:var(--violet)"></div>
-    <div class="blob" id="b2" style="width:800px;height:800px;background:#1E6BFF"></div>
+    <div class="blob" id="b2" style="width:800px;height:800px;background:#06331A"></div>
     <div class="blob" id="b3" style="width:600px;height:600px;background:var(--lime);opacity:.18"></div>
   </div>
   <div class="grid" id="grid"></div>
@@ -71,13 +71,13 @@ function typed(el,txt,t,a,cps=26){const n=Math.floor(clamp((t-a)*cps,0,txt.lengt
 
 /* ---------- build scenes ---------- */
 const TOOLS=[
- {key:'t1',name:'NotebookLM',by:'by Google',one:'Notes → <b>podcast</b> + quizzes',acc:'#C8FF3E',tint:'#7C5CFF'},
- {key:'t2',name:'Perplexity',by:'AI search',one:'Answers with <b>real sources</b>',acc:'#3EE6FF',tint:'#1E6BFF'},
- {key:'t3',name:'Gamma',by:'AI slides',one:'Topic → <b>full slide deck</b>',acc:'#FF4FA3',tint:'#7C5CFF'},
- {key:'t4',name:'Napkin AI',by:'text to visuals',one:'Text → <b>clean diagrams</b>',acc:'#FFC93E',tint:'#FF6A3E'},
- {key:'t5',name:'Otter',by:'lecture notes',one:'Records + <b>transcribes</b> lectures',acc:'#3EE6FF',tint:'#1E6BFF'},
- {key:'t6',name:'QuillBot',by:'writing',one:'Fix grammar. <b>Rewrite</b> anything.',acc:'#C8FF3E',tint:'#18B87A'},
- {key:'t7',name:'Consensus',by:'research',one:'Answers from <b>research papers</b>',acc:'#B69CFF',tint:'#7C5CFF'},
+ {key:'t1',name:'NotebookLM',by:'by Google',one:'Notes → <b>podcast</b> + quizzes',acc:'#22E06F',tint:'#0E7A3C'},
+ {key:'t2',name:'Perplexity',by:'AI search',one:'Answers with <b>real sources</b>',acc:'#22E06F',tint:'#06331A'},
+ {key:'t3',name:'Gamma',by:'AI slides',one:'Topic → <b>full slide deck</b>',acc:'#22E06F',tint:'#0E7A3C'},
+ {key:'t4',name:'Napkin AI',by:'text to visuals',one:'Text → <b>clean diagrams</b>',acc:'#22E06F',tint:'#0E7A3C'},
+ {key:'t5',name:'Otter',by:'lecture notes',one:'Records + <b>transcribes</b> lectures',acc:'#22E06F',tint:'#06331A'},
+ {key:'t6',name:'QuillBot',by:'writing',one:'Fix grammar. <b>Rewrite</b> anything.',acc:'#22E06F',tint:'#22E06F'},
+ {key:'t7',name:'Consensus',by:'research',one:'Answers from <b>research papers</b>',acc:'#22E06F',tint:'#0E7A3C'},
 ];
 const scenesEl=$('#scenes');
 function mk(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
@@ -88,12 +88,12 @@ for(let i=0;i<7;i++) $('#prog').appendChild(mk('<div class="seg"><i></i></div>')
 // HOOK
 const hook=mk(`<div class="scene" id="s-hook">
   <div class="abs mono" id="h-tag" style="top:250px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">FOR STUDENTS · 100% FREE</div>
-  <div class="abs" id="h-7" style="top:300px;left:0;right:0;text-align:center;font-family:Mont;font-weight:900;font-size:560px;line-height:1;letter-spacing:-.06em;background:linear-gradient(180deg,#fff 30%,#C8FF3E);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 20px 80px rgba(200,255,62,.35))">7</div>
+  <div class="abs" id="h-7" style="top:300px;left:0;right:0;text-align:center;font-family:Mont;font-weight:900;font-size:560px;line-height:1;letter-spacing:-.06em;background:linear-gradient(180deg,#fff 30%,#22E06F);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 20px 80px rgba(34,224,111,.35))">7</div>
   <div class="abs title" id="h-t1" style="top:860px;left:0;right:0;text-align:center;font-size:118px">FREE AI TOOLS</div>
-  <div class="abs" id="h-t2" style="top:990px;left:0;right:0;text-align:center;font-family:ISerif;font-size:92px;color:#D9DCF0">every student needs</div>
+  <div class="abs" id="h-t2" style="top:990px;left:0;right:0;text-align:center;font-family:ISerif;font-size:92px;color:#D8E0DA">every student needs</div>
   <div class="abs" id="h-list" style="top:1150px;left:70px;right:70px;display:flex;flex-wrap:wrap;justify-content:center;gap:18px"></div>
-  <div class="abs pill" id="h-save" style="top:1330px;left:50%;margin-left:-160px;width:320px;justify-content:center;background:var(--lime);color:#0A0B10;font-size:34px;font-weight:900">
-    <svg width="30" height="36" viewBox="0 0 30 36"><path d="M3 2h24v32l-12-8-12 8z" fill="#0A0B10"/></svg> SAVE THIS</div>
+  <div class="abs pill" id="h-save" style="top:1330px;left:50%;margin-left:-160px;width:320px;justify-content:center;background:var(--lime);color:#030403;font-size:34px;font-weight:900">
+    <svg width="30" height="36" viewBox="0 0 30 36"><path d="M3 2h24v32l-12-8-12 8z" fill="#030403"/></svg> SAVE THIS</div>
 </div>`);
 scenesEl.appendChild(hook);
 TOOLS.forEach((T,i)=>{const p=mk(`<div class="pill" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.16);font-size:32px"><i style="width:14px;height:14px;border-radius:50%;background:${T.acc};box-shadow:0 0 12px ${T.acc}"></i>${T.name}</div>`);$('#h-list').appendChild(p);});
@@ -106,7 +106,7 @@ function toolScene(T,i){
     <div class="abs mono s-idx" style="top:230px;left:90px;font-size:32px;color:${T.acc}">TOOL ${String(i+1).padStart(2,'0')} / 07</div>
     <div class="abs title s-name" style="top:290px;left:84px">${T.name}</div>
     <div class="abs s-by" style="top:430px;left:90px;display:flex;gap:16px;align-items:center">
-      <span class="pill" style="background:${T.acc};color:#08090F;font-size:28px;padding:10px 22px;font-weight:900">FREE</span>
+      <span class="pill" style="background:${T.acc};color:#030403;font-size:28px;padding:10px 22px;font-weight:900">FREE</span>
       <span class="mono" style="font-size:30px;color:var(--muted)">${T.by.toUpperCase()}</span></div>
     <div class="abs sub s-one" style="top:540px;left:90px;right:90px;font-size:56px;font-weight:700;color:#fff">${T.one.replace(/<b>/g,`<b style="color:${T.acc}">`)}</div>
     <div class="card s-card" style="top:${CARD_TOP}px;height:${CARD_H}px"><div class="abs" style="inset:0;background:radial-gradient(600px 300px at 80% 0%,${T.tint}55,transparent 70%)"></div><div class="abs s-ui" style="inset:0"></div></div>
@@ -121,70 +121,70 @@ const ui=i=>$('.s-ui',TS[i]);
 ui(0).innerHTML=`
  <div class="abs n-doc" style="left:60px;top:70px;width:250px;height:320px;border-radius:24px;background:#fff;padding:30px">
    <div style="font:800 26px Inter;color:#111">Bio_Notes.pdf</div>
-   ${[90,100,80,95,70,100,60].map(w=>`<div style="height:12px;width:${w}%;background:#D7DAE6;border-radius:6px;margin-top:20px"></div>`).join('')}
+   ${[90,100,80,95,70,100,60].map(w=>`<div style="height:12px;width:${w}%;background:#D6DCD8;border-radius:6px;margin-top:20px"></div>`).join('')}
  </div>
- <svg class="abs n-arrow" style="left:330px;top:200px" width="120" height="60"><path d="M5 30 H100 M80 10 L105 30 L80 50" stroke="#C8FF3E" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg>
+ <svg class="abs n-arrow" style="left:330px;top:200px" width="120" height="60"><path d="M5 30 H100 M80 10 L105 30 L80 50" stroke="#22E06F" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg>
  <div class="abs n-out" style="left:470px;top:60px;width:370px;display:flex;flex-direction:column;gap:22px">
-   <div class="n-o" style="border-radius:24px;padding:24px;background:rgba(200,255,62,.12);border:1.5px solid rgba(200,255,62,.5)">
-     <div style="font:800 30px Inter">Audio Overview</div><div class="n-wave" style="display:flex;gap:7px;align-items:center;height:70px;margin-top:10px">${Array.from({length:22}).map(()=>'<i style="width:9px;border-radius:5px;background:#C8FF3E;height:20px"></i>').join('')}</div></div>
-   <div class="n-o" style="border-radius:24px;padding:24px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14)"><div style="font:800 30px Inter">Quiz</div><div style="font:500 26px Inter;color:#9AA0B8;margin-top:6px">10 questions</div></div>
-   <div class="n-o" style="border-radius:24px;padding:24px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14)"><div style="font:800 30px Inter">Flashcards</div><div style="font:500 26px Inter;color:#9AA0B8;margin-top:6px">24 cards</div></div>
+   <div class="n-o" style="border-radius:24px;padding:24px;background:rgba(34,224,111,.12);border:1.5px solid rgba(34,224,111,.5)">
+     <div style="font:800 30px Inter">Audio Overview</div><div class="n-wave" style="display:flex;gap:7px;align-items:center;height:70px;margin-top:10px">${Array.from({length:22}).map(()=>'<i style="width:9px;border-radius:5px;background:#22E06F;height:20px"></i>').join('')}</div></div>
+   <div class="n-o" style="border-radius:24px;padding:24px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14)"><div style="font:800 30px Inter">Quiz</div><div style="font:500 26px Inter;color:#8E9890;margin-top:6px">10 questions</div></div>
+   <div class="n-o" style="border-radius:24px;padding:24px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14)"><div style="font:800 30px Inter">Flashcards</div><div style="font:500 26px Inter;color:#8E9890;margin-top:6px">24 cards</div></div>
  </div>
- <div class="abs mono" style="left:60px;bottom:50px;font-size:26px;color:#9AA0B8">GENERATING<span class="n-dots"></span></div>`;
+ <div class="abs mono" style="left:60px;bottom:50px;font-size:26px;color:#8E9890">GENERATING<span class="n-dots"></span></div>`;
 // 2 Perplexity
 ui(1).innerHTML=`
- <div class="abs" style="left:50px;right:50px;top:50px;height:110px;border-radius:60px;background:rgba(0,0,0,.35);border:1.5px solid rgba(62,230,255,.5);display:flex;align-items:center;padding:0 40px;gap:22px">
-   <svg width="40" height="40" viewBox="0 0 40 40"><circle cx="17" cy="17" r="12" stroke="#3EE6FF" stroke-width="5" fill="none"/><path d="M26 26l10 10" stroke="#3EE6FF" stroke-width="5" stroke-linecap="round"/></svg>
-   <span class="p-q" style="font:600 36px Inter"></span><i class="p-caret" style="width:4px;height:44px;background:#3EE6FF"></i></div>
+ <div class="abs" style="left:50px;right:50px;top:50px;height:110px;border-radius:60px;background:rgba(0,0,0,.35);border:1.5px solid rgba(34,224,111,.5);display:flex;align-items:center;padding:0 40px;gap:22px">
+   <svg width="40" height="40" viewBox="0 0 40 40"><circle cx="17" cy="17" r="12" stroke="#22E06F" stroke-width="5" fill="none"/><path d="M26 26l10 10" stroke="#22E06F" stroke-width="5" stroke-linecap="round"/></svg>
+   <span class="p-q" style="font:600 36px Inter"></span><i class="p-caret" style="width:4px;height:44px;background:#22E06F"></i></div>
  <div class="abs p-ans" style="left:60px;right:60px;top:210px">
-   ${[100,92,97,70].map((w,k)=>`<div class="p-l" style="display:flex;align-items:center;gap:12px;margin-bottom:24px"><div class="bar" style="width:${w*0.82}%"></div><span class="p-c" style="font:800 24px Inter;background:#3EE6FF;color:#06070D;border-radius:12px;padding:4px 12px">${k+1}</span></div>`).join('')}
+   ${[100,92,97,70].map((w,k)=>`<div class="p-l" style="display:flex;align-items:center;gap:12px;margin-bottom:24px"><div class="bar" style="width:${w*0.82}%"></div><span class="p-c" style="font:800 24px Inter;background:#22E06F;color:#030403;border-radius:12px;padding:4px 12px">${k+1}</span></div>`).join('')}
  </div>
  <div class="abs p-src" style="left:50px;right:50px;bottom:50px;display:flex;gap:18px">
-   ${['nature.com','khanacademy','britannica'].map((s,k)=>`<div class="p-s" style="flex:1;border-radius:22px;padding:22px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14)"><div class="mono" style="font-size:22px;color:#3EE6FF">SOURCE ${k+1}</div><div style="font:700 26px Inter;margin-top:8px">${s}</div></div>`).join('')}
+   ${['nature.com','khanacademy','britannica'].map((s,k)=>`<div class="p-s" style="flex:1;border-radius:22px;padding:22px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14)"><div class="mono" style="font-size:22px;color:#22E06F">SOURCE ${k+1}</div><div style="font:700 26px Inter;margin-top:8px">${s}</div></div>`).join('')}
  </div>`;
 // 3 Gamma
 ui(2).innerHTML=`
- <div class="abs" style="left:50px;right:50px;top:50px;height:100px;border-radius:26px;background:rgba(0,0,0,.35);border:1.5px solid rgba(255,79,163,.5);display:flex;align-items:center;padding:0 34px;gap:18px">
-   <span class="mono" style="font-size:26px;color:#FF4FA3">PROMPT</span><span class="g-q" style="font:600 34px Inter"></span></div>
- ${[0,1,2].map(k=>`<div class="abs g-s" style="left:${135+k*0}px;top:200px;width:630px;height:370px;border-radius:26px;background:${['linear-gradient(135deg,#2A1640,#5B2A6E)','linear-gradient(135deg,#14213D,#2B4C8C)','linear-gradient(135deg,#3B1426,#8C2B57)'][k]};border:1.5px solid rgba(255,255,255,.2);box-shadow:0 30px 60px rgba(0,0,0,.5);padding:40px;transform-origin:50% 120%">
+ <div class="abs" style="left:50px;right:50px;top:50px;height:100px;border-radius:26px;background:rgba(0,0,0,.35);border:1.5px solid rgba(34,224,111,.5);display:flex;align-items:center;padding:0 34px;gap:18px">
+   <span class="mono" style="font-size:26px;color:#0E7A3C">PROMPT</span><span class="g-q" style="font:600 34px Inter"></span></div>
+ ${[0,1,2].map(k=>`<div class="abs g-s" style="left:${135+k*0}px;top:200px;width:630px;height:370px;border-radius:26px;background:${['linear-gradient(135deg,#06140C,#0E4A27)','linear-gradient(135deg,#08180F,#156B38)','linear-gradient(135deg,#030806,#0B3A20)'][k]};border:1.5px solid rgba(255,255,255,.2);box-shadow:0 30px 60px rgba(0,0,0,.5);padding:40px;transform-origin:50% 120%">
    <div style="font:900 44px Mont;line-height:1.05">${['Causes of','The Rise of','Turning'][k]}<br>${['World War II','Fascism','Points'][k]}</div>
    <div style="display:flex;gap:20px;margin-top:34px"><div style="flex:1"><div class="bar" style="height:14px;width:90%"></div><div class="bar" style="height:14px;width:75%;margin-top:16px"></div><div class="bar" style="height:14px;width:82%;margin-top:16px"></div></div><div style="width:180px;height:150px;border-radius:18px;background:rgba(255,255,255,.18)"></div></div>
    <div class="mono" style="position:absolute;right:30px;bottom:24px;font-size:22px;color:rgba(255,255,255,.6)">${k+1}/12</div></div>`).join('')}`;
 // 4 Napkin
 ui(3).innerHTML=`
- <div class="abs k-txt" style="left:60px;right:60px;top:50px;font:500 28px/1.45 Inter;color:#B9BED3">The water cycle: <span style="color:#FFC93E;font-weight:800">evaporation</span> → <span style="color:#FFC93E;font-weight:800">condensation</span> → <span style="color:#FFC93E;font-weight:800">precipitation</span> → <span style="color:#FFC93E;font-weight:800">collection</span>.</div>
+ <div class="abs k-txt" style="left:60px;right:60px;top:50px;font:500 28px/1.45 Inter;color:#B5BEB8">The water cycle: <span style="color:#22E06F;font-weight:800">evaporation</span> → <span style="color:#22E06F;font-weight:800">condensation</span> → <span style="color:#22E06F;font-weight:800">precipitation</span> → <span style="color:#22E06F;font-weight:800">collection</span>.</div>
  <svg class="abs" style="left:0;top:0" width="900" height="640">
-  ${[[250,300,600,300],[600,300,600,510],[600,510,250,510],[250,510,250,300]].map(([a,b,c,d],k)=>`<path class="k-e" d="M${a} ${b} L${c} ${d}" stroke="#FFC93E" stroke-width="6" stroke-linecap="round" fill="none" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" opacity=".85"/>`).join('')}
+  ${[[250,300,600,300],[600,300,600,510],[600,510,250,510],[250,510,250,300]].map(([a,b,c,d],k)=>`<path class="k-e" d="M${a} ${b} L${c} ${d}" stroke="#22E06F" stroke-width="6" stroke-linecap="round" fill="none" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" opacity=".85"/>`).join('')}
  </svg>
- ${[['Evaporation',250,300,'#FF6A3E'],['Condensation',600,300,'#FFC93E'],['Precipitation',600,510,'#3EE6FF'],['Collection',250,510,'#C8FF3E']].map(([n,x,y,c])=>`<div class="abs k-n" style="left:${x-130}px;top:${y-48}px;width:260px;height:96px;border-radius:24px;background:#12131F;border:2.5px solid ${c};display:flex;align-items:center;justify-content:center;font:800 28px Inter;box-shadow:0 0 40px ${c}44">${n}</div>`).join('')}
- <div class="abs k-ring" style="left:375px;top:355px;width:100px;height:100px;border-radius:50%;border:6px solid #FFC93E;border-right-color:transparent"></div>`;
+ ${[['Evaporation',250,300,'#0E7A3C'],['Condensation',600,300,'#22E06F'],['Precipitation',600,510,'#22E06F'],['Collection',250,510,'#22E06F']].map(([n,x,y,c])=>`<div class="abs k-n" style="left:${x-130}px;top:${y-48}px;width:260px;height:96px;border-radius:24px;background:#0B100D;border:2.5px solid ${c};display:flex;align-items:center;justify-content:center;font:800 28px Inter;box-shadow:0 0 40px ${c}44">${n}</div>`).join('')}
+ <div class="abs k-ring" style="left:375px;top:355px;width:100px;height:100px;border-radius:50%;border:6px solid #22E06F;border-right-color:transparent"></div>`;
 // 5 Otter
 ui(4).innerHTML=`
- <div class="abs" style="left:60px;top:55px;display:flex;align-items:center;gap:18px"><i class="o-rec" style="width:26px;height:26px;border-radius:50%;background:#FF3E5E;box-shadow:0 0 24px #FF3E5E"></i><span class="mono o-time" style="font-size:34px">00:00</span><span class="mono" style="font-size:26px;color:#9AA0B8;margin-left:10px">PSYCH 101 · LECTURE 4</span></div>
- <div class="abs o-wave" style="left:60px;right:60px;top:130px;height:150px;display:flex;gap:6px;align-items:center">${Array.from({length:52}).map(()=>'<i style="flex:1;border-radius:4px;background:#3EE6FF;height:10px"></i>').join('')}</div>
+ <div class="abs" style="left:60px;top:55px;display:flex;align-items:center;gap:18px"><i class="o-rec" style="width:26px;height:26px;border-radius:50%;background:#22E06F;box-shadow:0 0 24px #22E06F"></i><span class="mono o-time" style="font-size:34px">00:00</span><span class="mono" style="font-size:26px;color:#8E9890;margin-left:10px">PSYCH 101 · LECTURE 4</span></div>
+ <div class="abs o-wave" style="left:60px;right:60px;top:130px;height:150px;display:flex;gap:6px;align-items:center">${Array.from({length:52}).map(()=>'<i style="flex:1;border-radius:4px;background:#22E06F;height:10px"></i>').join('')}</div>
  <div class="abs" style="left:60px;right:60px;top:320px;font:500 31px/1.45 Inter">
-   <div><span style="color:#3EE6FF;font-weight:800">Prof. Lee&nbsp; </span><span class="o-t1"></span></div>
-   <div style="margin-top:22px"><span style="color:#C8FF3E;font-weight:800">Summary&nbsp; </span><span class="o-t2" style="color:#C9CDE0"></span></div></div>`;
+   <div><span style="color:#22E06F;font-weight:800">Prof. Lee&nbsp; </span><span class="o-t1"></span></div>
+   <div style="margin-top:22px"><span style="color:#22E06F;font-weight:800">Summary&nbsp; </span><span class="o-t2" style="color:#C8D0CA"></span></div></div>`;
 // 6 QuillBot
 ui(5).innerHTML=`
  <div class="abs" style="left:50px;top:50px;display:flex;gap:14px">${['Standard','Fluency','Formal','Academic'].map((m,k)=>`<span class="pill q-m" style="font-size:26px;padding:12px 24px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14)">${m}</span>`).join('')}</div>
  <div class="abs" style="left:60px;right:60px;top:170px;font:500 40px/1.5 Inter">
-   <div class="mono" style="font-size:22px;color:#9AA0B8;margin-bottom:8px">BEFORE</div>
-   <div>Me and him <span class="q-bad" style="position:relative">goes<i class="q-u" style="position:absolute;left:0;right:0;bottom:-2px;height:5px;background:#FF3E5E;border-radius:3px"></i></span> to the libary.</div>
-   <div class="q-after-wrap" style="margin-top:44px"><div class="mono" style="font-size:22px;color:#C8FF3E;margin-bottom:8px">AFTER</div>
+   <div class="mono" style="font-size:22px;color:#8E9890;margin-bottom:8px">BEFORE</div>
+   <div style="color:#8A938C">Me and him <span class="q-bad" style="position:relative">goes<i class="q-u" style="position:absolute;left:0;right:0;bottom:-4px;height:0;border-bottom:5px dotted rgba(255,255,255,.75)"></i></span> to the libary.</div>
+   <div class="q-after-wrap" style="margin-top:44px"><div class="mono" style="font-size:22px;color:#22E06F;margin-bottom:8px">AFTER</div>
    <div class="q-after" style="font-weight:700;color:#fff"></div></div>
  </div>
- <div class="abs q-score" style="right:50px;bottom:46px;display:flex;align-items:center;gap:14px"><span class="mono" style="font-size:24px;color:#9AA0B8">CLARITY</span><span class="q-sv" style="font:900 52px Mont;color:#C8FF3E">62</span></div>`;
+ <div class="abs q-score" style="right:50px;bottom:46px;display:flex;align-items:center;gap:14px"><span class="mono" style="font-size:24px;color:#8E9890">CLARITY</span><span class="q-sv" style="font:900 52px Mont;color:#22E06F">62</span></div>`;
 // 7 Consensus
 ui(6).innerHTML=`
- <div class="abs" style="left:50px;right:50px;top:50px;height:100px;border-radius:26px;background:rgba(0,0,0,.35);border:1.5px solid rgba(182,156,255,.5);display:flex;align-items:center;padding:0 34px;font:600 36px Inter"><span class="c-q"></span></div>
+ <div class="abs" style="left:50px;right:50px;top:50px;height:100px;border-radius:26px;background:rgba(0,0,0,.35);border:1.5px solid rgba(34,224,111,.5);display:flex;align-items:center;padding:0 34px;font:600 36px Inter"><span class="c-q"></span></div>
  <div class="abs" style="left:60px;right:60px;top:172px">
-   <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="mono" style="font-size:26px;color:#9AA0B8">CONSENSUS METER</span><span class="c-p" style="font:900 72px Mont;color:#B69CFF">0%</span></div>
-   <div style="height:34px;border-radius:20px;background:rgba(255,255,255,.1);margin-top:14px;overflow:hidden;display:flex"><i class="c-y" style="height:100%;width:0;background:linear-gradient(90deg,#7C5CFF,#B69CFF)"></i><i class="c-n" style="height:100%;width:0;background:#FF4FA3"></i></div>
-   <div style="display:flex;gap:30px;margin-top:14px;font:700 26px Inter;color:#C9CDE0"><span><b style="color:#B69CFF">●</b> Yes</span><span><b style="color:#FF4FA3">●</b> Possibly</span></div>
+   <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="mono" style="font-size:26px;color:#8E9890">CONSENSUS METER</span><span class="c-p" style="font:900 72px Mont;color:#22E06F">0%</span></div>
+   <div style="height:34px;border-radius:20px;background:rgba(255,255,255,.1);margin-top:14px;overflow:hidden;display:flex"><i class="c-y" style="height:100%;width:0;background:linear-gradient(90deg,#0E7A3C,#22E06F)"></i><i class="c-n" style="height:100%;width:0;background:#0E7A3C"></i></div>
+   <div style="display:flex;gap:30px;margin-top:14px;font:700 26px Inter;color:#C8D0CA"><span><b style="color:#22E06F">●</b> Yes</span><span><b style="color:#0E7A3C">●</b> Possibly</span></div>
  </div>
  <div class="abs" style="left:50px;right:50px;bottom:34px;display:flex;flex-direction:column;gap:14px">
-   ${[['Sleep and memory consolidation','Nature Neurosci. · 2,140 citations'],['REM sleep boosts recall','J. Neuroscience · 860 citations']].map(([a,b])=>`<div class="c-card" style="border-radius:22px;padding:15px 26px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14)"><div style="font:800 28px Inter">${a}</div><div class="mono" style="font-size:22px;color:#9AA0B8;margin-top:6px">${b}</div></div>`).join('')}
+   ${[['Sleep and memory consolidation','Nature Neurosci. · 2,140 citations'],['REM sleep boosts recall','J. Neuroscience · 860 citations']].map(([a,b])=>`<div class="c-card" style="border-radius:22px;padding:15px 26px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14)"><div style="font:800 28px Inter">${a}</div><div class="mono" style="font-size:22px;color:#8E9890;margin-top:6px">${b}</div></div>`).join('')}
  </div>`;
 
 // CTA
@@ -192,8 +192,8 @@ const cta=mk(`<div class="scene" id="s-cta">
   <div class="abs mono" style="top:250px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)" id="c-tag">ALL 7 · ALL FREE</div>
   <div class="abs" id="c-grid" style="top:330px;left:90px;right:90px;display:grid;grid-template-columns:1fr 1fr;gap:20px"></div>
   <div class="abs title" id="c-t" style="top:1010px;left:0;right:0;text-align:center;font-size:110px">Follow for more</div>
-  <div class="abs" id="c-s" style="top:1135px;left:0;right:0;text-align:center;font-family:ISerif;font-size:80px;color:#D9DCF0">AI tools that actually help</div>
-  <div class="abs pill" id="c-btn" style="top:1290px;left:50%;width:380px;margin-left:-190px;height:110px;justify-content:center;font-size:44px;font-weight:900;background:var(--lime);color:#0A0B10">Follow</div>
+  <div class="abs" id="c-s" style="top:1135px;left:0;right:0;text-align:center;font-family:ISerif;font-size:80px;color:#D8E0DA">AI tools that actually help</div>
+  <div class="abs pill" id="c-btn" style="top:1290px;left:50%;width:380px;margin-left:-190px;height:110px;justify-content:center;font-size:44px;font-weight:900;background:var(--lime);color:#030403">Follow</div>
   <svg class="abs" id="c-cur" style="top:1352px;left:700px" width="70" height="80" viewBox="0 0 70 80"><path d="M6 4 L6 62 L22 48 L34 74 L46 68 L34 43 L56 43 Z" fill="#fff" stroke="#000" stroke-width="4" stroke-linejoin="round"/></svg>
 </div>`);
 scenesEl.appendChild(cta);
@@ -218,7 +218,7 @@ S.forEach(s=>{const ws=s.text.replace(/A\.I\./g,'AI').split(/\s+/);
 // group into chunks of <=3 words, break at punctuation
 const chunks=[];let cur=[];
 capWords.forEach(w=>{cur.push(w);if(cur.length>=3||w.brk){chunks.push(cur);cur=[];}});if(cur.length)chunks.push(cur);
-const ACC={hook:'#C8FF3E',cta:'#C8FF3E'};TOOLS.forEach(T=>ACC[T.key]=T.acc);
+const ACC={hook:'#22E06F',cta:'#22E06F'};TOOLS.forEach(T=>ACC[T.key]=T.acc);
 
 function renderBg(t){
   st($('#b1'),{left:`${300+Math.sin(t*.35)*180}px`,top:`${200+Math.cos(t*.28)*160}px`});
@@ -288,7 +288,7 @@ function renderTool(i,t,el){
     typed($('.o-t1',U),'Memory works in three stages: encoding, storage and retrieval…',u,.25,30);
     typed($('.o-t2',U),'3 stages of memory · key terms saved',u,2.0,30); }
   if(i===5){ const ms=[...U.querySelectorAll('.q-m')]; const act=u<1.6?0:(u<2.2?1:3);
-    ms.forEach((m,k)=>{const on=k===act; st(m,{background:on?'#C8FF3E':'rgba(255,255,255,.07)',color:on?'#08090F':'#fff'});});
+    ms.forEach((m,k)=>{const on=k===act; st(m,{background:on?'#22E06F':'rgba(255,255,255,.07)',color:on?'#030403':'#fff'});});
     $('.q-u',U).style.transform=`scaleX(${eo(P(u,.2,.4))})`;
     const after=act===3?'He and I go to the library to study.':'He and I go to the library.';
     const aw=$('.q-after-wrap',U); rise(aw,u,.7,.4,30);
@@ -305,7 +305,7 @@ function renderCta(t,el){
   rise($('#c-s',el),t,.5,.4,30);
   const b=$('#c-btn',el); pop(b,t,.7,.45,.4);
   const click=P(t,1.75,.2); const followed=t>1.85;
-  st(b,{background:followed?'rgba(255,255,255,.12)':'#C8FF3E',color:followed?'#fff':'#0A0B10',border:followed?'2px solid rgba(255,255,255,.4)':'none'}); b.innerHTML=followed?'Following <svg width="34" height="34" viewBox="0 0 34 34" style="margin-left:10px"><path d="M6 18l7 7L28 9" stroke="#C8FF3E" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>':'Follow';
+  st(b,{background:followed?'rgba(255,255,255,.12)':'#22E06F',color:followed?'#fff':'#030403',border:followed?'2px solid rgba(255,255,255,.4)':'none'}); b.innerHTML=followed?'Following <svg width="34" height="34" viewBox="0 0 34 34" style="margin-left:10px"><path d="M6 18l7 7L28 9" stroke="#22E06F" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>':'Follow';
   b.style.transform+=` scale(${1-Math.sin(click*Math.PI)*.08})`;
   const pc=eio(P(t,1.0,.75)); st($('#c-cur',el),{opacity:clamp(P(t,.95,.2)),transform:`translate(${(1-pc)*220}px,${(1-pc)*260}px)`});
 }
