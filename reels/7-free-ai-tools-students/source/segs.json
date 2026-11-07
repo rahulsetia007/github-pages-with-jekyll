@@ -1,59 +1,59 @@
 {
- "total": 35.445,
+ "total": 35.226,
  "segs": [
   {
    "key": "hook",
-   "text": "Seven free A.I. tools every student needs. Save this.",
+   "text": "Seven free AI tools every student needs. Save this.",
    "start": 0.0,
-   "dur": 3.494
+   "dur": 3.48
   },
   {
    "key": "t1",
    "text": "One. NotebookLM. Upload your notes, and it turns them into a podcast and quizzes.",
-   "start": 3.644,
+   "start": 3.63,
    "dur": 5.139
   },
   {
    "key": "t2",
    "text": "Two. Perplexity. Research answers with real sources cited.",
-   "start": 9.003,
+   "start": 8.99,
    "dur": 3.705
   },
   {
    "key": "t3",
    "text": "Three. Gamma. Type a topic, get a full slide deck in seconds.",
-   "start": 12.928,
+   "start": 12.915,
    "dur": 3.56
   },
   {
    "key": "t4",
-   "text": "Four. Napkin A.I. Paste your text, get clean diagrams.",
-   "start": 16.708,
-   "dur": 3.42
+   "text": "Four. Napkin AI. Paste your text, get clean diagrams.",
+   "start": 16.695,
+   "dur": 3.764
   },
   {
    "key": "t5",
    "text": "Five. Otter. It records and transcribes your lectures.",
-   "start": 20.348,
+   "start": 20.679,
    "dur": 3.436
   },
   {
    "key": "t6",
    "text": "Six. QuillBot. Fixes your grammar and rewrites any sentence.",
-   "start": 24.004,
+   "start": 24.335,
    "dur": 3.735
   },
   {
    "key": "t7",
    "text": "Seven. Consensus. Answers backed by real research papers.",
-   "start": 27.959,
+   "start": 28.29,
    "dur": 3.94
   },
   {
    "key": "cta",
-   "text": "Follow for more A.I. tools that actually help.",
-   "start": 32.119,
-   "dur": 3.106
+   "text": "Follow for more AI tools that actually help.",
+   "start": 32.45,
+   "dur": 2.556
   }
  ]
 }
