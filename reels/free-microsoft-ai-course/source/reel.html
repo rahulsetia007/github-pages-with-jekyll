@@ -1,0 +1,186 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Inter;src:url(file:///root/.claude/skills/effects/fonts/Inter.ttf);font-weight:100 900}
+@font-face{font-family:Mono;src:url(file:///root/.claude/skills/effects/fonts/SpaceMono-Bold.ttf)}
+:root{--g:#22E06F;--g2:#39D353;--bg:#06080A;--card:#0D1117;--bd:#30363D;--txt:#F0F6FC;--mut:#8B949E;--red:#FF5A5A;--gold:#FFC83D}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--bg)}
+body{font-family:Inter,'Noto Color Emoji',sans-serif;color:var(--txt);-webkit-font-smoothing:antialiased}
+.abs{position:absolute}
+#grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:54px 54px}
+#glow{position:absolute;left:90px;top:300px;width:900px;height:1000px;border-radius:50%;background:radial-gradient(closest-side,rgba(34,224,111,.10),transparent)}
+#contrib{position:absolute;left:0;right:0;top:1440px;height:440px;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 45%)}
+#contrib i{position:absolute;width:40px;height:40px;border-radius:8px}
+#prog{position:absolute;left:0;bottom:0;height:7px;background:linear-gradient(90deg,#0E7A3C,#22E06F,#8DF5B4)}
+#ctx{position:absolute;top:150px;left:60px;right:60px;text-align:center;font-weight:600;font-size:34px;color:var(--mut)}
+#head{position:absolute;top:196px;left:50px;right:50px;text-align:center;font-weight:900;font-size:76px;line-height:1.02;letter-spacing:-.01em;text-transform:uppercase}
+#head .g{color:var(--g)} #head .r{color:var(--red)} #head .y{color:var(--gold)}
+#cap{position:absolute;top:1290px;left:60px;right:60px;text-align:center;font-weight:800;font-size:54px;letter-spacing:-.01em}
+#cap span{display:inline-block;margin:0 9px}
+.scene{position:absolute;left:0;top:0;width:1080px;height:1920px;display:none}
+.card{position:absolute;border-radius:28px;background:var(--card);border:2px solid var(--bd);box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.mono{font-family:Mono,monospace}
+.chip{display:inline-flex;align-items:center;gap:10px;padding:10px 20px;border-radius:999px;font-weight:700;font-size:26px;background:#161B22;border:2px solid var(--bd)}
+.box{display:inline-block;padding:4px 26px;border-radius:14px;font-weight:900;font-size:120px;line-height:1.05;letter-spacing:-.01em}
+.tile{border-radius:24px;background:#0D1117;border:3px solid var(--g);box-shadow:0 0 40px rgba(34,224,111,.35);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.tile b{font-weight:900;font-size:110px;line-height:1;color:var(--g)}
+.tile span{font-family:Mono;font-size:22px;color:var(--mut);margin-top:10px;letter-spacing:.08em}
+.node{position:absolute;padding:14px 24px;border-radius:16px;background:#0D1117;border:2.5px solid var(--g);font-weight:800;font-size:30px;white-space:nowrap;display:flex;align-items:center;gap:12px}
+.node i{width:12px;height:12px;border-radius:50%;background:var(--g)}
+.dots{display:flex;gap:10px;padding:18px 24px;border-bottom:2px solid var(--bd)}
+.dots i{width:16px;height:16px;border-radius:50%}
+</style></head><body>
+<div id="grid"></div><div id="glow"></div><div id="contrib"></div>
+<div id="scenes"></div>
+<div id="ctx"></div><div id="head"></div><div id="cap"></div><div id="prog"></div>
+<script>
+const D=window.__DATA__;const $=(s,e=document)=>e.querySelector(s);const $$=(s,e=document)=>[...e.querySelectorAll(s)];
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-clamp(t),3),eo5=t=>1-Math.pow(1-clamp(t),5),eio=t=>{t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+const back=t=>{t=clamp(t);const c=1.7;return 1+(c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2)};
+const P=(t,a,d)=>clamp((t-a)/d);
+function st(e,o){for(const k in o)e.style[k]=o[k]}
+function mk(h){const d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild}
+function rnd(i){const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+const S=Object.fromEntries(D.segs.map(s=>[s.key,s]));
+const ORDER=D.segs.map(s=>s.key);
+const START=ORDER.map((k,i)=>i===0?0:S[k].words[0].s-0.12);
+const END=D.end;
+const w=(k,i)=>S[k].words[i].s;
+const L='logos/';
+const fmt=n=>Math.round(n).toLocaleString('en-US');
+/* headline per scene: [context, html]; keywords appear as their word is spoken via data-at */
+const H={
+ s1:['This one is wild…','Microsoft\'s AI course is <span class="g">free</span>'],
+ s2:['',''],
+ s3:['This repo has','<span class="y">123K+ stars</span> ⭐'],
+ s4:['And inside you get…','What\'s <span class="g">inside</span>'],
+ s5:['Everything from','Prompts <span class="g">→</span> AI agents'],
+ s6:['And who made it?','Built by <span class="g">Microsoft</span>'],
+ s7:['Meanwhile…','Others <span class="r">charge</span> for this'],
+ s8:['Oh, and it\'s','In <span class="g">50+ languages</span>'],
+ s9:['Want the link?','Comment <span class="g">"AI"</span>'],
+ s10:['','Follow for more'],
+};
+const KEYW={s1:['free.','AI'],s2:['Insane','free','GitHub','finds.'],s3:['thousand','stars.'],s4:['twenty','lessons,','Python','TypeScript.'],s5:['RAG,','agents.','prompt'],s6:['Microsoft\'s','Advocates.'],s7:['charge','hundreds','away.'],s8:['fifty','languages.'],s9:['AI,','link.'],s10:['Follow','free']};
+/* contribution grid */
+const cg=$('#contrib');for(let r=0;r<9;r++)for(let c=0;c<22;c++){const e=document.createElement('i');e.style.left=(16+c*48)+'px';e.style.top=(r*48)+'px';cg.appendChild(e)}
+const GREENS=['#0E4429','#006D32','#26A641','#39D353'];
+/* ---------- scenes ---------- */
+const SC={};const sc=(k,h)=>{const e=mk(`<div class="scene">${h}</div>`);$('#scenes').appendChild(e);SC[k]=e;return e};
+sc('s1',`<div class="card" style="left:90px;top:430px;width:900px;height:740px;overflow:hidden">
+ <div class="dots"><i style="background:#FF5F57"></i><i style="background:#FEBC2E"></i><i style="background:#28C840"></i><span class="mono" style="margin-left:20px;font-size:22px;color:#8B949E">github.com</span></div>
+ <div style="padding:34px 40px">
+  <div style="display:flex;align-items:center;gap:20px"><span style="width:84px;height:84px;border-radius:18px;background:#fff;display:flex;align-items:center;justify-content:center"><img src="${L}microsoft-icon.svg" style="width:52px"></span>
+   <div><div style="font-size:30px;color:#8B949E;font-weight:600">microsoft /</div><div style="font-size:42px;font-weight:800;color:#58A6FF">generative-ai-for-beginners</div></div></div>
+  <div style="font-size:32px;color:#C9D1D9;margin-top:22px;font-weight:500">21 Lessons, Get Started Building with Generative AI</div>
+  <div style="display:flex;gap:14px;margin-top:24px;flex-wrap:wrap"><span class="chip">⭐ <span class="s1-st">0</span></span><span class="chip">🍴 66K forks</span><span class="chip">⚖️ MIT</span><span class="chip" id="s1-free" style="background:#22E06F;color:#06080A;border-color:#22E06F">100% FREE</span></div>
+  <div class="mono" style="font-size:20px;color:#8B949E;margin-top:30px">COMMIT ACTIVITY</div>
+  <div id="s1-cg" style="display:grid;grid-template-columns:repeat(26,1fr);gap:6px;margin-top:12px">${Array.from({length:26*5}).map(()=>'<i style="display:block;aspect-ratio:1;border-radius:4px;background:#161B22"></i>').join('')}</div>
+ </div></div>`);
+sc('s2',`<div class="abs" style="left:0;right:0;top:420px;display:flex;flex-direction:column;align-items:center;gap:22px">
+ <span class="box s2b" style="background:#F0F6FC;color:#06080A">INSANE</span>
+ <span class="box s2b" style="background:#22E06F;color:#06080A">FREE</span>
+ <span class="box s2b" style="border:5px solid #F0F6FC;color:#F0F6FC">GITHUB</span>
+ <span class="box s2b" style="background:#0E7A3C;color:#F0F6FC">FINDS</span>
+ <img class="s2b" src="${L}github-icon.svg" style="width:120px;margin-top:20px;filter:invert(1)"></div>`);
+sc('s3',`<div class="card" style="left:90px;top:520px;width:900px;height:600px;overflow:hidden">
+ <div class="dots"><i style="background:#FF5F57"></i><i style="background:#FEBC2E"></i><i style="background:#28C840"></i><span class="mono" style="margin-left:20px;font-size:22px;color:#8B949E">github.com/microsoft/generative-ai-for-beginners</span></div>
+ <div id="s3-page" style="padding:30px 40px;opacity:.35;filter:blur(3px)">
+  ${['00-course-setup','01-introduction-to-genai','02-exploring-and-comparing-different-llms','03-using-generative-ai-responsibly','04-prompt-engineering-fundamentals','05-advanced-prompts','06-text-generation-apps'].map(f=>`<div style="display:flex;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid #21262D;font-size:26px;color:#C9D1D9">📁 ${f}</div>`).join('')}</div>
+ <div class="abs" style="left:0;right:0;top:170px;text-align:center"><div id="s3-n" style="font-weight:900;font-size:170px;color:#FFC83D;letter-spacing:-.03em;text-shadow:0 10px 60px rgba(255,200,61,.45)">0</div>
+ <div id="s3-badge" class="chip" style="background:#FFC83D;color:#06080A;border-color:#FFC83D;font-size:34px;font-weight:900;margin-top:10px">⭐ STARS ON GITHUB</div></div></div>`);
+sc('s4',`<div class="abs" style="left:90px;right:90px;top:430px;display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+ <div class="tile s4t" style="height:250px"><b class="s4n">0</b><span>LESSONS</span></div>
+ <div class="tile s4t" style="height:250px"><b class="s4n">0</b><span>VIDEO INTROS</span></div>
+ <div class="tile s4t" style="height:250px"><b>2</b><span>CODE LANGUAGES</span></div></div>
+ <div class="card" style="left:90px;top:710px;width:900px;height:470px;padding:22px 34px;overflow:hidden">
+ ${['01 · Introduction to Generative AI and LLMs','04 · Prompt Engineering Fundamentals','07 · Building Chat Applications','15 · RAG and Vector Databases','17 · AI Agents','18 · Fine-Tuning LLMs'].map(f=>`<div class="s4r" style="display:flex;gap:16px;align-items:center;padding:15px 0;border-bottom:1px solid #21262D;font-size:28px;font-weight:600;color:#C9D1D9"><i style="width:12px;height:12px;border-radius:3px;background:#22E06F"></i>${f}</div>`).join('')}
+ <div class="abs s4lang" style="right:30px;bottom:26px;display:flex;gap:14px"><span class="chip"><img src="${L}python.svg" style="width:30px">Python</span><span class="chip"><img src="${L}typescript-icon.svg" style="width:28px">TypeScript</span></div></div>`);
+sc('s5',`<svg class="abs" style="left:0;top:0" width="1080" height="1920">${[[250,520],[830,520],[180,820],[900,820],[250,1110],[830,1110]].map(([x,y],i)=>`<path class="s5l" d="M540 820 L${x} ${y}" stroke="#22E06F" stroke-width="4" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" opacity=".7"/>`).join('')}</svg>
+ <div class="abs" id="s5c" style="left:440px;top:720px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#8DF5B4,#22E06F 45%,#0E7A3C);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:44px;color:#06080A;box-shadow:0 0 80px rgba(34,224,111,.5)">YOU</div>
+ ${[['Prompt Engineering',250,520],['Chat Apps',830,520],['RAG',180,820],['AI Agents',900,820],['Image Apps',250,1110],['Fine-tuning',830,1110]].map(([n,x,y])=>`<div class="node s5n" style="left:${x}px;top:${y}px;transform:translate(-50%,-50%)"><i></i>${n}</div>`).join('')}`);
+sc('s6',`<div class="card" style="left:140px;top:470px;width:800px;height:680px;padding:46px;text-align:center">
+ <div style="margin:0 auto;width:200px;height:200px;border-radius:44px;background:#fff;display:flex;align-items:center;justify-content:center"><img src="${L}microsoft-icon.svg" style="width:120px"></div>
+ <div style="font-weight:900;font-size:58px;margin-top:30px">Microsoft</div>
+ <div class="s6r" style="font-weight:600;font-size:34px;color:#C9D1D9;margin-top:8px">Cloud Advocates team</div>
+ <div class="s6r" style="display:flex;justify-content:center;gap:14px;margin-top:34px;flex-wrap:wrap"><span class="chip">⚖️ MIT license</span><span class="chip">🔄 Updated this week</span><span class="chip">🌍 Open source</span></div>
+ <div class="s6r" id="s6-badge" style="margin:34px auto 0;display:inline-flex;align-items:center;gap:12px;padding:16px 30px;border-radius:16px;background:#22E06F;color:#06080A;font-weight:900;font-size:34px">✓ OFFICIAL COURSE</div></div>`);
+sc('s7',`<div class="card" id="s7-c" style="left:170px;top:470px;width:740px;height:640px;overflow:hidden;background:#fff;border:none;transform-origin:50% 50%">
+ <div style="height:220px;background:linear-gradient(120deg,#6D28D9,#A855F7 60%,#F97316);padding:40px;color:#fff;font-weight:900;font-size:56px;line-height:1.05">Generative AI<br>Masterclass</div>
+ <div style="padding:34px 40px;color:#111"><div style="font-weight:700;font-size:30px">Learn to build AI apps</div>
+ <div style="font-weight:900;font-size:96px;margin-top:10px" id="s7-p">$299</div>
+ <div style="margin-top:18px;height:80px;border-radius:14px;background:#7C3AED;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:32px">Enroll now</div></div>
+ <div class="abs" id="s7-dim" style="inset:0;background:rgba(6,8,10,.55)"></div>
+ <div class="abs" id="s7-free" style="right:40px;top:300px;padding:10px 34px;border:7px solid #22E06F;border-radius:20px;color:#22E06F;font-weight:900;font-size:110px;transform:rotate(-12deg);background:rgba(6,8,10,.85);box-shadow:0 0 50px rgba(34,224,111,.6)">FREE</div></div>
+ <div class="abs mono" style="left:0;right:0;top:1130px;text-align:center;font-size:22px;color:#8B949E">ILLUSTRATIVE · TYPICAL PAID COURSE</div>`);
+sc('s8',`<div class="abs" style="left:70px;right:70px;top:470px;display:flex;flex-wrap:wrap;justify-content:center;gap:18px">
+ ${['English','Español','Français','Deutsch','Português','Italiano','हिन्दी','日本語','中文','한국어','العربية','Türkçe','Tiếng Việt','Polski','Bahasa','Русский','Nederlands','Svenska','ไทย','+ more'].map((l,i)=>`<span class="chip s8c" style="font-size:36px;padding:14px 28px${i===19?';background:#22E06F;color:#06080A;border-color:#22E06F':''}">${l}</span>`).join('')}</div>`);
+sc('s9',`<div class="card" style="left:110px;top:460px;width:860px;height:700px;padding:32px">
+ <div style="text-align:center;font-weight:800;font-size:32px">Comments</div>
+ <div style="display:flex;gap:18px;align-items:center;margin-top:30px"><span style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#F97316,#EC4899)"></span><div><div style="font-size:24px;color:#8B949E;font-weight:600">sara.codes · 2m</div><div style="font-size:32px;font-weight:700">AI 🔥</div></div></div>
+ <div class="s9-mine" style="display:flex;gap:18px;align-items:center;margin-top:26px"><span style="width:64px;height:64px;border-radius:50%;background:#22E06F"></span><div><div style="font-size:24px;color:#8B949E;font-weight:600">you · now</div><div style="font-size:32px;font-weight:700">AI</div></div></div>
+ <div style="position:absolute;left:32px;right:32px;bottom:250px;height:90px;border-radius:45px;border:2px solid #30363D;display:flex;align-items:center;padding:0 34px;font-size:34px;font-weight:700"><span id="s9-typ"></span><i id="s9-car" style="width:4px;height:42px;background:#22E06F;margin-left:4px"></i><span style="margin-left:auto;color:#58A6FF;font-weight:800">Post</span></div>
+ <div id="s9-dm" style="position:absolute;left:32px;right:32px;bottom:34px"><div style="display:inline-block;padding:18px 26px;border-radius:24px;background:linear-gradient(90deg,#22E06F,#0E7A3C);color:#06080A;font-weight:800;font-size:30px">Here's the link, as promised 👇</div>
+ <div style="margin-top:12px;padding:18px 24px;border-radius:18px;background:#161B22;border:2px solid #30363D;display:flex;gap:16px;align-items:center;font-size:26px;font-weight:700"><img src="${L}github-icon.svg" style="width:40px;filter:invert(1)">microsoft/generative-ai-for-beginners</div></div></div>`);
+sc('s10',`<div class="card" style="left:110px;top:470px;width:860px;height:640px;padding:40px">
+ <div style="display:flex;gap:24px;align-items:center"><span style="width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#8DF5B4,#22E06F 50%,#0E7A3C);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:58px;color:#06080A">G</span>
+ <div><div style="font-weight:900;font-size:48px">GrowMe</div><div style="font-size:28px;color:#8B949E;font-weight:600">Free AI finds, every week</div></div></div>
+ <div id="s10-btn" style="margin-top:34px;height:96px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:38px">Follow</div>
+ ${['Free AI courses','Hidden GitHub gems','Tools that save you hours'].map(n=>`<div class="s10r" style="margin-top:18px;padding:20px 26px;border-radius:16px;background:#161B22;border:2px solid #30363D;display:flex;gap:16px;align-items:center;font-size:32px;font-weight:700"><i style="width:14px;height:14px;border-radius:50%;background:#22E06F"></i>${n}</div>`).join('')}
+ <svg class="abs" id="s10-cur" style="left:560px;top:250px" width="60" height="70" viewBox="0 0 70 80"><path d="M6 4 L6 62 L22 48 L34 74 L46 68 L34 43 L56 43 Z" fill="#fff" stroke="#000" stroke-width="4" stroke-linejoin="round"/></svg></div>`);
+
+/* captions: chunks of <=3 words, break on punctuation */
+const CH=[];ORDER.forEach(k=>{let cur=[];S[k].words.forEach((x,i)=>{cur.push({...x,k,kw:(KEYW[k]||[]).includes(x.w)});if(cur.length>=3||/[.,]$/.test(x.w)){CH.push(cur);cur=[]}});if(cur.length)CH.push(cur)});
+
+function sceneAt(t){let i=0;for(let j=0;j<ORDER.length;j++)if(t>=START[j])i=j;return i}
+let lastHead=null;
+window.seek=function(t){
+  const idx=sceneAt(t),k=ORDER[idx],lt=t-START[idx];
+  // contribution grid flicker
+  $$('#contrib i').forEach((c,i)=>{const r=rnd(i),ph=rnd(i+500);const lv=Math.floor(clamp(.5+.5*Math.sin(t*1.6+ph*30)+(r-.5),0,.999)*5);c.style.background=lv===0?'#0D1117':GREENS[lv-1];c.style.opacity=.5});
+  $('#prog').style.width=(clamp(t/END)*100)+'%';
+  // scenes: quick fade + scale-in
+  ORDER.forEach((kk,i)=>{const e=SC[kk];if(i!==idx){e.style.display='none';return}e.style.display='block';
+    const pin=i===0?1:eo5(P(lt,0,.35)); const out=i+1<ORDER.length?eio(P(t,START[i+1]-.14,.14)):0;
+    st(e,{opacity:pin*(1-out),transform:`scale(${lerp(.94,1,pin)*lerp(1,1.04,out)})`});});
+  // headline + context
+  if(lastHead!==k){lastHead=k;$('#ctx').textContent=H[k][0];$('#head').innerHTML=H[k][1];}
+  const hp=idx===0?1:eo5(P(lt,0,.3));const out=idx+1<ORDER.length?eio(P(t,START[idx+1]-.14,.14)):0;
+  st($('#head'),{opacity:hp*(1-out),transform:`scale(${lerp(1.12,1,hp)})`});st($('#ctx'),{opacity:hp*(1-out)});
+  // captions
+  const ch=CH.find(c=>t>=c[0].s-.04&&t<(CH[CH.indexOf(c)+1]?CH[CH.indexOf(c)+1][0].s-.04:END));
+  const cap=$('#cap');if(!ch||k==='s2'){cap.innerHTML='';}else{cap.innerHTML=ch.map(x=>{const on=t>=x.s-.02;return `<span style="opacity:${on?1:.0};color:${x.kw?'#22E06F':'#F0F6FC'};transform:translateY(${on?0:10}px) scale(${on&&t<x.s+.18?1.08:1})">${x.w.replace(/[.,]$/,'')}</span>`}).join('');}
+  const e=SC[k];const W=i=>w(k,i);
+  if(k==='s1'){$('.s1-st',e).textContent=fmt(123114*eo(P(t,-.25,1.8)));
+    $$('#s1-cg i',e).forEach((c,i)=>{const r=rnd(i*3);const on=t>r*2.6-.9;c.style.background=on?GREENS[Math.floor(rnd(i)*4)]:'#161B22';});
+    const f=$('#s1-free',e);const p=back(P(t,W(11),.4));st(f,{transform:`scale(${t<W(11)?1:p})`,boxShadow:t>W(11)?`0 0 ${30+10*Math.sin(t*6)}px rgba(34,224,111,.7)`:'none'});}
+  if(k==='s2'){$$('.s2b',e).forEach((b,i)=>{const a=i<4?W(i):W(3)+.25;const p=back(P(t,a-.03,.35));st(b,{opacity:clamp(P(t,a-.03,.08)),transform:`scale(${lerp(.4,1,p)}) rotate(${(1-eo(P(t,a,.35)))*(i%2?6:-6)}deg)`});});}
+  if(k==='s3'){const a=W(4);const n=123114*eo(P(t,a,W(9)+.4-a));$('#s3-n',e).textContent=fmt(n);
+    const b=$('#s3-badge',e);const p=back(P(t,W(10),.4));st(b,{opacity:clamp(P(t,W(10),.08)),transform:`scale(${p})`});}
+  if(k==='s4'){const ns=$$('.s4n',e);ns[0].textContent=Math.round(21*eo(P(t,W(3),.6)));ns[1].textContent=Math.round(18*eo(P(t,W(6),.6)));
+    $$('.s4t',e).forEach((x,i)=>{const a=[W(3),W(6),W(11)][i];const p=back(P(t,a-.05,.4));st(x,{opacity:clamp(P(t,a-.05,.08)),transform:`scale(${lerp(.6,1,p)})`});});
+    $$('.s4r',e).forEach((r,i)=>{const p=eo5(P(lt,.15+i*.1,.35));st(r,{opacity:p,transform:`translateX(${(1-p)*-40}px)`});});
+    const lp=back(P(t,W(11),.4));st($('.s4lang',e),{opacity:clamp(P(t,W(11),.08)),transform:`scale(${lp})`});}
+  if(k==='s5'){const tw=[W(1),W(4),W(6),W(9),W(9)+.25,W(9)+.45];
+    st($('#s5c',e),{transform:`scale(${back(P(lt,0,.45))})`});
+    $$('.s5l',e).forEach((l,i)=>l.style.strokeDashoffset=1-eo(P(t,tw[i]-.1,.25)));
+    $$('.s5n',e).forEach((n,i)=>{const p=back(P(t,tw[i],.35));st(n,{opacity:clamp(P(t,tw[i],.08)),transform:`translate(-50%,-50%) scale(${lerp(.5,1,p)})`});});}
+  if(k==='s6'){$$('.s6r',e).forEach((r,i)=>{const a=[W(4),W(4)+.2,W(5)][i];const p=eo5(P(t,a,.35));st(r,{opacity:p,transform:`translateY(${(1-p)*24}px)`});});
+    st($('#s6-badge',e),{transform:`scale(${back(P(t,W(5),.4))})`});}
+  if(k==='s7'){const a=W(7);const g=eo(P(t,a,.3));st($('#s7-dim',e),{opacity:g});st($('#s7-c',e),{filter:`grayscale(${g})`,transform:`rotate(${lerp(0,-2,g)}deg)`});
+    const p=back(P(t,a+.15,.4));st($('#s7-free',e),{opacity:clamp(P(t,a+.15,.06)),transform:`rotate(-12deg) scale(${lerp(2.2,1,p)})`});
+    $('#s7-p',e).style.textDecoration=t>a?'line-through':'none';}
+  if(k==='s8'){$$('.s8c',e).forEach((c,i)=>{const a=W(2)+i*.07;const p=back(P(t,a,.35));st(c,{opacity:clamp(P(t,a,.08)),transform:`scale(${lerp(.5,1,p)})`});});}
+  if(k==='s9'){const ty=t-W(0);$('#s9-typ',e).textContent=ty<0?'':'AI'.slice(0,Math.floor(ty*8));const posted=t>W(1)+.35;
+    if(posted)$('#s9-typ',e).textContent='';$('#s9-car',e).style.opacity=Math.floor(t*3)%2?1:0;
+    const pm=eo5(P(t,W(1)+.35,.3));st($('.s9-mine',e),{opacity:pm,transform:`translateY(${(1-pm)*20}px)`});
+    const pd=back(P(t,W(4),.45));st($('#s9-dm',e),{opacity:clamp(P(t,W(4),.1)),transform:`translateY(${(1-pd)*40}px)`});}
+  if(k==='s10'){const btn=$('#s10-btn',e);const click=W(0)+.35;const fol=t>click;
+    st(btn,{background:fol?'#21262D':'#22E06F',color:fol?'#F0F6FC':'#06080A',border:fol?'2px solid #30363D':'none',transform:`scale(${1-Math.sin(Math.PI*P(t,click-.08,.18))*.06})`});btn.textContent=fol?'Following ✓':'Follow';
+    const pc=eio(P(lt,0,.45));st($('#s10-cur',e),{transform:`translate(${(1-pc)*200}px,${(1-pc)*260}px)`,opacity:t<click+.6?1:1-P(t,click+.6,.3)});
+    $$('.s10r',e).forEach((r,i)=>{const a=W(2)+i*.3;const p=eo5(P(t,a,.35));st(r,{opacity:p,transform:`translateX(${(1-p)*-50}px)`});});}
+  return true};
+window.__ready=document.fonts.ready.then(()=>true);
+</script></body></html>
