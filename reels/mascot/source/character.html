@@ -1,0 +1,155 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+html,body{margin:0;background:transparent;width:800px;height:900px;overflow:hidden}
+svg{display:block}
+</style></head><body>
+<svg id="c" width="800" height="900" viewBox="0 0 800 900" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <filter id="sticker" x="-10%" y="-10%" width="120%" height="120%">
+    <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+    <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="outline"/>
+    <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d2"/>
+    <feGaussianBlur in="d2" stdDeviation="10" result="b"/><feOffset dy="10" in="b" result="sh"/>
+    <feFlood flood-color="#000" flood-opacity=".45"/><feComposite in2="sh" operator="in" result="shadow"/>
+    <feMerge><feMergeNode in="shadow"/><feMergeNode in="outline"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E2A77C"/><stop offset="1" stop-color="#C98B60"/></linearGradient>
+  <linearGradient id="hood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22262B"/><stop offset="1" stop-color="#0E1013"/></linearGradient>
+  <linearGradient id="hair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A2A21"/><stop offset="1" stop-color="#1E1510"/></linearGradient>
+  <clipPath id="eyeL"><ellipse cx="342" cy="402" rx="30" ry="24"/></clipPath>
+  <clipPath id="eyeR"><ellipse cx="458" cy="402" rx="30" ry="24"/></clipPath>
+</defs>
+<g id="all" filter="url(#sticker)">
+ <g id="body">
+  <!-- arm for pointing pose (behind body) -->
+  <g id="armPoint" style="display:none">
+    <path d="M200 760 C170 700 150 640 160 600 L215 590 C220 640 245 690 270 730 Z" fill="url(#hood)"/>
+    <rect x="152" y="588" width="70" height="22" rx="10" fill="#22E06F"/>
+    <g id="pointHand" transform="translate(190,566) rotate(-28)">
+      <!-- index finger on the thumb side, clearly extended -->
+      <rect x="-34" y="-104" width="22" height="92" rx="11" fill="url(#skin)"/>
+      <path d="M-28 -98 C-24 -102 -18 -102 -16 -98" stroke="#B57A52" stroke-width="3" fill="none"/>
+      <!-- fist -->
+      <rect x="-36" y="-24" width="78" height="62" rx="22" fill="url(#skin)"/>
+      <!-- three curled fingers as knuckle bumps -->
+      <rect x="-12" y="-34" width="20" height="34" rx="10" fill="#D99A6E"/>
+      <rect x="6" y="-30" width="19" height="30" rx="9.5" fill="#D99A6E"/>
+      <rect x="22" y="-24" width="18" height="26" rx="9" fill="#D99A6E"/>
+      <path d="M-10 -6 L38 -6" stroke="#B57A52" stroke-width="3" stroke-linecap="round"/>
+      <!-- thumb across the curled fingers -->
+      <path d="M-36 6 C-20 -4 6 -2 24 6 C14 16 -18 18 -36 16 Z" fill="#E2A77C" stroke="#B57A52" stroke-width="2.5"/>
+    </g>
+  </g>
+  <!-- hoodie -->
+  <path d="M110 900 C118 735 215 665 400 655 C585 665 682 735 690 900 Z" fill="url(#hood)"/>
+  <path d="M290 668 C320 720 480 720 510 668 C470 690 330 690 290 668 Z" fill="#090A0C"/>
+  <!-- hood rim -->
+  <path d="M262 640 C250 700 320 742 400 742 C480 742 550 700 538 640 C520 690 470 712 400 712 C330 712 280 690 262 640 Z" fill="#2B3036"/>
+  <!-- drawstrings -->
+  <path d="M352 720 C350 760 352 800 356 830" stroke="#22E06F" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <path d="M448 720 C450 760 448 800 444 830" stroke="#22E06F" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <circle cx="356" cy="836" r="9" fill="#8DF5B4"/><circle cx="444" cy="836" r="9" fill="#8DF5B4"/>
+  <!-- chest logo -->
+  <text x="545" y="805" font-family="Space Mono, monospace" font-weight="700" font-size="40" fill="#22E06F">&lt;/&gt;</text>
+  <!-- neck -->
+  <path d="M352 560 L352 650 C370 672 430 672 448 650 L448 560 Z" fill="#B97B52"/>
+  <!-- headphones around neck -->
+  <path d="M268 640 C280 700 520 700 532 640" stroke="#1A1D21" stroke-width="22" fill="none" stroke-linecap="round"/>
+  <path d="M268 640 C280 700 520 700 532 640" stroke="#22E06F" stroke-width="6" fill="none" stroke-linecap="round" opacity=".9"/>
+  <rect x="236" y="600" width="58" height="84" rx="26" fill="#1A1D21" transform="rotate(-18 265 642)"/>
+  <rect x="246" y="612" width="38" height="60" rx="18" fill="#22E06F" transform="rotate(-18 265 642)"/>
+  <rect x="506" y="600" width="58" height="84" rx="26" fill="#1A1D21" transform="rotate(18 535 642)"/>
+  <rect x="516" y="612" width="38" height="60" rx="18" fill="#22E06F" transform="rotate(18 535 642)"/>
+  <!-- arm for wave pose -->
+  <g id="armWave" style="display:none">
+    <path d="M600 760 C640 700 655 640 645 590 L590 585 C585 640 560 690 535 730 Z" fill="url(#hood)"/>
+    <rect x="584" y="578" width="70" height="22" rx="10" fill="#22E06F"/>
+    <g id="waveHand" transform="translate(620,540)">
+      <path d="M-34 36 C-40 0 -30 -26 0 -28 C30 -26 40 0 34 36 Z" fill="url(#skin)"/>
+      <rect x="-32" y="-82" width="17" height="64" rx="8.5" fill="url(#skin)" transform="rotate(-10 -24 -20)"/>
+      <rect x="-13" y="-96" width="17" height="76" rx="8.5" fill="url(#skin)"/>
+      <rect x="6" y="-92" width="17" height="72" rx="8.5" fill="url(#skin)" transform="rotate(6 14 -20)"/>
+      <rect x="22" y="-76" width="16" height="58" rx="8" fill="url(#skin)" transform="rotate(14 30 -20)"/>
+      <path d="M-30 10 C-52 0 -60 -22 -50 -30 C-42 -34 -32 -18 -24 -8" fill="url(#skin)"/>
+    </g>
+  </g>
+ </g>
+ <g id="head">
+  <!-- ears -->
+  <ellipse cx="252" cy="418" rx="24" ry="36" fill="#C98B60"/><ellipse cx="548" cy="418" rx="24" ry="36" fill="#C98B60"/>
+  <ellipse cx="254" cy="420" rx="11" ry="20" fill="#A86E48"/><ellipse cx="546" cy="420" rx="11" ry="20" fill="#A86E48"/>
+  <!-- face -->
+  <path d="M258 380 C258 260 320 215 400 215 C480 215 542 260 542 380 L542 470 C542 560 480 610 400 612 C320 610 258 560 258 470 Z" fill="url(#skin)"/>
+  <!-- beard -->
+  <path d="M258 410 C262 470 268 520 300 570 C330 615 365 632 400 634 C435 632 470 615 500 570 C532 520 538 470 542 410 C530 470 515 500 488 512 C470 496 440 488 400 488 C360 488 330 496 312 512 C285 500 270 470 258 410 Z" fill="url(#hair)"/>
+  <!-- beard texture -->
+  <g stroke="#4A372B" stroke-width="3" stroke-linecap="round" opacity=".7">
+   <path d="M300 540 l8 14"/><path d="M330 572 l6 14"/><path d="M370 594 l3 14"/><path d="M430 594 l-3 14"/><path d="M470 572 l-6 14"/><path d="M500 540 l-8 14"/><path d="M400 600 l0 14"/>
+  </g>
+  <!-- mouth -->
+  <g id="mouth">
+    <path id="mouthOpen" d="" fill="#3B1212"/>
+    <path id="teeth" d="" fill="#F5F1EA"/>
+    <path id="tongue" d="" fill="#D8676B"/>
+    <path id="mouthLine" d="" stroke="#6B2E25" stroke-width="7" stroke-linecap="round" fill="none"/>
+  </g>
+  <!-- mustache -->
+  <path d="M332 512 C350 492 385 488 400 500 C415 488 450 492 468 512 C448 506 425 510 400 516 C375 510 352 506 332 512 Z" fill="url(#hair)"/>
+  <!-- nose -->
+  <path d="M398 420 C392 450 384 466 392 476 C398 482 410 482 414 474" stroke="#A86E48" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <!-- cheeks -->
+  <ellipse cx="300" cy="470" rx="22" ry="12" fill="#E07B6A" opacity=".25"/><ellipse cx="500" cy="470" rx="22" ry="12" fill="#E07B6A" opacity=".25"/>
+  <!-- eyes -->
+  <g id="eyes">
+   <ellipse cx="342" cy="402" rx="30" ry="24" fill="#fff"/><ellipse cx="458" cy="402" rx="30" ry="24" fill="#fff"/>
+   <g clip-path="url(#eyeL)"><g id="pupL"><circle cx="345" cy="404" r="15" fill="#5A3A22"/><circle cx="345" cy="404" r="8" fill="#140C07"/><circle cx="350" cy="398" r="4.5" fill="#fff"/></g>
+     <rect id="lidL" x="300" y="370" width="90" height="0" fill="#D99C70"/></g>
+   <g clip-path="url(#eyeR)"><g id="pupR"><circle cx="461" cy="404" r="15" fill="#5A3A22"/><circle cx="461" cy="404" r="8" fill="#140C07"/><circle cx="466" cy="398" r="4.5" fill="#fff"/></g>
+     <rect id="lidR" x="416" y="370" width="90" height="0" fill="#D99C70"/></g>
+  </g>
+  <!-- glasses -->
+  <g id="glasses" fill="none" stroke="#111" stroke-width="9">
+   <rect x="296" y="364" width="94" height="76" rx="22"/><rect x="410" y="364" width="94" height="76" rx="22"/>
+   <path d="M390 396 C396 388 404 388 410 396"/><path d="M296 392 L262 384"/><path d="M504 392 L538 384"/>
+  </g>
+  <path d="M312 376 L332 376" stroke="#22E06F" stroke-width="5" stroke-linecap="round" opacity=".8"/>
+  <path d="M426 376 L446 376" stroke="#22E06F" stroke-width="5" stroke-linecap="round" opacity=".8"/>
+  <!-- eyebrows -->
+  <path id="browL" d="M300 342 C320 326 356 324 382 336" stroke="#1E1510" stroke-width="15" stroke-linecap="round" fill="none"/>
+  <path id="browR" d="M418 336 C444 324 480 326 500 342" stroke="#1E1510" stroke-width="15" stroke-linecap="round" fill="none"/>
+  <!-- hair -->
+  <path d="M252 400 C236 300 270 222 340 196 C390 178 470 182 520 214 C566 246 566 320 548 400 C540 350 528 318 506 296 C470 304 430 296 398 280 C360 300 318 300 286 296 C268 320 258 356 252 400 Z" fill="url(#hair)"/>
+  <path d="M330 206 C370 168 450 160 500 196 C470 186 420 186 380 204 Z" fill="#4E3A2D"/>
+  <path d="M300 250 C330 230 360 226 390 232" stroke="#5B4536" stroke-width="5" fill="none" stroke-linecap="round"/>
+ </g>
+</g>
+</svg>
+<script>
+const $=s=>document.querySelector(s);
+// state: mouth 0..1 open, shape 0..1 (wide vs round), blink 0..1, brow 0..1 raise, look x,y (-1..1), tilt deg, bob px, pose 'idle'|'wave'|'point', wave phase
+window.pose=function(o){
+  const m=o.mouth||0, sh=o.shape??.5, smile=o.smile??.6;
+  const cx=400, cy=536, wdt=lerp(34,46,1-sh)+m*6, h=m*lerp(30,40,sh);
+  if(m<0.06){
+    $('#mouthOpen').setAttribute('d','');$('#teeth').setAttribute('d','');$('#tongue').setAttribute('d','');
+    $('#mouthLine').setAttribute('d',`M${cx-wdt} ${cy-4} Q${cx} ${cy+14*smile} ${cx+wdt} ${cy-4}`);
+  } else {
+    $('#mouthLine').setAttribute('d','');
+    $('#mouthOpen').setAttribute('d',`M${cx-wdt} ${cy-4} Q${cx} ${cy-8} ${cx+wdt} ${cy-4} Q${cx+wdt*.8} ${cy+h} ${cx} ${cy+h+6} Q${cx-wdt*.8} ${cy+h} ${cx-wdt} ${cy-4} Z`);
+    $('#teeth').setAttribute('d',`M${cx-wdt*.82} ${cy-3} Q${cx} ${cy-7} ${cx+wdt*.82} ${cy-3} L${cx+wdt*.72} ${cy+Math.min(9,h*.4)} Q${cx} ${cy+Math.min(10,h*.4)} ${cx-wdt*.72} ${cy+Math.min(9,h*.4)} Z`);
+    $('#tongue').setAttribute('d',h>14?`M${cx-wdt*.5} ${cy+h} Q${cx} ${cy+h*.45} ${cx+wdt*.5} ${cy+h} Q${cx} ${cy+h+6} ${cx-wdt*.5} ${cy+h} Z`:'');
+  }
+  const b=o.blink||0; $('#lidL').setAttribute('height',54*b); $('#lidR').setAttribute('height',54*b);
+  const lx=(o.lookX||0)*8, ly=(o.lookY||0)*5;
+  $('#pupL').setAttribute('transform',`translate(${lx},${ly})`);$('#pupR').setAttribute('transform',`translate(${lx},${ly})`);
+  const br=(o.brow||0)*-12; $('#browL').setAttribute('transform',`translate(0,${br})`);$('#browR').setAttribute('transform',`translate(0,${br})`);
+  $('#head').setAttribute('transform',`translate(0,${o.bob||0}) rotate(${o.tilt||0} 400 600)`);
+  $('#armWave').style.display=o.pose==='wave'?'block':'none';
+  $('#armPoint').style.display=o.pose==='point'?'block':'none';
+  $('#waveHand').setAttribute('transform',`translate(620,540) rotate(${Math.sin((o.wave||0))*16})`);
+};
+function lerp(a,b,t){return a+(b-a)*t}
+pose({});
+window.__ready=document.fonts.ready.then(()=>true);
+</script></body></html>
