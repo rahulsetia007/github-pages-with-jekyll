@@ -1,0 +1,234 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Inter;src:url(file:///root/.claude/skills/effects/fonts/Inter.ttf);font-weight:100 900}
+@font-face{font-family:ISerif;src:url(file:///root/.claude/skills/effects/fonts/InstrumentSerif-Italic.ttf)}
+@font-face{font-family:Mono;src:url(file:///root/.claude/skills/effects/fonts/SpaceMono-Bold.ttf)}
+:root{--g:#22E06F;--gd:#0E7A3C;--ink:#040504;--deep:#04170C;--card:#0B110D;--line:rgba(255,255,255,.12);--txt:#F3F7F4;--mut:#8A938C}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ink)}
+body{font-family:Inter,sans-serif;color:var(--txt);-webkit-font-smoothing:antialiased}
+.abs{position:absolute}
+#bgA,#bgB{position:absolute;inset:0}
+#mosaic{position:absolute;inset:0}
+#mosaic i{position:absolute;width:90px;height:90px}
+#glow{position:absolute;left:140px;top:500px;width:800px;height:900px;border-radius:50%;background:radial-gradient(closest-side,rgba(34,224,111,.20),transparent);filter:blur(30px)}
+#parts i{position:absolute;width:16px;height:16px;border:2px dashed rgba(34,224,111,.45)}
+.mono{font-family:Mono,monospace}
+#lab{position:absolute;top:168px;left:90px;font-size:34px;color:var(--mut);letter-spacing:.02em}
+#stat{position:absolute;top:168px;right:90px;font-size:34px;color:var(--mut);text-align:right}
+#stat b{color:var(--g);font-weight:400}
+#head{position:absolute;top:226px;left:90px;width:900px;font-weight:800;font-size:76px;line-height:1.08;letter-spacing:-.025em}
+#head span{display:inline-block;margin-right:.24em;transform-origin:0 70%;position:relative}
+#head span.k{font-family:ISerif;font-weight:400;color:var(--g);font-size:1.12em;letter-spacing:0}
+#head span.k u{position:absolute;left:0;right:0;bottom:.04em;height:5px;background:var(--g);transform-origin:left;border-radius:3px}
+.card{position:absolute;border-radius:30px;background:var(--card);border:2px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.dot{border:2px dotted rgba(255,255,255,.22)}
+.scene{position:absolute;left:0;top:0;width:1080px;height:1920px;display:none}
+/* tracker */
+#trk{position:absolute;left:58px;top:1404px;width:560px;height:170px;border-radius:22px;background:#F3F7F4;color:#040504;padding:22px 26px;box-shadow:10px 10px 0 rgba(34,224,111,.35)}
+#trk .ttl{display:flex;align-items:center;gap:14px;font-weight:800;font-size:38px}
+#trk .ttl i{font-style:normal;font-family:Mono;font-size:22px;background:#040504;color:var(--g);border-radius:8px;padding:4px 8px}
+#trk .st{margin-left:auto;font-family:Inter;font-weight:900;font-size:24px;color:var(--gd);letter-spacing:.04em}
+#trk .bx{display:flex;gap:16px;margin-top:18px}
+#trk .bx b{width:84px;height:58px;border-radius:12px;border:3px solid #040504;display:flex;align-items:center;justify-content:center}
+#trk .bx b em{width:12px;height:12px;border-radius:50%;background:#B9C2BC}
+/* ring */
+#ring{position:absolute;left:668px;top:1356px;width:354px;height:354px}
+#ring .n{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#ring .n b{font-weight:900;font-size:96px;letter-spacing:-.04em;line-height:1}
+#ring .n span{font-family:Mono;font-size:22px;color:var(--mut);margin-top:8px;letter-spacing:.06em}
+#pix{position:absolute;inset:0;pointer-events:none}
+#pix i{position:absolute;width:120px;height:120px}
+.chip{position:absolute;padding:12px 22px;border-radius:999px;font-weight:800;font-size:30px;background:var(--g);color:#040504;white-space:nowrap}
+.tag{font-family:Mono;font-size:22px;color:var(--mut);letter-spacing:.06em}
+</style></head><body>
+<div id="bgA"></div>
+<div id="mosaic"></div><div id="glow"></div><div id="parts"></div>
+<div id="scenes"></div>
+<div id="lab" class="mono"></div><div id="stat" class="mono"></div>
+<div id="head"></div>
+<div id="trk"><div class="ttl"><i>8H</i>Save 8h/week<span class="st" id="trkst">START</span></div><div class="bx" id="bx"></div></div>
+<div id="ring"><svg width="354" height="354" viewBox="0 0 354 354"><circle cx="177" cy="177" r="150" stroke="rgba(255,255,255,.1)" stroke-width="22" fill="none"/>
+<circle id="arc" cx="177" cy="177" r="150" stroke="#22E06F" stroke-width="22" fill="none" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" transform="rotate(-90 177 177)" style="filter:drop-shadow(0 0 14px rgba(34,224,111,.6))"/></svg>
+<div class="n"><b id="hrs">0h</b><span>SAVED / WEEK</span></div></div>
+<div id="pix"></div>
+<script>
+const D=window.__DATA__;const $=(s,e=document)=>e.querySelector(s);const $$=(s,e=document)=>[...e.querySelectorAll(s)];
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-clamp(t),3),eo5=t=>1-Math.pow(1-clamp(t),5),eio=t=>{t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+const back=t=>{t=clamp(t);const c=1.9;return 1+(c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2)};
+const P=(t,a,d)=>clamp((t-a)/d);
+function st(e,o){for(const k in o)e.style[k]=o[k]}
+function mk(h){const d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild}
+function rnd(i){const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+const S=Object.fromEntries(D.segs.map(s=>[s.key,s]));
+const W=(k,i)=>S[k].words[i].s;            // word start time
+const ORDER=['hook','h1','h2','h3','h4','h5','cta'];
+const START=ORDER.map((k,i)=>i===0?0:S[k].start-0.30);  // scene cut lands just before voice
+const END=D.end;
+const HRS=[3,2,1.5,1,0.5];
+/* per-scene config: label, stat, headline words (index into spoken words), keyword indices, display overrides */
+const CFG={
+ hook:{lab:'// 05 hacks — 1 week',stat:'TIME <b>+8H</b>',skip:[],key:[6,7],disp:{0:'5',6:'8'},bg:0,trk:'START'},
+ h1:{lab:'// 01 — batch',stat:'SAVES <b>~3H</b>',skip:[0],key:[1],disp:{3:'4'},bg:1,trk:'BATCH'},
+ h2:{lab:'// 02 — repurpose',stat:'SAVES <b>~2H</b>',skip:[0],key:[1],disp:{},bg:0,trk:'REUSE'},
+ h3:{lab:'// 03 — templates',stat:'SAVES <b>~1.5H</b>',skip:[0],key:[2],disp:{},bg:1,trk:'TEMPLATE'},
+ h4:{lab:'// 04 — schedule',stat:'SAVES <b>~1H</b>',skip:[0],key:[1],disp:{},bg:0,trk:'SCHEDULE'},
+ h5:{lab:'// 05 — idea bank',stat:'SAVES <b>~0.5H</b>',skip:[0],key:[3,4],disp:{},bg:1,trk:'IDEAS'},
+ cta:{lab:'// total — every week',stat:'SAVED <b>8H</b>',skip:[],key:[3],disp:{},bg:0,trk:'DONE'},
+};
+/* ---------- backgrounds ---------- */
+const mos=$('#mosaic');for(let i=0;i<12*22;i++){const c=document.createElement('i');c.style.left=(i%12)*90+'px';c.style.top=Math.floor(i/12)*90+'px';mos.appendChild(c)}
+const parts=$('#parts');for(let i=0;i<46;i++){const c=document.createElement('i');parts.appendChild(c)}
+const pix=$('#pix');for(let i=0;i<9*16;i++){const c=document.createElement('i');c.style.left=(i%9)*120+'px';c.style.top=Math.floor(i/9)*120+'px';pix.appendChild(c)}
+for(let i=0;i<5;i++)$('#bx').appendChild(mk('<b><em></em></b>'));
+const BG=['#040504','#04170C'];
+/* ---------- scenes ---------- */
+const SC={};const sc=(k,h)=>{const e=mk(`<div class="scene" id="s-${k}">${h}</div>`);$('#scenes').appendChild(e);SC[k]=e;return e};
+const DAYS=['MON','TUE','WED','THU','FRI','SAT','SUN'];
+// HOOK: week calendar where 8 hour-blocks clear
+sc('hook',`<div class="card" style="left:90px;top:560px;width:900px;height:740px;padding:34px">
+ <div style="display:flex;justify-content:space-between"><span class="tag">YOUR CONTENT WEEK</span><span class="tag" id="hk-c" style="color:#22E06F">0H FREED</span></div>
+ <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:14px;margin-top:26px">${DAYS.map(d=>`<div class="tag" style="text-align:center">${d}</div>`).join('')}
+ ${Array.from({length:35}).map((_,i)=>`<div class="hb" data-i="${i}" style="height:96px;border-radius:14px;background:#1A231D;border:2px solid rgba(255,255,255,.08)"></div>`).join('')}</div>
+ <div class="chip abs" id="hk-chip" style="right:34px;bottom:30px">+8 hours back</div></div>`);
+// H1: batch — 4 video cards fly into one session
+sc('h1',`<div class="card" style="left:90px;top:560px;width:900px;height:740px;padding:34px">
+ <div class="tag">FILMING SCHEDULE</div>
+ <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:22px">${['MON','TUE','WED','THU'].map(d=>`<div class="tag" style="text-align:center">${d}</div>`).join('')}</div>
+ ${[0,1,2,3].map(i=>`<div class="abs b-v" style="left:${34+i*213}px;top:120px;width:195px;height:300px;border-radius:22px;background:linear-gradient(170deg,#163A24,#0B1A10);border:2px solid rgba(34,224,111,.45);padding:18px">
+   <div style="width:54px;height:54px;border-radius:50%;background:#22E06F;display:flex;align-items:center;justify-content:center"><svg width="22" height="24" viewBox="0 0 22 24"><path d="M2 2l18 10L2 22z" fill="#040504"/></svg></div>
+   <div style="margin-top:120px;height:12px;width:80%;border-radius:6px;background:rgba(255,255,255,.25)"></div><div style="margin-top:12px;height:12px;width:55%;border-radius:6px;background:rgba(255,255,255,.15)"></div>
+   <div class="mono" style="position:absolute;right:16px;top:20px;font-size:22px;color:#22E06F">0${i+1}</div></div>`).join('')}
+ <div class="abs dot" id="b-slot" style="left:34px;right:34px;top:450px;height:254px;border-radius:22px"></div>
+ <div class="abs tag" style="right:60px;top:468px" id="b-slt">SUNDAY · ONE SITTING</div>
+ <div class="chip abs" id="b-chip" style="right:56px;top:600px">1 setup · 4 videos</div></div>`);
+// H2: repurpose tree
+sc('h2',`<div class="abs" style="left:0;top:0;width:1080px;height:1920px">
+ <svg class="abs" style="left:0;top:0" width="1080" height="1920">${[[540,840,230,1050],[540,840,540,1050],[540,840,850,1050]].map(([a,b,c,d],i)=>`<path class="r-l" d="M${a} ${b} C ${a} 960, ${c} 930, ${c} ${d}" stroke="#22E06F" stroke-width="5" fill="none" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>`).join('')}</svg>
+ <div class="card abs" id="r-src" style="left:390px;top:560px;width:300px;height:280px;padding:24px;background:linear-gradient(170deg,#163A24,#0B1A10);border-color:rgba(34,224,111,.5)">
+   <div class="tag" style="color:#22E06F">1 LONG VIDEO</div>
+   <div style="margin:36px auto 0;width:96px;height:96px;border-radius:50%;background:#22E06F;display:flex;align-items:center;justify-content:center"><svg width="36" height="40" viewBox="0 0 22 24"><path d="M3 2l17 10L3 22z" fill="#040504"/></svg></div>
+   <div class="mono" style="text-align:center;margin-top:22px;font-size:24px;color:#C8D0CA">12:40</div></div>
+ ${[['REEL','0:30',90],['CAROUSEL','8 slides',400],['NEWSLETTER','600 words',710]].map(([n,m,x],i)=>`<div class="card abs r-o" style="left:${x}px;top:1050px;width:280px;height:250px;padding:24px">
+   <div class="tag" style="color:#22E06F">${n}</div>
+   ${i===0?`<div style="margin-top:20px;width:90px;height:140px;border-radius:14px;border:3px solid #F3F7F4;position:relative"><div style="position:absolute;left:30px;top:52px;width:0;height:0;border-left:28px solid #F3F7F4;border-top:18px solid transparent;border-bottom:18px solid transparent"></div></div>`:''}
+   ${i===1?`<div style="margin-top:22px;display:flex;gap:10px">${[0,1,2].map(j=>`<div style="width:62px;height:120px;border-radius:12px;background:${j===0?'#22E06F':'rgba(255,255,255,.16)'}"></div>`).join('')}</div>`:''}
+   ${i===2?`<div style="margin-top:24px">${[92,78,88,60].map(w=>`<div style="height:12px;width:${w}%;border-radius:6px;background:rgba(255,255,255,.22);margin-top:16px"></div>`).join('')}</div>`:''}
+   <div class="mono" style="position:absolute;right:22px;bottom:18px;font-size:22px;color:#8A938C">${m}</div></div>`).join('')}</div>`);
+// H3: templates
+sc('h3',`<div class="card" style="left:90px;top:560px;width:520px;height:740px;padding:30px">
+ <div style="display:flex;justify-content:space-between"><span class="tag" style="color:#22E06F">BRAND TEMPLATE</span><span class="tag">01</span></div>
+ <div class="t-slot dot" style="margin-top:24px;height:92px;border-radius:16px;position:relative"><div class="t-f" style="position:absolute;inset:0;border-radius:14px;background:#22E06F;display:flex;align-items:center;padding:0 24px;font-weight:900;font-size:36px;color:#040504">Hook goes here</div></div>
+ <div class="t-slot dot" style="margin-top:20px;height:330px;border-radius:16px;position:relative"><div class="t-f" style="position:absolute;inset:0;border-radius:14px;background:linear-gradient(160deg,#1E5A35,#0B1A10);"><svg class="abs" style="left:150px;top:100px" width="160" height="120" viewBox="0 0 160 120"><circle cx="40" cy="34" r="18" fill="#22E06F"/><path d="M0 120 L60 60 L95 92 L120 70 L160 120 Z" fill="rgba(255,255,255,.35)"/></svg></div></div>
+ <div class="t-slot dot" style="margin-top:20px;height:150px;border-radius:16px;position:relative"><div class="t-f" style="position:absolute;inset:0;border-radius:14px;background:rgba(255,255,255,.08);padding:26px">${[90,70,50].map(w=>`<div style="height:12px;width:${w}%;border-radius:6px;background:rgba(255,255,255,.3);margin-bottom:16px"></div>`).join('')}</div></div></div>
+ <div class="card" id="t-blank" style="left:640px;top:700px;width:350px;height:460px;background:#F3F7F4;border:none">
+  <div class="tag abs" style="left:26px;top:24px;color:#6B746E">FROM SCRATCH</div>
+  <svg class="abs" style="left:0;top:0" width="350" height="460"><path id="t-x1" d="M40 90 L310 420" stroke="#040504" stroke-width="12" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/><path id="t-x2" d="M310 90 L40 420" stroke="#040504" stroke-width="12" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg></div>`);
+// H4: schedule week
+sc('h4',`<div class="card" style="left:90px;top:560px;width:900px;height:740px;padding:34px">
+ <div style="display:flex;justify-content:space-between"><span class="tag">SCHEDULER · NEXT WEEK</span><span class="tag" id="s-cnt" style="color:#22E06F">0/7 QUEUED</span></div>
+ <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:12px;margin-top:26px">
+ ${DAYS.map((d,i)=>`<div><div class="tag" style="text-align:center">${d}</div><div class="dot" style="margin-top:14px;height:430px;border-radius:16px;position:relative">
+   <div class="s-p" style="position:absolute;left:8px;right:8px;top:${30+(i%3)*70}px;height:170px;border-radius:12px;background:linear-gradient(170deg,#22E06F,#0E7A3C);padding:10px">
+   <div style="height:70px;border-radius:8px;background:rgba(4,5,4,.25)"></div><div style="margin-top:12px;height:8px;border-radius:4px;background:rgba(4,5,4,.45)"></div><div style="margin-top:8px;height:8px;width:60%;border-radius:4px;background:rgba(4,5,4,.35)"></div></div></div></div>`).join('')}</div>
+ <div class="chip abs" id="s-chip" style="left:34px;bottom:30px">✓ Whole week in 1 sitting</div></div>`);
+// H5: idea bank
+sc('h5',`<div class="card" style="left:90px;top:560px;width:600px;height:740px;padding:32px">
+ <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:900;font-size:40px">Idea bank</span><span class="mono" id="i-n" style="font-size:30px;color:#22E06F">0</span></div>
+ <div class="tag" style="margin-top:6px">NOTES · ALWAYS OPEN</div>
+ ${['“3 mistakes I made with…”','Client FAQ → carousel','Behind the scenes: setup','Hot take on posting daily','Before / after case study','Tool I use every day'].map((t,i)=>`<div class="i-r" style="margin-top:${i?14:28}px;padding:18px 20px;border-radius:16px;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.1);display:flex;gap:16px;align-items:center;font-weight:700;font-size:28px"><i style="width:14px;height:14px;border-radius:4px;background:#22E06F;flex:none"></i>${t}</div>`).join('')}</div>
+ <div class="card" id="i-blank" style="left:720px;top:820px;width:270px;height:360px;background:#F3F7F4;border:none">
+  <div class="tag abs" style="left:22px;top:22px;color:#6B746E">BLANK PAGE</div>
+  <svg class="abs" style="left:0;top:0" width="270" height="360"><path id="i-x" d="M30 330 L240 60" stroke="#040504" stroke-width="12" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg></div>`);
+// CTA
+sc('cta',`<div class="card" style="left:90px;top:560px;width:900px;height:740px;padding:40px">
+ <div class="tag">YOUR WEEK, BACK</div>
+ ${['Batch','Repurpose','Templates','Schedule','Idea bank'].map((n,i)=>`<div class="c-r" style="display:flex;align-items:center;gap:22px;margin-top:${i?16:30}px;padding:20px 24px;border-radius:18px;background:rgba(255,255,255,.06)"><span style="width:44px;height:44px;border-radius:10px;background:#22E06F;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="#040504" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-weight:800;font-size:36px">${n}</span><span class="mono" style="margin-left:auto;font-size:30px;color:#22E06F">~${HRS[i]}h</span></div>`).join('')}
+ <div style="display:flex;gap:18px;margin-top:30px"><div class="chip" id="c-save" style="position:static;background:#F3F7F4">Save this</div><div class="chip" id="c-fol" style="position:static">Follow for more</div></div></div>`);
+
+/* headline build per scene */
+const HEADS={};
+ORDER.forEach(k=>{const c=CFG[k];const ws=S[k].words;const sp=[];
+  ws.forEach((w,i)=>{if(c.skip.includes(i))return;let txt=c.disp[i]??w.w;const isK=c.key.includes(i);
+    sp.push({i,txt,isK,s:w.s});});HEADS[k]=sp;});
+let curHead=null;
+function buildHead(k){if(curHead===k)return;curHead=k;const h=$('#head');h.innerHTML=HEADS[k].map(o=>`<span class="${o.isK?'k':''}" data-s="${o.s}">${o.txt}${o.isK?'<u></u>':''}</span>`).join('');}
+
+function sceneAt(t){let idx=0;for(let i=0;i<ORDER.length;i++)if(t>=START[i])idx=i;return idx}
+
+function renderHead(k,t){
+  $$('#head span').forEach(sp=>{let s=+sp.dataset.s;if(s<0.05)s=-1;const p=P(t,s-0.04,.16);const isK=sp.classList.contains('k');
+    if(isK){const q=eo5(P(t,s-0.04,.32));st(sp,{opacity:clamp(p*3),transform:`scale(${lerp(2.4,1,q)})`,filter:`blur(${(1-clamp(p*2))*8}px)`});
+      const u=$('u',sp);if(u)u.style.transform=`scaleX(${eo(P(t,s+.2,.3))})`;}
+    else st(sp,{opacity:p,transform:`translateY(${(1-eo(p))*14}px)`,filter:`blur(${(1-p)*6}px)`});});
+}
+function cumHours(t){let h=0;['h1','h2','h3','h4','h5'].forEach((k,i)=>{const a=S[k].words.at(-1).s;h+=HRS[i]*eo(P(t,a,.6));});return h}
+
+window.seek=function(t){
+  const idx=sceneAt(t),k=ORDER[idx],lt=t-START[idx];
+  // background alternate + mosaic flicker
+  document.body.style.background=BG[CFG[k].bg];
+  $$('#mosaic i').forEach((c,i)=>{const r=rnd(i),r2=rnd(i+999);const on=r>.78;const fl=.5+.5*Math.sin(t*1.3+r2*20);
+    c.style.background=on?(r2>.85?`rgba(34,224,111,${.06*fl})`:`rgba(255,255,255,${.022+.025*fl})`):'transparent';});
+  $$('#parts i').forEach((c,i)=>{const r=rnd(i+50),r2=rnd(i+77);const x=(r*1080+Math.sin(t*.4+r2*9)*40),y=((r2*1500+300)-t*18*(0.5+r))%1500+300;
+    st(c,{left:x+'px',top:y+'px',transform:`rotate(${t*30*(r-.5)+r*90}deg)`,opacity:.55*(0.5+.5*Math.sin(t+r*7))});});
+  // scenes
+  ORDER.forEach((kk,i)=>SC[kk].style.display=i===idx?'block':'none');
+  const card=SC[k];const pin=k==='hook'?1:eo5(P(lt,.0,.5));
+  st(card,{transform:`translateY(${(1-pin)*90}px) scale(${lerp(.96,1,pin)})`,opacity:clamp(pin*1.5)});
+  // labels
+  const L=$('#lab'),Sx=$('#stat');L.textContent=CFG[k].lab;Sx.innerHTML=CFG[k].stat;
+  const firstW=S[k].words[0].s; const lp=k==='hook'?1:eo(P(t,START[idx],.3));
+  st(L,{opacity:lp,color:(k!=='hook'&&k!=='cta'&&t>=firstW&&t<firstW+.5)?'#22E06F':'#8A938C'});
+  st(Sx,{opacity:lp});
+  buildHead(k);renderHead(k,t);
+  // tracker
+  const done=['h1','h2','h3','h4','h5'].map(kk=>t>=S[kk].words.at(-1).s);
+  $$('#bx b').forEach((b,i)=>{const a=S[ORDER[i+1]].words.at(-1).s;const p=P(t,a,.25);
+    if(done[i]){st(b,{background:'#040504',transform:`scale(${lerp(1.2,1,eo(p))})`});b.innerHTML=`<svg width="34" height="34" viewBox="0 0 34 34"><path d="M6 18l7 7L28 9" stroke="#22E06F" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1-eo(P(t,a+.05,.25))}"/></svg>`;}
+    else{st(b,{background:'transparent',transform:'none'});b.innerHTML='<em></em>';}
+    if(i===idx-1&&!done[i])b.style.boxShadow=`0 0 0 ${4+3*Math.sin(t*8)}px rgba(34,224,111,.5)`;else b.style.boxShadow='none';});
+  $('#trkst').textContent=CFG[k].trk;
+  const tp=1;st($('#trk'),{transform:`translateX(${(1-tp)*-600}px)`});
+  // ring
+  const h=cumHours(t);$('#arc').style.strokeDashoffset=1-h/8;$('#hrs').textContent=(Math.round(h*2)/2)+'h';
+  const rp=1;st($('#ring'),{transform:`translateX(${(1-rp)*500}px) scale(${1+.06*Math.max(0,Math.sin(Math.PI*clamp((t-(['h1','h2','h3','h4','h5'].map(kk=>S[kk].words.at(-1).s).filter(a=>t>=a).at(-1)||-9))/0.4)))})`});
+  // per-scene animation
+  const w=(i)=>S[k].words[i].s;
+  if(k==='hook'){const blocks=$$('.hb',card);const fill=[1,3,4,6,8,9,11,12,15,16,18,19,22,23,25,26,29,30,32,33];
+    const clearIdx=[3,8,11,15,19,23,26,30];const ct=w(6);
+    blocks.forEach((b,i)=>{const isF=fill.includes(i);const ci=clearIdx.indexOf(i);const cleared=ci>=0&&t>ct+ci*.07;
+      const ap=1;
+      st(b,{background:isF&&!cleared?'#22E06F':(cleared?'transparent':'#1A231D'),border:cleared?'2px dashed rgba(34,224,111,.7)':'2px solid rgba(255,255,255,.08)',transform:`scale(${lerp(.6,1,ap)*(cleared?lerp(1.15,1,eo(P(t,ct+ci*.07,.25))):1)})`,opacity:ap});});
+    const fr=clamp((t-ct)/.56)*8;$('#hk-c',card).textContent=Math.round(fr)+'H FREED';
+    const cp=back(P(t,w(7)+.1,.4));st($('#hk-chip',card),{opacity:clamp(P(t,w(7)+.1,.1)),transform:`scale(${cp})`});}
+  if(k==='h1'){const g=eio(P(t,w(6),.6));
+    $$('.b-v',card).forEach((v,i)=>{const ap=back(P(lt,.1+i*.08,.45));const tx=lerp(0,(60+i*74)-(34+i*213),g),ty=lerp(0,510-120,g);
+      st(v,{opacity:clamp(P(lt,.1+i*.08,.1)),transform:`translate(${tx}px,${ty}px) scale(${ap*lerp(1,.58,g)}) rotate(${lerp(0,(i-1.5)*4,g)}deg)`,transformOrigin:'left top',zIndex:i});});
+    st($('#b-slot',card),{borderColor:g>.9?'rgba(34,224,111,.7)':'rgba(255,255,255,.22)'});
+    const cp=back(P(t,w(7)+.15,.4));st($('#b-chip',card),{opacity:clamp(P(t,w(7)+.15,.1)),transform:`scale(${cp})`});}
+  if(k==='h2'){st($('#r-src',card),{transform:`scale(${back(P(t,w(3),.4))*1})`,opacity:clamp(P(lt,0,.2))});
+    const tw=[w(6),w(8),w(11)];$$('.r-l',card).forEach((l,i)=>l.style.strokeDashoffset=1-eo(P(t,tw[i]-.15,.3)));
+    $$('.r-o',card).forEach((o,i)=>{const p=back(P(t,tw[i],.4));st(o,{opacity:clamp(P(t,tw[i],.1)),transform:`translateY(${(1-p)*60}px) scale(${lerp(.6,1,p)})`});});}
+  if(k==='h3'){$$('.t-f',card).forEach((f,i)=>{const a=w(2)+i*.14;const p=back(P(t,a,.35));st(f,{opacity:clamp(P(t,a,.08)),transform:`scale(${lerp(.7,1,p)})`});});
+    st($('#t-blank',card),{transform:`rotate(${lerp(8,3,eo(P(lt,0,.6)))}deg)`});
+    $('#t-x1',card).style.strokeDashoffset=1-eo(P(t,w(3),.22));$('#t-x2',card).style.strokeDashoffset=1-eo(P(t,w(5),.22));}
+  if(k==='h4'){const ps=$$('.s-p',card);const a0=w(3),a1=w(6)+.2;let n=0;
+    ps.forEach((p,i)=>{const a=lerp(a0,a1,i/6);const q=back(P(t,a,.35));if(t>=a)n++;st(p,{opacity:clamp(P(t,a,.08)),transform:`translateY(${(1-q)*-160}px)`});});
+    $('#s-cnt',card).textContent=`${n}/7 QUEUED`;const cp=back(P(t,w(6)+.35,.4));st($('#s-chip',card),{opacity:clamp(P(t,w(6)+.35,.1)),transform:`scale(${cp})`});}
+  if(k==='h5'){const rs=$$('.i-r',card);rs.forEach((r,i)=>{const a=w(3)+i*.13;const p=eo5(P(t,a,.35));st(r,{opacity:p,transform:`translateX(${(1-p)*-60}px)`});});
+    $('#i-n',card).textContent=Math.round(52*eo(P(t,w(3),1.4)))+' ideas';
+    st($('#i-blank',card),{transform:`rotate(${lerp(-10,-4,eo(P(lt,0,.6)))}deg)`});$('#i-x',card).style.strokeDashoffset=1-eo(P(t,w(5),.25));}
+  if(k==='cta'){$$('.c-r',card).forEach((r,i)=>{const p=eo5(P(lt,.1+i*.08,.35));st(r,{opacity:p,transform:`translateX(${(1-p)*80}px)`});});
+    st($('#c-save',card),{transform:`scale(${back(P(t,w(0),.35))})`,opacity:clamp(P(t,w(0),.08))});
+    st($('#c-fol',card),{transform:`scale(${back(P(t,w(3),.35))})`,opacity:clamp(P(t,w(3),.08))});}
+  // pixel transition
+  let cov=0, cut=-1;for(let i=1;i<ORDER.length;i++){if(Math.abs(t-START[i])<.2){cut=i;}}
+  $$('#pix i').forEach((c,i)=>{if(cut<0){c.style.opacity=0;return}const d=t-START[cut];const r=rnd(i*3+cut*17),r2=rnd(i*7+cut*31);
+    const on=d<0?(d>-.17+r*.16):(d<.02+r2*.15); const cols=['#22E06F','#F3F7F4','#040504','#0E7A3C','#04170C'];
+    c.style.background=cols[Math.floor(rnd(i+cut*5+Math.floor(t*30))*5)];c.style.opacity=on&&rnd(i+cut)>.42?1:0;});
+  return true};
+window.__ready=document.fonts.ready.then(()=>true);
+</script></body></html>
