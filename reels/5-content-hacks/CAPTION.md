@@ -1,6 +1,6 @@
 # 5 Simple Content Hacks That Save 8 Hours a Week
 
-**Length:** 24s · 1080x1920 · 30fps · -14 LUFS
+**Length:** 24s · 1080x1920 · 30fps · stereo · -14 LUFS
 
 ## Time-saving estimates (creator posting ~5x/week)
 | Hack | Est. saved / week | Why |

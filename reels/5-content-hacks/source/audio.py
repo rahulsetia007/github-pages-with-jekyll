@@ -50,14 +50,14 @@ music /= np.max(np.abs(music))
 sfx = np.zeros(N)
 starts = [S[k]['start'] - 0.30 for k in ORDER[1:]]
 for c, b in enumerate(starts):
-    # pixel glitch: burst of short square blips
-    for j in range(7):
-        f = [880, 1320, 660, 1760, 990, 1480, 740][(j + c) % 7]; l = int(.035 * sr); et = np.arange(l) / sr
-        place(sfx, np.sign(np.sin(2 * np.pi * f * et)) * np.exp(-et * 60), b - .17 + j * .045, .16)
-    l = int(.35 * sr); et = np.arange(l) / sr
-    place(sfx, hp(rng.standard_normal(l), 2500) * np.sin(np.pi * et / .35) ** 2, b - .2, .18)
-    hl = int(.35 * sr); ht = np.arange(hl) / sr
-    place(sfx, np.sin(2 * np.pi * (52 * ht + 40 * (1 - np.exp(-ht * 30)) / 30)) * np.exp(-ht * 9), b + .02, .4)
+    l = int(.45 * sr); et = np.arange(l) / sr
+    x = rng.standard_normal(l); out = np.zeros(l); C = 9
+    for j in range(C):
+        a0 = j * l // C; a1 = (j + 1) * l // C; f = 500 * 2 ** (j / C * 2.5)
+        out[a0:a1] = sosfilt(butter(2, [f * .7, f * 1.5], 'bandpass', fs=sr, output='sos'), x)[a0:a1]
+    place(sfx, out * np.sin(np.pi * et / .45) ** 2, b - .3, .35)
+    hl = int(.3 * sr); ht = np.arange(hl) / sr
+    place(sfx, np.sin(2 * np.pi * (55 * ht + 30 * (1 - np.exp(-ht * 30)) / 30)) * np.exp(-ht * 10), b, .18)
 # checkbox ticks
 for k in ORDER[1:6]:
     a = S[k]['words'][-1]['s']; l = int(.05 * sr); et = np.arange(l) / sr
@@ -67,17 +67,22 @@ for k in ORDER:
     pass
 # opening hit
 hl = int(.9 * sr); ht = np.arange(hl) / sr
-place(sfx, np.sin(2 * np.pi * (44 * ht + 80 * (1 - np.exp(-ht * 25)) / 25)) * np.exp(-ht * 4.5), 0, .6)
+place(sfx, np.sin(2 * np.pi * (44 * ht + 80 * (1 - np.exp(-ht * 25)) / 25)) * np.exp(-ht * 6), 0, .3)
 # --- voice ---
 v, vsr = sf.read('voice.wav'); v = resample_poly(v, 2, 1) if vsr == 24000 else v
 voice = np.zeros(N); voice[:min(N, len(v))] = v[:N]
-voice = hp(voice, 90); voice = np.tanh(voice * 1.5) / np.tanh(1.5)
-venv = lfilter([1 - np.exp(-1 / (sr * .08))], [1, -np.exp(-1 / (sr * .08))], np.abs(voice))
-duck = np.clip(1 - venv * 3, .45, 1)
+voice = hp(voice, 90)
+voice = voice / np.max(np.abs(voice))
+voice = np.tanh(voice * 2.2) / np.tanh(2.2)            # gentle compression, lifts quiet syllables
+venv = lfilter([1 - np.exp(-1 / (sr * .06))], [1, -np.exp(-1 / (sr * .06))], np.abs(voice))
+duck = np.clip(1 - venv * 4, .35, 1)
 fade = np.clip((END - t) / 1.0, 0, 1)
-mix = voice * .95 + music * .16 * duck * fade + sfx * .55
+V = voice * 1.0; M = music * .14 * duck * fade; X = sfx * .4
+def db(x): return round(20 * np.log10(np.sqrt(np.mean(x ** 2)) + 1e-9), 1)
+print('voice dB', db(V), ' music dB', db(M), ' sfx dB', db(X))
+mix = V + M + X
 mix = mix / np.max(np.abs(mix)) * .93
-sf.write('mix.wav', mix.astype(np.float32), sr)
-nm = voice * .95 + sfx * .55; nm = nm / np.max(np.abs(nm)) * .93
-sf.write('voice_sfx_nomusic.wav', nm.astype(np.float32), sr)
+sf.write('mix.wav', np.stack([mix, mix], 1).astype(np.float32), sr)
+nm = V + X; nm = nm / np.max(np.abs(nm)) * .93
+sf.write('voice_sfx_nomusic.wav', np.stack([nm, nm], 1).astype(np.float32), sr)
 print('ok', round(END, 2))
