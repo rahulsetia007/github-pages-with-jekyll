@@ -21,6 +21,6 @@ Built by Microsoft's Cloud Advocates. 123K+ stars ⭐
 People charge hundreds for this. Microsoft gave it away.
 
 💬 Comment "AI" and I'll DM you the link
-➕ Follow for more free finds like this
+➕ Follow @tech_blogcorner for more free finds like this
 
 #ai #generativeai #github #freecourse #learnai #microsoft #aiagents #promptengineering #coding #techtips
