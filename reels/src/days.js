@@ -574,7 +574,7 @@ let current = null, cache0 = null;
 window.setupDay = function (id) {
   current = DAYS[id](window.DATA);
   cache0 = null;
-  return { dur: current.dur, cues: current.cues };
+  return { dur: current.dur, cues: current.cues, music: !!current.music };
 };
 // Render frame at time t. The last 0.4s crossfades into frame 0 so the video loops.
 window.renderFrame = function (t, quality = 0.93) {

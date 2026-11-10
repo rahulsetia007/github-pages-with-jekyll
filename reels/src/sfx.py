@@ -126,6 +126,78 @@ LEVEL = {'hit': 0.55, 'hit2': 0.45, 'whoosh': 0.35, 'pop': 0.4, 'pop2': 0.45, 't
          'riser': 0.35, 'reveal': 0.5, 'rewind': 0.35, 'scratch': 0.4, 'buzz': 0.35, 'thud': 0.45}
 
 
+# ------------------------------------------------------------- music bed
+# Same feel as the Day 5 film's score: 75 BPM, Dm - Bb - F - C, soft pad,
+# electric-piano stabs, round bass, kick on 1 and 3, light hats.
+NOTE = {'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5, 'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11}
+
+
+def hz(n):
+    name, octv = n[:-1], int(n[-1])
+    return 440 * 2 ** ((NOTE[name] + 12 * (octv + 1) - 69) / 12)
+
+
+def tone(f, dur, kind):
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    if kind == 'pad':
+        x = sum(np.sin(2 * np.pi * f * d * t + d) for d in (0.996, 1.0, 1.004)) / 3
+        x += 0.3 * np.sin(2 * np.pi * f * 2 * t)
+        a = np.minimum(1, t / 0.6) * np.minimum(1, (dur - t) / 0.5).clip(0)
+        return x * a
+    if kind == 'ep':
+        x = np.sin(2 * np.pi * f * t) + 0.35 * np.sin(2 * np.pi * f * 2 * t) * np.exp(-t / 0.15)
+        return x * env(n, 0.003, 0.45)
+    if kind == 'bass':
+        x = np.tanh(1.6 * np.sin(2 * np.pi * f * t))
+        return x * env(n, 0.005, 0.35)
+
+
+def kick():
+    d = 0.35
+    return sweep(150, 45, d) * env(int(d * SR), 0.001, 0.12)
+
+
+def hat():
+    d = 0.06
+    x = noise(d)
+    x = x - lowpass(x, 6000)
+    return x * env(int(d * SR), 0.0005, 0.015)
+
+
+def music_bed(dur):
+    bpm = 75
+    beat = 60 / bpm
+    prog = [['D2', 'F4', 'A4', 'D5'], ['A#1', 'F4', 'A#4', 'D5'], ['F2', 'A4', 'C5', 'F5'], ['C2', 'G4', 'C5', 'E5']]
+    out = np.zeros(int(dur * SR) + SR * 4)
+
+    def add(sig, t, g):
+        i = int(t * SR)
+        j = min(len(out), i + len(sig))
+        out[i:j] += sig[: j - i] * g
+    bar = 0
+    t = 0.0
+    while t < dur:
+        c = prog[bar % 4]
+        for n in c[1:]:
+            add(tone(hz(n), beat * 4 + 0.4, 'pad'), t, 0.10)
+        for b in (0, 1.5, 2.5):
+            add(tone(hz(c[0]), beat * 0.9, 'bass'), t + b * beat, 0.32)
+        for b in (1, 3):
+            for n in c[2:]:
+                add(tone(hz(n), beat, 'ep'), t + b * beat, 0.09)
+        for b in (0, 2):
+            add(kick(), t + b * beat, 0.45)
+        for b in (0.5, 1.5, 2.5, 3.5):
+            add(hat(), t + b * beat, 0.12)
+        t += beat * 4
+        bar += 1
+    out = out[: int(dur * SR)]
+    fade = int(0.8 * SR)
+    out[-fade:] *= np.linspace(1, 0, fade)
+    return out
+
+
 def main():
     cues = json.load(open(sys.argv[1]))
     dur = float(sys.argv[2])
@@ -139,7 +211,12 @@ def main():
         mix[start:end] += snd[: end - start] * LEVEL[name]
     mix = mix[: int(dur * SR)]
     peak = np.max(np.abs(mix)) or 1
-    mix = mix / peak * 10 ** (-6 / 20)  # peak at -6 dBFS, leaves room for the voiceover
+    mix = mix / peak * 10 ** (-6 / 20)  # effects peak at -6 dBFS
+    if len(sys.argv) > 4 and sys.argv[4] == 'music':
+        m = music_bed(dur)
+        rms = np.sqrt(np.mean(m ** 2)) or 1
+        mix = mix * 0.8 + m / rms * 10 ** (-24 / 20)  # quiet bed so the voice sits on top
+        mix = np.clip(mix, -0.98, 0.98)
     pcm = (np.stack([mix, mix], axis=1) * 32767).astype('<i2')
     with wave.open(out, 'wb') as w:
         w.setnchannels(2)

@@ -54,7 +54,7 @@ async function openPage() {
   await page.goto('file://' + path.join(ROOT, 'src', 'index.html'));
   const data = loadData();
   await page.evaluate(async d => {
-    for (const f of ['150px Anton', '40px JBM', '40px JBMB', '40px Marker', '40px Inter', '700 40px Inter']) await document.fonts.load(f);
+    for (const f of ['150px Anton', '40px JBM', '40px JBMB', '40px Marker', '40px Inter', '700 40px Inter', '900 40px Montserrat', '800 40px Montserrat', '700 40px Montserrat', '600 40px Montserrat']) await document.fonts.load(f);
     const load = src => src ? new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; }) : null;
     d.img = { before: await load(d.img.before), after: await load(d.img.after), tool: await load(d.img.tool) };
     window.DATA = d;
@@ -65,7 +65,7 @@ async function openPage() {
 const FPS = 30;
 
 async function renderDay(page, day, data) {
-  const { dur, cues } = await page.evaluate(id => window.setupDay(id), day);
+  const { dur, cues, music } = await page.evaluate(id => window.setupDay(id), day);
   const dd = String(day).padStart(2, '0');
   const missing = day === 10 && !(data.img.before && data.img.after && data.img.tool);
   const name = missing ? `day-${dd}-PREVIEW` : `day-${dd}`;
@@ -73,7 +73,7 @@ async function renderDay(page, day, data) {
   fs.mkdirSync(path.join(ROOT, 'exports'), { recursive: true });
   const cueFile = `${tmp}.cues.json`, wav = `${tmp}.wav`, vid = `${tmp}.video.mp4`;
   fs.writeFileSync(cueFile, JSON.stringify(cues));
-  execFileSync('python3', [path.join(ROOT, 'src', 'sfx.py'), cueFile, String(dur), wav]);
+  execFileSync('python3', [path.join(ROOT, 'src', 'sfx.py'), cueFile, String(dur), wav, music ? 'music' : 'nomusic']);
 
   const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
     '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', String(FPS), vid], { stdio: ['pipe', 'inherit', 'inherit'] });
