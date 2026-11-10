@@ -1,0 +1,275 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Mont;src:url(fonts/Montserrat.ttf);font-weight:100 900}
+@font-face{font-family:Inter;src:url(fonts/Inter.ttf);font-weight:100 900}
+:root{--g:#00FF66;--bk:#000;--w:#fff;--ui:#0E1210;--ui2:#161B18;--line:rgba(255,255,255,.12);--mut:#8B948E}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
+body{font-family:Inter,'Noto Color Emoji',sans-serif;color:#fff;-webkit-font-smoothing:antialiased}
+.abs{position:absolute}
+/* SAFE ZONE: all text lives in x 60..930, y 170..1650 (bottom 270px + right 150px kept empty) */
+#title{position:absolute;left:60px;top:176px;width:870px;font-family:Mont,'Noto Color Emoji';font-weight:900;font-size:66px;line-height:1.06;letter-spacing:-.02em;color:var(--g);text-align:center;transform-origin:50% 50%;text-shadow:0 0 30px rgba(0,255,102,.35)}
+#cap{position:absolute;left:60px;top:398px;width:870px;height:96px;display:flex;justify-content:center;align-items:center;gap:20px;font-family:Mont,'Noto Color Emoji';font-weight:900;font-size:68px;letter-spacing:-.01em;text-transform:uppercase;white-space:nowrap}
+#cap span{display:inline-block;color:#fff;-webkit-text-stroke:3px #000;paint-order:stroke fill;text-shadow:0 6px 0 #000,0 0 18px rgba(0,0,0,.9)}
+#cap span.on{color:var(--g)}
+#stage{position:absolute;left:60px;top:520px;width:870px;height:1120px;overflow:hidden;border-radius:40px;background:#050806;box-shadow:inset 0 0 0 2px rgba(0,255,102,.18)}
+.cam{position:absolute;left:0;top:0;width:870px;height:1120px;transform-origin:0 0}
+.scene{position:absolute;inset:0;display:none}
+.hl{position:absolute;border:7px solid var(--g);border-radius:22px;box-shadow:0 0 0 3000px rgba(0,0,0,.5),0 0 40px rgba(0,255,102,.75),inset 0 0 24px rgba(0,255,102,.35);opacity:0;pointer-events:none}
+#flash{position:absolute;inset:0;background:var(--g);opacity:0;pointer-events:none}
+.win{position:absolute;background:var(--ui);border:2px solid var(--line);border-radius:30px;overflow:hidden}
+.bar{height:74px;display:flex;align-items:center;gap:14px;padding:0 28px;border-bottom:2px solid var(--line);background:var(--ui2);font-weight:700;font-size:28px}
+.dots i{display:inline-block;width:16px;height:16px;border-radius:50%;background:#2A322D;margin-right:9px}
+.spark{width:40px;height:40px;border-radius:12px;background:var(--g);display:flex;align-items:center;justify-content:center;flex:none}
+.bub{position:absolute;border-radius:26px;padding:22px 28px;font-size:32px;line-height:1.3;font-weight:500}
+.me{background:#1F2A23;color:#fff}
+.tag{font-family:Inter;font-weight:800;font-size:22px;letter-spacing:.1em;color:var(--mut);text-transform:uppercase}
+.row{display:flex;align-items:center;gap:22px}
+.box{width:62px;height:62px;border-radius:16px;border:5px solid var(--g);display:flex;align-items:center;justify-content:center;flex:none}
+.box svg{opacity:0}
+.chip{display:inline-block;padding:12px 24px;border-radius:999px;background:var(--g);color:#000;font-weight:900;font-size:28px;white-space:nowrap}
+.caret{display:inline-block;width:4px;height:1.05em;background:var(--g);vertical-align:-0.15em;margin-left:3px}
+</style></head><body>
+<div id="title"></div>
+<div id="stage"><div id="scenes"></div><div id="flash"></div></div>
+<div id="cap"></div>
+<script>
+const D=window.__DATA__;const $=(s,e=document)=>e.querySelector(s);const $$=(s,e=document)=>[...e.querySelectorAll(s)];
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-clamp(t),3),eo5=t=>1-Math.pow(1-clamp(t),5);
+const back=t=>{t=clamp(t);const c=2.2;return 1+(c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2)};
+const P=(t,a,d)=>clamp((t-a)/d);
+const mk=h=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild};
+const S=Object.fromEntries(D.segs.map(s=>[s.key,s]));
+const W=(k,i)=>S[k].words[i].s;
+const ORDER=['hook','loop','s1','s2','s3','s4','s5','cta'];
+const START=ORDER.map((k,i)=>i?S[k].start-0.15:0);const END=D.end;
+const TITLES={hook:'Start a business from home with AI 🏠🤖',loop:'5 steps 👇<br>(don\'t skip #5)',s1:'Step 1: Ask AI for ideas 💡',s2:'Step 2: Name + logo in minutes 🎨',s3:'Step 3: AI builds your website 🌐',s4:'Step 4: AI writes your posts ✍️',s5:'Step 5: Talk to real customers 🤝',cta:'Save this 📌<br>Follow @tech_blogcorner'};
+const STEPS=['Ask AI for ideas','Name + logo','AI builds your website','AI writes your posts','Talk to real customers'];
+const CHECK=`<svg width="38" height="38" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="#00FF66" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const SPARK=`<svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 1l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z" fill="#000"/></svg>`;
+const SC={};const sc=(k,h)=>{const e=mk(`<div class="scene" id="s-${k}"><div class="cam">${h}</div></div>`);$('#scenes').appendChild(e);SC[k]=e;return e};
+
+/* ---------- reusable mini tool screens (shown on the laptop) ---------- */
+const MINI={
+ chat:`<div class="abs" style="inset:0;background:#0E1210;padding:18px"><div class="row" style="gap:10px"><div class="spark" style="width:26px;height:26px;border-radius:8px">${SPARK.replace(/24/g,'16')}</div><b style="font-size:17px">AI Chat</b></div>
+  <div class="bub me" style="right:18px;top:62px;font-size:15px;padding:10px 14px;border-radius:14px;max-width:300px">Give me 5 business ideas I can start from home</div>
+  ${[0,1,2,3,4].map(i=>`<div class="abs" style="left:18px;top:${140+i*30}px;height:14px;width:${[300,260,330,240,280][i]}px;border-radius:7px;background:${i?'rgba(255,255,255,.18)':'rgba(0,255,102,.6)'}"></div>`).join('')}</div>`,
+ logo:`<div class="abs" style="inset:0;background:#0E1210"><div class="abs" style="left:0;top:0;bottom:0;width:70px;background:#161B18"></div>${[0,1,2,3].map(i=>`<div class="abs" style="left:20px;top:${24+i*52}px;width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.14)"></div>`).join('')}
+  <div class="abs" style="left:150px;top:30px;width:290px;height:270px;border-radius:12px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="width:110px;height:110px;border-radius:50%;background:#00C853"></div><div style="margin-top:14px;width:170px;height:16px;border-radius:8px;background:#111"></div></div><b class="abs" style="left:88px;top:12px;font-size:15px;color:#8B948E">AI logo maker</b></div>`,
+ web:`<div class="abs" style="inset:0;background:#fff"><div class="abs" style="left:0;right:0;top:0;height:30px;background:#E9EDEA"></div><div class="abs" style="left:20px;top:48px;width:120px;height:16px;border-radius:8px;background:#111"></div>
+  <div class="abs" style="left:20px;top:86px;width:480px;height:120px;border-radius:12px;background:linear-gradient(120deg,#00C853,#0B5E2E)"></div><div class="abs" style="left:20px;top:222px;width:300px;height:20px;border-radius:10px;background:#111"></div>
+  <div class="abs" style="left:20px;top:262px;width:130px;height:40px;border-radius:20px;background:#00C853"></div><b class="abs" style="right:16px;top:6px;font-size:15px;color:#333">AI website builder</b></div>`,
+ ai:`<div class="abs" style="inset:0;background:#000;display:flex;align-items:center;justify-content:center"><b style="font-family:Mont;font-weight:900;font-size:190px;color:#00FF66;text-shadow:0 0 50px rgba(0,255,102,.8)">AI</b></div>`,
+};
+/* ---------- HOOK + LOOP-BACK: laptop on a kitchen table ---------- */
+const KITCHEN=id=>`
+ <div class="abs" style="inset:0;background:linear-gradient(180deg,#0B1510 0%,#0F1D15 55%,#000 56%)"></div>
+ <div class="abs" style="left:520px;top:70px;width:260px;height:330px;border-radius:14px;background:linear-gradient(160deg,#1E3A2A,#0E2016);border:10px solid #2A3A30"></div>
+ <div class="abs" style="left:640px;top:70px;width:10px;height:330px;background:#2A3A30"></div><div class="abs" style="left:520px;top:225px;width:260px;height:10px;background:#2A3A30"></div>
+ <div class="abs" style="left:70px;top:140px;width:300px;height:22px;border-radius:6px;background:#1C2A22"></div>
+ ${[0,1,2].map(i=>`<div class="abs" style="left:${95+i*85}px;top:${70-i*12}px;width:58px;height:${70+i*12}px;border-radius:10px 10px 6px 6px;background:${['#26402F','#1F3327','#2D4A37'][i]}"></div>`).join('')}
+ <div class="abs" style="left:0;right:0;top:616px;bottom:0;background:linear-gradient(180deg,#6B4A30,#4A321F 60%,#2E1F13)"></div>
+ ${[0,1,2,3,4].map(i=>`<div class="abs" style="left:0;right:0;top:${660+i*90}px;height:3px;background:rgba(0,0,0,.18)"></div>`).join('')}
+ <div class="abs" style="left:175px;top:300px;width:520px;height:350px;border-radius:22px 22px 6px 6px;background:#1A1F1C;padding:14px"><div class="abs" id="${id}" style="left:14px;top:14px;width:492px;height:322px;border-radius:10px;overflow:hidden"></div></div>
+ <div class="abs" style="left:120px;top:650px;width:630px;height:34px;border-radius:0 0 30px 30px;background:linear-gradient(180deg,#C9CFCB,#7D847F)"></div>
+ <div class="abs" style="left:380px;top:650px;width:110px;height:10px;border-radius:0 0 8px 8px;background:#5C635E"></div>
+ <div class="abs" style="left:40px;top:700px;width:100px;height:110px;border-radius:0 0 26px 26px;background:#E8ECE9"></div><div class="abs" style="left:132px;top:722px;width:40px;height:56px;border-radius:0 24px 24px 0;border:10px solid #E8ECE9;border-left:none"></div>
+ <div class="abs" style="left:700px;top:700px;width:110px;height:100px;border-radius:8px 8px 26px 26px;background:#B5653A"></div>
+ ${[[690,600,70],[760,590,60],[725,550,64],[790,640,46]].map(([x,y,r])=>`<div class="abs" style="left:${x}px;top:${y}px;width:${r}px;height:${r}px;border-radius:50% 0;background:#1FA34F;transform:rotate(${x%90}deg)"></div>`).join('')}
+ <div class="abs" style="left:250px;top:760px;width:300px;height:190px;border-radius:14px;background:#E9E3D6;transform:rotate(-6deg)"><div style="margin:30px 30px 0;height:10px;border-radius:5px;background:#BDB4A2"></div><div style="margin:20px 30px 0;width:60%;height:10px;border-radius:5px;background:#BDB4A2"></div></div>`;
+sc('hook',KITCHEN('lapA'));
+sc('back',KITCHEN('lapB'));
+/* ---------- LOOP: checklist ---------- */
+const LIST=(cls)=>`<div class="win" style="left:40px;top:120px;width:790px;height:880px;padding:46px 46px">
+ <div class="row" style="justify-content:space-between"><span style="font-family:Mont;font-weight:900;font-size:50px;color:#00FF66">THE 5 STEPS</span><span class="tag ${cls}-n">0/5</span></div>
+ ${STEPS.map((s,i)=>`<div class="row ${cls}-r" style="margin-top:${i?34:52}px;padding:24px 26px;border-radius:22px;background:rgba(255,255,255,.05)"><div class="box">${CHECK}</div><span style="font-family:Mont;font-weight:800;font-size:40px">${i+1}. ${s}</span></div>`).join('')}
+ <div class="hl ${cls}-hl" style="left:30px;top:${178+4*144-8}px;width:730px;height:126px"></div>
+ <div class="chip abs ${cls}-chip" style="right:56px;top:${178+4*144+138}px">⚠️ most people skip this</div></div>`;
+sc('loop',LIST('L'));
+/* ---------- S1: AI chat ---------- */
+sc('s1',`<div class="win" style="left:0;top:0;width:870px;height:1120px;border-radius:40px">
+ <div class="bar"><div class="spark">${SPARK}</div>AI Chat<span class="tag" style="margin-left:auto">new chat</span></div>
+ <div class="abs" id="c-hi" style="left:0;right:0;top:330px;text-align:center;font-family:Mont;font-weight:800;font-size:46px;color:#DDE3DF">What can I help with?</div>
+ <div class="bub me" id="c-sent" style="right:30px;top:110px;width:640px;font-size:30px"></div>
+ <div class="abs" id="c-ans" style="left:30px;top:350px;width:810px">
+   <div class="row" style="gap:16px;font-size:30px;font-weight:600;color:#DDE3DF"><div class="spark">${SPARK}</div>Here are 5 ideas you can start from home:</div>
+   ${['Weekly meal prep for busy families','Home baking for local orders','Online cooking classes','Healthy lunch boxes for workers','A simple recipe e-book'].map((x,i)=>`<div class="c-i row" style="margin-top:22px;padding:20px 24px;border-radius:18px;background:rgba(255,255,255,.06);font-size:33px;font-weight:700"><b style="color:#00FF66;font-family:Mont;font-size:36px;width:40px">${i+1}</b>${x}</div>`).join('')}
+ </div>
+ <div class="hl" id="c-hl" style="left:24px;top:420px;width:822px;height:550px"></div>
+ <div class="abs" style="left:30px;right:30px;bottom:34px;min-height:116px;border-radius:30px;border:3px solid rgba(0,255,102,.55);background:#161B18;padding:26px 110px 26px 30px;font-size:32px;line-height:1.3;font-weight:500" id="c-in"><span id="c-txt"></span><span class="caret" id="c-car"></span><span id="c-ph" style="color:#6B746E">Message AI…</span>
+   <div class="abs" style="right:20px;bottom:20px;width:70px;height:70px;border-radius:50%;background:#00FF66;display:flex;align-items:center;justify-content:center"><svg width="34" height="34" viewBox="0 0 24 24"><path d="M12 20V5M5 11l7-7 7 7" stroke="#000" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+</div>`);
+/* ---------- S2: names, then logo editor ---------- */
+const NAMES=['Pan & Plenty','Little Ladle','Home Plate Co.','Sunday Simmer'];
+sc('s2',`<div id="n-a"><div class="win" style="left:0;top:0;width:870px;height:1120px;border-radius:40px">
+  <div class="bar"><div class="spark">${SPARK}</div>AI Chat</div>
+  <div class="bub me" style="right:30px;top:110px;width:600px;font-size:30px">Name ideas for a home meal-prep business</div>
+  <div class="abs" style="left:30px;top:300px;width:810px">${NAMES.map((n,i)=>`<div class="n-i row" style="margin-top:${i?24:0}px;padding:30px 30px;border-radius:22px;background:rgba(255,255,255,.06);font-family:Mont;font-size:48px;font-weight:800"><b style="color:#00FF66;width:56px">${i+1}</b>${n}</div>`).join('')}</div>
+  <div class="hl" id="n-hl" style="left:24px;top:${300+148-12}px;width:822px;height:148px"></div></div></div>
+ <div id="n-b" style="display:none"><div class="win" style="left:0;top:0;width:870px;height:1120px;border-radius:40px;background:#1A1F1C">
+  <div class="bar"><div class="dots"><i></i><i></i><i></i></div>Logo design · AI<span class="chip" style="margin-left:auto;font-size:22px;padding:8px 18px">Export</span></div>
+  <div class="abs" style="left:0;top:74px;bottom:0;width:110px;background:#121614;border-right:2px solid var(--line)">${[0,1,2,3,4].map(i=>`<div style="margin:28px auto 0;width:52px;height:52px;border-radius:14px;background:${i===1?'#00FF66':'rgba(255,255,255,.12)'}"></div>`).join('')}</div>
+  <div class="abs" style="left:140px;top:104px;width:700px;height:86px;border-radius:20px;background:#0E1210;border:2px solid rgba(0,255,102,.5);padding:0 26px;display:flex;align-items:center;gap:16px;font-size:28px;font-weight:600;color:#DDE3DF"><div class="spark" style="width:44px;height:44px">${SPARK}</div><span id="g-pr"></span></div>
+  <div class="abs" id="g-cv" style="left:170px;top:240px;width:640px;height:640px;border-radius:24px;background:#FFFFFF;box-shadow:0 30px 70px rgba(0,0,0,.5)">
+    <svg class="abs" style="left:170px;top:70px" width="300" height="300" viewBox="0 0 300 300">
+      <circle id="g-c" cx="150" cy="150" r="138" fill="#00C853"/>
+      <g id="g-ic"><path d="M150 70 L150 160" stroke="#fff" stroke-width="18" stroke-linecap="round"/><path d="M95 160 h110 a55 55 0 0 1 -110 0z" fill="#fff"/><circle cx="150" cy="70" r="14" fill="#fff"/></g></svg>
+    <div class="abs" id="g-t" style="left:0;right:0;top:400px;text-align:center;font-family:Mont;font-weight:900;font-size:72px;color:#0B1A10;letter-spacing:-.02em">Little Ladle</div>
+    <div class="abs" id="g-s" style="left:0;right:0;top:494px;text-align:center;font-family:Inter;font-weight:700;font-size:30px;letter-spacing:.24em;color:#00A846">HOME-COOKED MEALS</div></div>
+  <div class="hl" id="g-hl" style="left:156px;top:226px;width:668px;height:668px"></div>
+  <div class="abs row" style="left:170px;top:920px;gap:20px">${[0,1,2].map(i=>`<div class="g-v" style="width:200px;height:150px;border-radius:18px;background:#fff;display:flex;align-items:center;justify-content:center"><div style="width:80px;height:80px;border-radius:${['50%','18px','50% 0'][i]};background:${['#00C853','#0B1A10','#00A846'][i]}"></div></div>`).join('')}</div>
+ </div></div>`);
+/* ---------- S3: website builds itself ---------- */
+sc('s3',`<div class="win" style="left:0;top:0;width:870px;height:1120px;border-radius:40px;background:#F4F6F5;color:#0B1A10">
+ <div class="bar" style="background:#E3E8E5;color:#333;border-color:#D0D6D2"><div class="dots"><i style="background:#C3CAC6"></i><i style="background:#C3CAC6"></i><i style="background:#C3CAC6"></i></div><div style="flex:1;height:44px;border-radius:22px;background:#fff;display:flex;align-items:center;padding:0 22px;font-size:24px;color:#6B746E">AI website builder · preview</div></div>
+ <div class="abs" style="left:26px;top:96px;right:26px;height:96px;border-radius:22px;background:#0E1210;color:#fff;display:flex;align-items:center;gap:16px;padding:0 24px;font-size:28px;font-weight:600"><div class="spark">${SPARK}</div><span id="w-pr" style="flex:1"></span><span id="w-go" class="chip" style="font-size:22px;padding:10px 20px">Build ✨</span></div>
+ <div class="abs" id="w-empty" style="left:26px;right:26px;top:220px;bottom:26px;border:4px dashed #C3CAC6;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:30px;color:#9AA39D;font-weight:700">Your page appears here</div>
+ <div class="abs w-b" style="left:26px;right:26px;top:220px;height:90px;border-radius:20px;background:#fff;display:flex;align-items:center;padding:0 28px;gap:30px;font-size:24px;font-weight:700;color:#556"><b style="font-family:Mont;font-size:34px;color:#0B1A10">🥄 Little Ladle</b><span style="margin-left:auto">Menu</span><span>About</span><span>Order</span></div>
+ <div class="abs w-b" style="left:26px;right:26px;top:328px;height:330px;border-radius:24px;background:linear-gradient(130deg,#00C853,#0B5E2E);overflow:hidden">
+   <div class="abs" style="right:40px;top:40px;width:250px;height:250px;border-radius:50%;background:#F4F6F5"></div><div class="abs" style="right:70px;top:70px;width:190px;height:190px;border-radius:50%;background:#FFD27A"></div>
+   ${[[600,120,'#E8553D'],[650,190,'#3DBB5C'],[560,180,'#F09A3E'],[620,140,'#fff']].map(([x,y,c])=>`<div class="abs" style="left:${x}px;top:${y}px;width:46px;height:46px;border-radius:50%;background:${c}"></div>`).join('')}
+   <div class="abs" style="left:40px;top:60px;width:440px;font-family:Mont;font-weight:900;font-size:50px;line-height:1.08;color:#fff">Home-cooked meals for your busy week</div></div>
+ <div class="abs w-b row" style="left:26px;top:684px;gap:20px"><span class="chip" style="font-size:32px;padding:20px 40px;background:#0B1A10;color:#fff">See this week's menu</span><span class="chip" style="font-size:32px;padding:20px 40px">Order</span></div>
+ <div class="hl" id="w-hl" style="left:14px;top:672px;width:620px;height:110px"></div>
+ <div class="abs row" style="left:26px;right:26px;top:810px;gap:20px">${['Fresh','Local','Weekly'].map((x,i)=>`<div class="w-c" style="flex:1;height:260px;border-radius:22px;background:#fff;padding:26px"><div style="width:70px;height:70px;border-radius:18px;background:${['#00C853','#FFD27A','#0B5E2E'][i]}"></div><div style="margin-top:28px;font-family:Mont;font-weight:800;font-size:34px">${x}</div><div style="margin-top:16px;height:12px;border-radius:6px;background:#DDE3DF"></div><div style="margin-top:12px;width:70%;height:12px;border-radius:6px;background:#DDE3DF"></div></div>`).join('')}</div>
+</div>`);
+/* ---------- S4: phone post composer, then post grid ---------- */
+const FOOD=(s=1)=>`<div class="abs" style="inset:0;background:linear-gradient(140deg,#0E3B22,#062012)"><div class="abs" style="left:50%;top:50%;width:${200*s}px;height:${200*s}px;margin:${-100*s}px;border-radius:50%;background:#F4F6F5"></div><div class="abs" style="left:50%;top:50%;width:${150*s}px;height:${150*s}px;margin:${-75*s}px;border-radius:50%;background:#FFD27A"></div><div class="abs" style="left:50%;top:50%;width:${40*s}px;height:${40*s}px;margin:${-50*s}px 0 0 ${-30*s}px;border-radius:50%;background:#E8553D"></div><div class="abs" style="left:50%;top:50%;width:${36*s}px;height:${36*s}px;margin:${4*s}px 0 0 ${8*s}px;border-radius:50%;background:#3DBB5C"></div></div>`;
+sc('s4',`<div class="abs" style="left:175px;top:30px;width:520px;height:1060px;border-radius:70px;background:#1A1F1C;padding:18px;box-shadow:0 30px 80px rgba(0,0,0,.6)">
+ <div class="abs" style="left:18px;top:18px;right:18px;bottom:18px;border-radius:54px;background:#0E1210;overflow:hidden">
+  <div class="abs" style="left:50%;top:14px;width:130px;height:36px;margin-left:-65px;border-radius:18px;background:#000"></div>
+  <div id="p-a">
+   <div class="abs row" style="left:28px;top:74px;gap:14px;font-weight:800;font-size:28px"><div style="width:56px;height:56px;border-radius:50%;background:#00FF66;display:flex;align-items:center;justify-content:center;color:#000;font-family:Mont;font-weight:900">LL</div>New post</div>
+   <div class="abs" style="left:28px;top:156px;width:428px;height:360px;border-radius:26px;overflow:hidden">${FOOD(1)}</div>
+   <div class="abs" id="p-cap" style="left:28px;top:540px;width:428px;height:300px;border-radius:22px;background:#161B18;border:2px solid var(--line);padding:22px;font-size:27px;line-height:1.32;font-weight:600"><span id="p-txt"></span><span class="caret" id="p-car"></span><span id="p-ph" style="color:#6B746E">Write a caption…</span></div>
+   <div class="abs" id="p-btn" style="left:28px;top:864px;width:428px;height:86px;border-radius:43px;background:#00FF66;color:#000;display:flex;align-items:center;justify-content:center;gap:12px;font-weight:900;font-size:30px">${SPARK} Write with AI</div>
+   <div class="hl" id="p-hl" style="left:16px;top:852px;width:452px;height:110px"></div>
+  </div>
+  <div id="p-b" style="display:none">
+   <div class="abs row" style="left:28px;top:74px;gap:18px"><div style="width:96px;height:96px;border-radius:50%;background:#00FF66;display:flex;align-items:center;justify-content:center;color:#000;font-family:Mont;font-weight:900;font-size:36px">LL</div><div><div style="font-weight:800;font-size:30px">Little Ladle</div><div class="tag" style="margin-top:6px">one tip a day</div></div></div>
+   <div class="abs" style="left:10px;top:200px;width:464px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px">${Array.from({length:12},(_,i)=>`<div class="p-g" style="position:relative;height:150px;overflow:hidden;border-radius:6px">${FOOD(.55)}<b class="abs" style="left:8px;bottom:6px;font-family:Mont;font-size:20px;color:#fff;text-shadow:0 2px 6px #000">Tip #${12-i}</b></div>`).join('')}</div>
+   <div class="hl" id="g-hl2" style="left:4px;top:194px;width:162px;height:162px;border-radius:12px"></div>
+   ${['This is so helpful! 🙌','Saving this 🔖','Do you deliver nearby?'].map((x,i)=>`<div class="p-cm bub" style="left:${[90,40,70][i]}px;top:${[420,560,700][i]}px;background:#fff;color:#000;font-size:26px;font-weight:700;padding:16px 22px;border-radius:22px 22px 22px 6px;box-shadow:0 12px 30px rgba(0,0,0,.5)">${x}</div>`).join('')}
+   ${[0,1,2,3,4,5].map(i=>`<div class="p-h abs" style="left:${60+i*68}px;top:880px;font-size:46px">💚</div>`).join('')}
+  </div>
+ </div></div>`);
+/* ---------- S5: message draft, 10 sent, checklist complete ---------- */
+const INIT=['AM','JK','RS','TL','MB','CP','DW','EN','SH','OG'];
+sc('s5',`<div id="m-a">${LIST('M')}</div>
+ <div id="m-b" style="display:none"><div class="win" style="left:0;top:0;width:870px;height:1120px;border-radius:40px">
+  <div class="bar"><div class="dots"><i></i><i></i><i></i></div>New message<span class="tag" id="m-cnt" style="margin-left:auto;color:#00FF66">0 / 10 sent</span></div>
+  <div class="abs" id="m-drf" style="left:30px;top:110px;width:810px;height:300px;border-radius:26px;background:#161B18;border:3px solid rgba(0,255,102,.55);padding:28px;font-size:33px;line-height:1.35;font-weight:600">
+    <div class="row tag" style="gap:12px;color:#00FF66;margin-bottom:14px"><div class="spark" style="width:34px;height:34px;border-radius:10px">${SPARK.replace(/24/g,'18')}</div>AI draft</div><span id="m-txt"></span><span class="caret" id="m-car"></span></div>
+  <div class="hl" id="m-hl" style="left:18px;top:98px;width:834px;height:324px"></div>
+  <div class="abs" style="left:30px;top:450px;width:810px;display:grid;grid-template-columns:1fr 1fr;gap:16px">${INIT.map(n=>`<div class="m-p row" style="gap:16px;padding:16px 18px;border-radius:20px;background:rgba(255,255,255,.06)"><div style="width:62px;height:62px;border-radius:50%;background:#1F2A23;border:3px solid #00FF66;display:flex;align-items:center;justify-content:center;font-family:Mont;font-weight:900;font-size:24px;color:#00FF66;flex:none">${n}</div><div style="flex:1"><div style="height:12px;width:80%;border-radius:6px;background:rgba(255,255,255,.22)"></div><div style="margin-top:10px;font-size:22px;font-weight:800;color:#00FF66">Sent ✓</div></div></div>`).join('')}</div>
+ </div></div>`);
+/* ---------- CTA: recap flashes ---------- */
+sc('cta',`<div id="r-a">${STEPS.map((s,i)=>`<div class="r-c abs" style="inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:${i%2?'#000':'#00FF66'};color:${i%2?'#00FF66':'#000'}"><div style="font-family:Mont;font-weight:900;font-size:240px;line-height:1">${i+1}</div><div style="margin-top:20px;font-family:Mont;font-weight:900;font-size:62px;text-align:center;width:760px;line-height:1.1">${s}</div></div>`).join('')}</div>
+ <div id="r-b" style="display:none" class="abs" >
+  <div class="win" style="left:40px;top:60px;width:790px;height:1000px;padding:46px">
+   <div class="tag">Save for later</div>
+   ${STEPS.map((s,i)=>`<div class="row" style="margin-top:${i?22:34}px;padding:22px 24px;border-radius:20px;background:rgba(255,255,255,.06)"><div class="box" style="background:#00FF66">${CHECK.replace('#00FF66','#000').replace('<svg','<svg style="opacity:1"')}</div><span style="font-family:Mont;font-weight:800;font-size:38px">${s}</span></div>`).join('')}
+   <div class="row" style="margin-top:44px;gap:20px"><span class="chip r-k" style="background:#fff;font-size:34px;padding:18px 34px">📌 Save</span><span class="chip r-k" style="font-size:34px;padding:18px 34px">➕ Follow</span></div>
+  </div></div>`);
+
+/* ---------- helpers ---------- */
+function cam(el,keys,t){ // keys: [time, scale, fx, fy]
+ let a=keys[0],b=keys[0];for(const k of keys){if(k[0]<=t){a=b;b=k}}
+ const p=eo5((t-b[0])/(b[4]||0.4));const s=lerp(a[1],b[1],p),fx=lerp(a[2],b[2],p),fy=lerp(a[3],b[3],p);
+ let tx=435-fx*s,ty=560-fy*s;if(s>=1){tx=clamp(tx,870-870*s,0);ty=clamp(ty,1120-1120*s,0)}
+ el.style.transform=`translate(${tx}px,${ty}px) scale(${s})`;
+}
+function hl(el,t,a,b=1e9){const on=t>=a&&t<b;el.style.opacity=on?eo(P(t,a,.12)):0;const s=lerp(1.12,1,back(P(t,a,.28)));el.style.transform=`scale(${s})`}
+function pop(el,t,a,d=.22){const p=P(t,a,d);el.style.opacity=t<a?0:1;el.style.transform=`scale(${t<a?.6:lerp(.6,1,back(p))})`}
+function slide(el,t,a,dy=60){const p=eo5(P(t,a,.3));el.style.opacity=t<a?0:1;el.style.transform=`translateY(${(1-p)*dy}px)`}
+function type(el,txt,t,a,b){const n=Math.round(txt.length*clamp((t-a)/(b-a)));el.textContent=txt.slice(0,n);return n}
+function blink(el,t){el.style.opacity=(Math.floor(t*2.4)%2)?0:1}
+function show(el,on){el.style.display=on?'':'none'}
+let flashT=[];
+
+/* ---------- per-scene animation ---------- */
+const MINI_SEQ=[[0,'chat'],[1.32,'logo'],[2.02,'web'],[2.72,'chat'],[3.87,'ai']];
+const UP={
+ hook(t){const sc_=SC.hook;
+  const k=MINI_SEQ.filter(m=>m[0]<=t).pop()[1];const L=$('#lapA');if(L.dataset.k!==k){L.innerHTML=MINI[k];L.dataset.k=k}
+  cam($('.cam',sc_),[[0,1,435,560],[0.05,1.62,435,475,1.05],[3.87,1.95,435,475,.25],[4.79,2.2,435,475,.2]],t);
+ },
+ back(t){const L=$('#lapB');if(!L.dataset.k){L.innerHTML=MINI.chat;L.dataset.k='chat'}
+  cam($('.cam',SC.back),[[0,1.25,435,520],[W('cta',8)-.1,1.12,435,540,.6],[W('cta',13),1,435,560,1.2]],t)},
+ loop(t){const r=$$('.L-r',SC.loop);r.forEach((e,i)=>slide(e,t,W('loop',2)+i*.2,80));
+  $('.L-n',SC.loop).textContent='5 STEPS';
+  hl($('.L-hl',SC.loop),t,W('loop',5));pop($('.L-chip',SC.loop),t,W('loop',9));
+  cam($('.cam',SC.loop),[[0,1,435,560],[W('loop',5),1.08,435,700],[W('loop',10),1.12,435,800,.5]],t)},
+ s1(t){const q='I\'m good at cooking, with 2 hours a day. Give me 5 business ideas I can start from home.';
+  const a1=W('s1',9),b1=W('s1',17)+.35,cut=41;const send=W('s1',20)+.15;
+  let n=0;if(t<b1)n=Math.round(cut*clamp((t-a1)/(b1-a1)));else n=Math.round(lerp(cut,q.length,clamp((t-b1-.15)/(send-.2-b1-.15))));
+  if(t>=send)n=0;$('#c-txt').textContent=q.slice(0,n);show($('#c-ph'),n===0&&t<a1);show($('#c-car'),t<send&&t>=W('s1',5));blink($('#c-car'),t);
+  const sent=$('#c-sent');sent.textContent=q;slide(sent,t,send,40);show($('#c-hi'),t<send);
+  const ans=$('#c-ans');ans.style.opacity=t>=send+.25?1:0;slide($('.row',ans),t,send+.25,30);
+  $$('.c-i',SC.s1).forEach((e,i)=>slide(e,t,send+.45+i*.18,50));
+  hl($('#c-hl'),t,W('s1',22)+.15+.2);
+  cam($('.cam',SC.s1),[[0,1,435,560],[W('s1',5),1.12,435,1000],[W('s1',13)+.5,1.22,435,1000,.6],[send,1,435,560,.35],[W('s1',22)+.3,1.03,435,690,.4],[W('s1',25),1.05,435,700,.8]],t)},
+ s2(t){const cut=W('s2',10)-.1;show($('#n-a'),t<cut);show($('#n-b'),t>=cut);
+  $$('.n-i',SC.s2).forEach((e,i)=>slide(e,t,W('s2',2)+i*.22,60));hl($('#n-hl'),t,W('s2',8));
+  type($('#g-pr'),'Logo for "Little Ladle", warm and simple',t,cut+.05,cut+.6);
+  pop($('#g-c'),t,W('s2',11),.25);$('#g-c').style.transformOrigin='150px 150px';
+  pop($('#g-ic'),t,W('s2',12)-.1,.25);$('#g-ic').style.transformOrigin='150px 120px';
+  slide($('#g-t'),t,W('s2',13)-.1,40);slide($('#g-s'),t,W('s2',14),30);
+  $$('.g-v',SC.s2).forEach((e,i)=>pop(e,t,W('s2',15)+i*.1));hl($('#g-hl'),t,W('s2',16));
+  cam($('.cam',SC.s2),[[0,1,435,560],[W('s2',5),1.03,435,520],[W('s2',8),1.05,435,560,.4],[cut,1,435,560,.01],[W('s2',16),1.28,490,560,.4]],t)},
+ s3(t){type($('#w-pr'),'Home-cooked meal prep for busy families',t,W('s3',4),W('s3',6)+.25);
+  const g=W('s3',7);pop($('#w-go'),t,g-.05,.2);$('#w-empty').style.visibility=t<g+.1?'visible':'hidden';
+  $$('.w-b',SC.s3).forEach((e,i)=>slide(e,t,g+.1+i*.42,90));$$('.w-c',SC.s3).forEach((e,i)=>pop(e,t,g+1.35+i*.12));
+  hl($('#w-hl'),t,W('s3',12)+.05);
+  cam($('.cam',SC.s3),[[0,1,435,560],[W('s3',4),1.15,435,150],[g,1,435,560,.35],[W('s3',12),1.2,330,730,.4]],t)},
+ s4(t){const cut=W('s4',8)-.1;show($('#p-a'),t<cut);show($('#p-b'),t>=cut);
+  const c='Tip #1: Cook rice for the whole week on Sunday. Weeknight dinners get so much easier! 🍚 #mealprep';
+  const a=W('s4',4);hl($('#p-hl'),t,a-.05,W('s4',5)+.1);const n=type($('#p-txt'),c,t,W('s4',5)+.05,cut-.25);
+  show($('#p-ph'),n===0);show($('#p-car'),t>=W('s4',5));blink($('#p-car'),t);
+  const G=$$('.p-g',SC.s4);G.forEach((e,i)=>pop(e,t,cut+.05+(11-i)*.08,.2));
+  hl($('#g-hl2'),t,W('s4',14)-.05);$$('.p-cm',SC.s4).forEach((e,i)=>pop(e,t,W('s4',15)+i*.25,.25));
+  $$('.p-h',SC.s4).forEach((e,i)=>{const p=P(t,W('s4',14)+i*.12,1.1);e.style.opacity=p>0&&p<1?1-p*p:0;e.style.transform=`translateY(${-p*240}px) scale(${.6+p*.6})`});
+  cam($('.cam',SC.s4),[[0,1,435,560],[a,1.25,435,940],[W('s4',5)+.15,1.4,435,720,.4],[cut,1,435,560,.01],[W('s4',14),1.12,435,560,.5]],t)},
+ s5(t){const cut=W('s5',6)-.1,back_=W('s5',22)-.1;const A=t<cut||t>=back_;show($('#m-a'),A);show($('#m-b'),!A);
+  const r=$$('.M-r',SC.s5);r.forEach((e,i)=>{e.style.opacity=1;e.style.transform='';const tk=i<4||(t>=back_+.3);const sv=$('svg',e);sv.style.opacity=tk?1:0;
+   if(i===4){sv.style.transform=`scale(${t>=back_+.3?lerp(.3,1,back(P(t,back_+.3,.3))):1})`;sv.style.transformOrigin='19px 19px'}});
+  $('.M-n',SC.s5).textContent=t>=back_+.3?'5/5 DONE':'4/5';$('.M-n',SC.s5).style.color=t>=back_+.3?'#00FF66':'';
+  hl($('.M-hl',SC.s5),t,t<cut?W('s5',4)-.1:back_+.3);pop($('.M-chip',SC.s5),t,t<cut?W('s5',4)-.1:1e9);if(t>=back_)$('.M-chip',SC.s5).style.opacity=0;
+  const m='Hi! I\'m starting a home meal-prep service for busy families nearby. Can I send you this week\'s menu? 😊';
+  type($('#m-txt'),m,t,W('s5',11)-.05,W('s5',15)+.3);blink($('#m-car'),t);show($('#m-car'),t<W('s5',16));
+  hl($('#m-hl'),t,W('s5',14)-.1,W('s5',17));
+  const pe=$$('.m-p',SC.s5);let sent=0;pe.forEach((e,i)=>{const a=W('s5',17)+i*.105;pop(e,t,a,.2);if(t>=a)sent++});$('#m-cnt').textContent=sent+' / 10 sent';
+  cam($('.cam',SC.s5),[[0,1,435,560],[W('s5',4)-.1,1.1,435,800,.4],[cut,1,435,560,.01],[W('s5',10),1.05,435,260,.4],[W('s5',16),1,435,560,.35],[back_,1,435,560,.01],[back_+.3,1.1,435,800,.4]],t)},
+ cta(t){const b=W('cta',7)+.05;show($('#r-a'),t<b);show($('#r-b'),t>=b);
+  const st=S.cta.start-0.15,stp=(b-st)/5;$$('.r-c',SC.cta).forEach((e,i)=>{const on=t>=st+i*stp&&t<st+(i+1)*stp;e.style.display=on?'flex':'none';if(on){const s=lerp(1.25,1,eo5(P(t,st+i*stp,.2)));e.firstChild.style.transform=`scale(${s})`}});
+  $$('.r-k',SC.cta).forEach((e,i)=>pop(e,t,b+.1+i*.15));
+  cam($('.cam',SC.cta),[[0,1,435,560],[b,1.06,435,560,1.2]],t)},
+};
+/* ---------- captions ---------- */
+const WORDS=D.segs.flatMap(s=>s.words.map(w=>({...w,d:w.w.replace(/["“”]/g,'')})));
+const GR=[];{let g=[];WORDS.forEach((w,i)=>{g.push(w);const nx=WORDS[i+1];const brk=!nx||g.length>=3||/[.,:!?…]$/.test(w.d.replace(/\.\.\.$/,'.'))||(nx&&nx.s-w.e>.35);if(brk){GR.push(g);g=[]}})}
+GR.forEach((g,i)=>{g.a=g[0].s;g.b=GR[i+1]?GR[i+1][0].s:END});
+function caps(t){const c=$('#cap');if(!D.caps){c.style.display='none';return}
+ const g=GR.find(g=>t>=g.a&&t<g.b)||(t<GR[0].a?GR[0]:null);if(!g){c.innerHTML='';return}
+ const key=g.a;if(c.dataset.k!=key){c.innerHTML=g.map(w=>`<span>${w.d.replace(/[.,:]+$/,'').replace(/…$/,'')}</span>`).join('');c.dataset.k=key;c.style.fontSize='68px';c.style.transform='none';const w=[...c.children].reduce((x,e)=>x+e.offsetWidth,0)+20*(c.children.length-1);if(w>800)c.style.fontSize=(68*800/w)+'px'}
+ const sp=[...c.children];let cur=0;g.forEach((w,i)=>{if(t>=w.s)cur=i});sp.forEach((e,i)=>e.className=i===cur?'on':'');
+ const p=P(t,g.a,.12);c.style.transform=`scale(${lerp(.85,1,back(p))})`}
+
+/* ---------- master ---------- */
+function sceneAt(t){let k='hook';ORDER.forEach((o,i)=>{if(t>=START[i])k=o});if(k==='cta'&&t>=W('cta',8)-.1)k='back';return k}
+window.seek=function(t){
+ const k=sceneAt(t);for(const s in SC)SC[s].style.display=s===k?'block':'none';
+ const ks=k==='back'?'cta':k;const i0=ORDER.indexOf(ks);const st=START[i0];
+ UP[k](k==='back'?t-(W('cta',8)-.1):t);
+ // title punch
+ const tt=$('#title');const tkey=(k==='back'&&t>=W('cta',14))?'hook':ks;if(tt.dataset.k!==tkey){tt.innerHTML=TITLES[tkey];tt.dataset.k=tkey}
+ const ts=tkey==='hook'&&k==='back'?W('cta',14):st;tt.style.transform=`scale(${lerp(1.15,1,back(P(t,ts,.2)))})`;
+ // scene cut flash (2 frames) + laptop screen flashes
+ const cuts=START.slice(1).concat([W('cta',8)-.1]);const f=$('#flash');let fo=0;cuts.forEach(c=>{if(t>=c&&t<c+.067)fo=.55});
+ if(k==='hook'){[1.32,2.02,2.72,3.87].forEach(c=>{if(t>=c&&t<c+.067)fo=.35})}f.style.opacity=fo;
+ caps(t);
+};
+window.__ready=document.fonts.ready.then(()=>{seek(0)});
+</script></body></html>
