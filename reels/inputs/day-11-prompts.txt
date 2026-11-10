@@ -1,0 +1,7 @@
+OFFER | Write 3 limited-time offers for my [business] that cost me little.
+FAQ | List the 10 questions customers ask before buying [product], with short answers.
+FOLLOW-UP | Write a friendly message for a customer who asked about [product] but didn't buy.
+REVIEWS | Reply kindly to this review in under 50 words: [review].
+BIO | Write 5 Instagram bios for my [business], under 150 characters, each with one clear action.
+ADS | Write 10 ad headlines for [product], under 8 words, each with a different angle.
+PARTNERS | Write a short message asking a nearby business to partner with my [business].
