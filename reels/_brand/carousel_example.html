@@ -1,0 +1,54 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Inter;src:url(file:///root/.claude/skills/effects/fonts/Inter.ttf);font-weight:100 900}
+@font-face{font-family:Mont;src:url(file:///root/.claude/skills/effects/fonts/Montserrat.ttf);font-weight:100 900}
+@font-face{font-family:Mono;src:url(file:///root/.claude/skills/effects/fonts/SpaceMono-Bold.ttf)}
+@font-face{font-family:ISerif;src:url(file:///root/.claude/skills/effects/fonts/InstrumentSerif-Italic.ttf)}
+:root{--ink:#030403;--lime:#22E06F;--dg:#0E7A3C;--deep:#06331A;--text:#F5F8F6;--muted:#8A938C}
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1920px;overflow:hidden;background:var(--ink);font-family:Inter,'Noto Color Emoji',sans-serif;color:var(--text);position:relative;-webkit-font-smoothing:antialiased}
+.abs{position:absolute}
+.blob{position:absolute;border-radius:50%;filter:blur(140px)}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:90px 90px;-webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 45%,#000 30%,transparent 80%);opacity:.55}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse 85% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.65) 100%)}
+.mono{font-family:Mono,monospace;letter-spacing:.04em}
+#prog{left:90px;width:810px;top:118px;display:flex;gap:12px}
+#prog i{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.12)}
+#prog i.on{background:var(--lime);box-shadow:0 0 18px var(--lime)}
+.card{left:60px;width:840px;border-radius:44px;background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.14);box-shadow:0 40px 120px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.18);overflow:hidden}
+.item{display:flex;align-items:center;gap:22px;padding:0 26px;height:82px;border-radius:20px;font-weight:700;font-size:36px;margin-top:14px;background:rgba(255,255,255,.06)}
+.item b{font-family:Mont;font-weight:900;font-size:38px;color:var(--lime);width:34px}
+.hl{position:absolute;border:6px solid var(--lime);border-radius:30px;box-shadow:0 0 44px rgba(34,224,111,.65),inset 0 0 24px rgba(34,224,111,.25)}
+</style></head><body>
+<div class="blob" style="width:900px;height:900px;left:-300px;top:-200px;background:var(--dg);opacity:.42"></div>
+<div class="blob" style="width:800px;height:800px;right:-260px;top:700px;background:var(--deep);opacity:.42"></div>
+<div class="blob" style="width:600px;height:600px;left:240px;top:1200px;background:var(--lime);opacity:.14"></div>
+<div class="grid"></div><div class="vig"></div>
+
+<div class="abs" id="prog"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+<div class="abs mono" style="left:90px;top:196px;font-size:34px;color:var(--lime)">STEP 01 / 05</div>
+<div class="abs mono" style="left:90px;width:810px;top:196px;font-size:28px;color:var(--muted);text-align:right">@TECH_BLOGCORNER</div>
+<div class="abs" style="left:90px;top:258px;width:810px;font-family:Mont;font-weight:900;font-size:104px;line-height:.98;letter-spacing:-.035em">Ask AI for<br><span style="color:var(--lime)">business ideas</span></div>
+<div class="abs" style="left:90px;top:480px;font-family:ISerif;font-size:62px;color:#D8E0DA">your skills + your time = a plan</div>
+
+<div class="abs card" style="top:600px;height:920px">
+  <div class="abs" style="inset:0;background:radial-gradient(600px 300px at 85% 0%,rgba(14,122,60,.45),transparent 70%)"></div>
+  <div class="abs" style="left:34px;right:34px;top:30px;display:flex;align-items:center;gap:14px">
+    <span style="width:46px;height:46px;border-radius:14px;background:var(--lime);display:inline-flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M12 1l2.6 8.4L23 12l-8.4 2.6L12 23l-2.6-8.4L1 12l8.4-2.6z" fill="#030403"/></svg></span>
+    <span class="mono" style="font-size:26px;color:var(--muted)">AI CHAT · CHATGPT OR CLAUDE</span></div>
+  <div class="abs" style="right:34px;top:104px;width:660px;padding:24px 30px;border-radius:30px 30px 8px 30px;background:#F5F8F6;color:#030403;font-weight:700;font-size:35px;line-height:1.3">I'm good at cooking and have 2 hours a day. Give me 5 business ideas I can start from home.</div>
+  <div class="abs" style="left:34px;right:34px;top:340px">
+    <div class="mono" style="font-size:24px;color:var(--lime)">AI ANSWER</div>
+    <div class="item"><b>1</b>Weekly meal prep for families</div>
+    <div class="item"><b>2</b>Home baking for local orders</div>
+    <div class="item"><b>3</b>Online cooking classes</div>
+    <div class="item"><b>4</b>Healthy lunch boxes</div>
+    <div class="item"><b>5</b>A simple recipe e-book</div>
+  </div>
+  <div class="hl" style="left:20px;right:20px;top:372px;height:504px"></div>
+</div>
+
+<div class="abs" style="left:90px;top:1556px;width:810px;display:flex;align-items:center;justify-content:space-between">
+  <span style="font-weight:700;font-size:38px">Copy this prompt <span style="color:var(--lime)">→ swap your skill</span></span>
+  <span class="mono" style="padding:14px 26px;border-radius:999px;background:var(--lime);color:#030403;font-size:28px;font-weight:700">SWIPE →</span>
+</div>
+</body></html>
