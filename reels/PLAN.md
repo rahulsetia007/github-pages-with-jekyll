@@ -24,7 +24,7 @@ So every video:
 | Day | Topic | Hook (problem first) | Send line |
 |---|---|---|---|
 | 6 ✅ | Hooks | Your Reels are stuck at 200 views? | a creator stuck at 200 views |
-| 7 | 1 video → 5 posts | Posting every day and still burnt out? | a creator who's always out of ideas |
+| 7 ✅ | 1 video → 5 posts | Posting every day and still burnt out? | a creator who's always out of ideas |
 | 8 | Reply to a 1-star review | One bad review is costing you customers. | a business owner with a bad review |
 | 9 | 30 promo ideas | Slow week? Your customers forgot you exist. | a shop owner having a slow week |
 | 10 | Phone photo → studio shot | Your product photos are losing you sales. | someone who sells online |
