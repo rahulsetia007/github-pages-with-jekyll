@@ -14,7 +14,11 @@ So every video:
 4. **Show the fix working** (before/after, a number moving, a check appearing).
 5. **Give real value**: the actual prompt and real example output, all of it in the caption.
 6. **End with a send**: "Send this to a [person] who [has the problem]", then Follow.
-7. Caption: first line repeats the problem, then the prompt, the output, a send and save line, 5 hashtags.
+7. Captions for all three platforms in CAPTION.md (first line repeats the problem, then the prompt, the output, a send line):
+   - **Instagram**: under 2,200 characters, save + send line, 3–5 specific hashtags (only as many as fit the topic).
+   - **TikTok**: search keywords written into the text (e.g. "ChatGPT prompt for…"), 3–5 hashtags.
+   - **YouTube Shorts**: title under 100 characters with the main search phrase, a description with the
+     prompt and output, "subscribe" instead of "follow", and 2–3 hashtags (only the first 3 show above the title).
 
 ## Days
 | Day | Topic | Hook (problem first) | Send line |
