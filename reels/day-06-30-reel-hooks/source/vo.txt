@@ -1,7 +1,9 @@
-hook|I stopped writing hooks. This one prompt writes thirty.
-prompt|Paste it in, add your niche, and you're done.
-list|Here's what it gave me.
-f1|You're using ChatGPT wrong. Here's why.
-f2|One prompt. A week of posts.
-f3|Why your Reels stop at two hundred views.
-cta|Save this for your next blank day.
+hook|Your Reels are stuck at two hundred views? It's not the algorithm. It's your first three seconds.
+how|Instagram shows every Reel to a small test group first. If they swipe away, it stops right there.
+bad|Most of us start like this. Hey guys, today I want to show you...
+good|Start with their problem instead. Like I just did.
+prompt|I made ChatGPT write thirty hooks like that. Copy this prompt.
+e1|Your captions are losing you followers.
+e2|Why nobody saves your posts.
+e3|Your content is good. Your hook isn't.
+cta|All thirty are in the caption. Send this to a creator stuck at two hundred views.

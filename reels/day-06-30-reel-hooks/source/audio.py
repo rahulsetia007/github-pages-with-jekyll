@@ -54,10 +54,15 @@ for b in starts:
     place(sfx, np.sin(2 * np.pi * (55 * ht + 30 * (1 - np.exp(-ht * 30)) / 30)) * np.exp(-ht * 10), b, .18)
 def tick(at, f=1500, g=.25):
     l = int(.06 * sr); et = np.arange(l) / sr; place(sfx, np.sin(2 * np.pi * f * et) * np.exp(-et * 60), at, g)
-la = S['list']['start'] - .18 + .55; lb = S['f1']['start'] - .18 - .35
-for i in range(0, 30, 3): tick(la + (lb - la) * (i / 30) ** .8, 1500 + i * 20, .16)   # pops while the list counts up
-for i in range(6): tick(.05 + i * .07, 1700, .14)                                      # hook pills
-tick(S['cta']['start'] - .18 + 1.75, 2200, .35)                                       # Follow tap
+h0 = S['how']['start'] - .18 + .5
+for i in range(0, 20, 2): tick(h0 + .6 + i * .04, 1500 + i * 30, .14)                 # test-group dots pop in
+tick(h0 + 4.0, 900, .3)                                                                # REACH STOPS
+b0 = S['bad']['start'] - .18 + .45
+for i in range(3): tick(b0 + i / 1.1, 2400, .12)                                        # 3-second timer
+g0 = S['good']['start'] - .18 + .45
+for k in range(2): tick(g0 + 1.3 + k * .45, 2000, .22)                                 # checkmarks
+for i in range(3): tick(.05 + i * .07, 1700, .14)                                      # hook pills
+tick(S['cta']['start'] - .18 + 2.6, 2200, .35)                                       # Follow tap
 hl = int(.9 * sr); ht = np.arange(hl) / sr
 place(sfx, np.sin(2 * np.pi * (44 * ht + 80 * (1 - np.exp(-ht * 25)) / 25)) * np.exp(-ht * 6), 0, .3)  # opening hit
 # voice

@@ -69,24 +69,25 @@ function typed(el,txt,t,a,cps=26){const n=Math.floor(clamp((t-a)*cps,0,txt.lengt
 function mk(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
 const scenesEl=$('#scenes');
 
-/* ---------- content (example ChatGPT output written for the Reel) ---------- */
-const HOOKS=["Stop posting until you watch this","This AI prompt saves me 5 hours weekly","Nobody talks about this free AI tool","Your captions are losing you followers","I let AI plan my whole month","Copy this prompt. Thank me later.","3 AI tricks small businesses ignore","You're using ChatGPT wrong. Here's why.","This prompt writes better ads than me","Steal my exact content system","One prompt. A week of posts.","Marketers, stop doing this by hand","The laziest way to grow on Instagram","I tested 10 AI tools. Keep these 2.","Save this before your next post","Your bio is why nobody follows","AI wrote this whole Reel script","Small business? Try this tonight.","This took me 30 seconds with AI","The prompt I use every Monday","Stop staring at a blank caption","Turn one idea into ten posts","No design skills? Use this instead.","Why your Reels stop at 200 views","Write a week of emails in minutes","Most creators skip this simple step","Your competitors already use this prompt","Do this before you hit post","The 10-second fix for boring hooks","Bookmark this. You'll need it Friday."];
-const PROMPT='Give me 30 short, scroll-stopping Reel hooks for an account that shares simple AI tips for [your niche]. Max 8 words each. Numbered list.';
-const FEAT=[
- {key:'f1',n:8, angle:'MISTAKE',  why:'Calls out a <b>mistake</b>.',  hi:'wrong', views:48.2},
- {key:'f2',n:11,angle:'SHORTCUT', why:'Promises a <b>shortcut</b>.',  hi:'week', views:31.6},
- {key:'f3',n:24,angle:'CURIOSITY',why:'Opens a <b>curiosity gap</b>.',hi:'200', views:62.9},
+/* ---------- content ---------- */
+const PROMPT='Write 30 Reel hooks for [your niche]. Each one names a problem my viewer has right now. Under 8 words. No "hey guys".';
+const EX=[
+ {key:'e1',n:1,angle:'PAIN',     why:'Names a <b>loss</b> they fear.',   h:'Your captions are losing you followers', hi:'losing', views:'48.2K'},
+ {key:'e2',n:2,angle:'CURIOSITY',why:'They need the <b>answer</b>.',     h:'Why nobody saves your posts', hi:'saves', views:'31.6K'},
+ {key:'e3',n:3,angle:'TWIST',    why:'Praise, then a <b>gut punch</b>.', h:'Your content is good. Your hook isn\'t.', hi:'hook', views:'62.9K'},
 ];
-const ANGLES=['Curiosity','Mistakes','Numbers','Shortcuts','Results','Urgency'];
+const CHECK=`<svg width="30" height="30" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="#22E06F" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const PHONE=(inner,id='')=>`<div class="abs ${id}" style="left:60px;top:60px;width:290px;height:520px;border-radius:40px;background:#0A0D0B;border:6px solid #1C231F;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.5)">
+  <div class="abs" style="inset:0;background:radial-gradient(300px 260px at 50% 40%,#0E7A3C,#06331A 60%,#030403)"></div>${inner}</div>`;
 
 /* ---------- HOOK (cover frame) ---------- */
 const hook=mk(`<div class="scene" id="s-hook">
-  <div class="abs mono" id="h-tag" style="top:250px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">FOR CREATORS · 1 PROMPT</div>
-  <div class="abs" id="h-n" style="top:300px;left:0;right:0;text-align:center;font-family:Mont;font-weight:900;font-size:560px;line-height:1;letter-spacing:-.06em;background:linear-gradient(180deg,#fff 30%,#22E06F);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 20px 80px rgba(34,224,111,.35))">30</div>
-  <div class="abs title" id="h-t1" style="top:860px;left:0;right:0;text-align:center;font-size:118px">REEL HOOKS</div>
-  <div class="abs" id="h-t2" style="top:990px;left:0;right:0;text-align:center;font-family:ISerif;font-size:92px;color:#D8E0DA">from one ChatGPT prompt</div>
+  <div class="abs mono" id="h-tag" style="top:250px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">STUCK AT 200 VIEWS?</div>
+  <div class="abs" id="h-n" style="top:300px;left:0;right:0;text-align:center;font-family:Mont;font-weight:900;font-size:520px;line-height:1;letter-spacing:-.06em;background:linear-gradient(180deg,#fff 30%,#22E06F);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 20px 80px rgba(34,224,111,.35))">200</div>
+  <div class="abs title" id="h-t1" style="top:860px;left:0;right:0;text-align:center;font-size:118px">VIEWS. AGAIN?</div>
+  <div class="abs" id="h-t2" style="top:990px;left:0;right:0;text-align:center;font-family:ISerif;font-size:92px;color:#D8E0DA">it's your first 3 seconds</div>
   <div class="abs" id="h-list" style="top:1140px;left:40px;right:40px;display:flex;flex-wrap:wrap;justify-content:center;gap:14px">
-    ${ANGLES.map((a,i)=>`<div class="pill ghost" style="font-size:29px;padding:8px 22px 8px 8px;gap:10px"><span class="tile mono" style="width:46px;height:46px;border-radius:23px;font:700 20px Mono">${String(i+1).padStart(2,'0')}</span>${a}</div>`).join('')}</div>
+    ${['How Reels get pushed','The fix','30 hooks'].map((a,i)=>`<div class="pill ghost" style="font-size:29px;padding:8px 22px 8px 8px;gap:10px"><span class="tile" style="width:46px;height:46px;border-radius:23px;font:700 20px Mono">${String(i+1).padStart(2,'0')}</span>${a}</div>`).join('')}</div>
   <div class="abs pill" id="h-save" style="top:1400px;left:50%;margin-left:-160px;width:320px;justify-content:center;background:var(--lime);color:#030403;font-size:34px;font-weight:900">
     <svg width="30" height="36" viewBox="0 0 30 36"><path d="M3 2h24v32l-12-8-12 8z" fill="#030403"/></svg> SAVE THIS</div>
 </div>`);
@@ -94,54 +95,76 @@ scenesEl.appendChild(hook);
 
 /* ---------- item scene shell (same layout as the tool scenes) ---------- */
 const CARD_TOP=760, CARD_H=640;
-function itemScene(key,idx,tileTxt,name,pillTxt,monoTxt,one){
+function itemScene(key,idx,tileTxt,name,pillTxt,monoTxt,one,pillMuted){
   const s=mk(`<div class="scene" id="s-${key}">
     <div class="abs mono s-idx" style="top:230px;left:90px;font-size:32px;color:var(--lime)">${idx}</div>
     <div class="abs s-logo" style="top:292px;left:90px"><span class="tile" style="width:132px;height:132px;border-radius:34px;font-size:${tileTxt.length>2?50:68}px">${tileTxt}</span></div>
-    <div class="abs title s-name" style="top:300px;left:252px;font-size:112px">${name}</div>
+    <div class="abs title s-name" style="top:300px;left:252px;font-size:${name.length>11?96:112}px">${name}</div>
     <div class="abs s-by" style="top:430px;left:90px;display:flex;gap:16px;align-items:center">
-      <span class="pill" style="background:var(--lime);color:#030403;font-size:28px;padding:10px 22px;font-weight:900">${pillTxt}</span>
+      <span class="pill" style="background:${pillMuted?'rgba(255,255,255,.14)':'var(--lime)'};color:${pillMuted?'#fff':'#030403'};font-size:28px;padding:10px 22px;font-weight:900">${pillTxt}</span>
       <span class="mono" style="font-size:30px;color:var(--muted)">${monoTxt}</span></div>
     <div class="abs sub s-one" style="top:540px;left:90px;right:90px;font-size:56px;font-weight:700;color:#fff">${one}</div>
     <div class="card s-card" style="top:${CARD_TOP}px;height:${CARD_H}px"><div class="abs" style="inset:0;background:radial-gradient(600px 300px at 80% 0%,#0E7A3C55,transparent 70%)"></div><div class="abs s-ui" style="inset:0"></div></div>
   </div>`);
   scenesEl.appendChild(s); return s;
 }
-const SP=itemScene('prompt','STEP 01 · COPY THIS','C','ChatGPT','FREE','FREE PLAN WORKS','Paste it in. Add your <b>niche</b>.');
+
+// 1) How Reels get pushed: small test group, most swipe, reach stops
+const SH=itemScene('how','STEP 01 · HOW REELS GET PUSHED','1','Test group','FIRST 3 SEC','DECIDE YOUR REACH','Swipe away = <b>no push</b>.');
+$('.s-ui',SH).innerHTML=`
+ <div class="abs h-reel" style="left:60px;top:150px;width:170px;height:300px;border-radius:30px;background:radial-gradient(160px 160px at 50% 40%,#0E7A3C,#06331A 70%);border:5px solid #1C231F;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px"><svg width="56" height="60" viewBox="0 0 22 24"><path d="M2 2l18 10L2 22z" fill="#fff"/></svg><span class="mono" style="font-size:22px">YOUR REEL</span></div>
+ <svg class="abs" style="left:250px;top:270px" width="110" height="60"><path class="h-arr" d="M5 30 H90 M70 10 L95 30 L70 50" stroke="#22E06F" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg>
+ <div class="abs" style="left:390px;top:120px;width:450px;display:grid;grid-template-columns:repeat(5,1fr);gap:22px">${Array.from({length:20}).map(()=>`<div class="h-d" style="width:66px;height:66px;border-radius:50%;background:#22E06F;box-shadow:0 0 20px rgba(34,224,111,.5)"></div>`).join('')}</div>
+ <div class="abs mono" style="left:390px;top:500px;font-size:24px;color:#8E9890">TEST GROUP</div>
+ <div class="abs" style="left:60px;top:520px;display:flex;align-items:baseline;gap:14px"><span class="mono" style="font-size:24px;color:#8E9890">VIEWS</span><span class="h-v" style="font:900 60px Mont">0</span></div>
+ <div class="abs h-stop pill" style="right:50px;bottom:44px;background:rgba(255,255,255,.14);color:#fff;font-size:30px;font-weight:900;border:2px solid rgba(255,255,255,.35)">REACH STOPS HERE</div>`;
+
+// 2) What most do: slow intro, viewer swipes
+const SB=itemScene('bad','STEP 02 · WHAT MOST DO','✕','Slow start','SWIPED','NO REASON TO STAY','"Hey guys…" = <b>gone</b>.',true);
+$('.s-ui',SB).innerHTML=PHONE(`<div class="abs b-cap" style="left:22px;right:22px;top:150px;font:900 34px/1.08 Mont;text-transform:uppercase"></div>`,'b-ph')+`
+ <div class="abs" style="left:400px;right:50px;top:90px"><div class="mono" style="font-size:24px;color:#8E9890">VIEWER WATCHING</div>
+   <div class="b-t" style="font:900 120px Mont;margin-top:10px;font-variant-numeric:tabular-nums">0:00</div>
+   <div style="height:22px;border-radius:12px;background:rgba(255,255,255,.12);margin-top:24px;overflow:hidden"><i class="b-bar" style="display:block;height:100%;width:0;background:#8A938C"></i></div>
+   <div class="b-sw" style="margin-top:44px;font:900 64px Mont;color:#fff;display:flex;align-items:center;gap:18px"><svg width="54" height="54" viewBox="0 0 24 24"><path d="M12 20V5M5 11l7-7 7 7" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Swiped</div></div>`;
+
+// 3) The fix: their problem first
+const SG=itemScene('good','STEP 03 · THE FIX','✓','Their problem','KEEPS THEM','SAY IT IN SECOND 1','Lead with their <b>problem</b>.');
+$('.s-ui',SG).innerHTML=PHONE(`<div class="abs" style="left:22px;right:22px;top:150px;font:900 38px/1.05 Mont;text-transform:uppercase">Your Reels are stuck at <span style="color:var(--lime)">200 views?</span></div>`,'g-ph')+`
+ <div class="abs" style="left:400px;right:50px;top:90px"><div class="mono" style="font-size:24px;color:#8E9890">VIEWER WATCHING</div>
+   <div class="g-t" style="font:900 120px Mont;margin-top:10px;color:var(--lime);font-variant-numeric:tabular-nums">0:00</div>
+   <div style="height:22px;border-radius:12px;background:rgba(255,255,255,.12);margin-top:24px;overflow:hidden"><i class="g-bar" style="display:block;height:100%;width:0;background:linear-gradient(90deg,#0E7A3C,#22E06F)"></i></div>
+   <div class="g-ok" style="margin-top:40px;display:flex;flex-direction:column;gap:16px;font:700 32px Inter;color:#C8D0CA">
+     <div class="g-c" style="display:flex;gap:14px;align-items:center">${CHECK}Kept watching</div>
+     <div class="g-c" style="display:flex;gap:14px;align-items:center">${CHECK}Shown to more people</div></div></div>`;
+
+// 4) The prompt
+const SP=itemScene('prompt','STEP 04 · COPY THIS','C','ChatGPT','FREE','FREE PLAN WORKS','Get <b>30 hooks</b> like that.');
 $('.s-ui',SP).innerHTML=`
  <div class="abs" style="left:50px;right:50px;top:50px;height:400px;border-radius:30px;background:rgba(0,0,0,.35);border:1.5px solid rgba(34,224,111,.5);padding:34px 40px">
    <div class="mono" style="font-size:24px;color:var(--lime);margin-bottom:14px">PROMPT</div>
    <div style="font:600 38px/1.42 Inter"><span class="p-q"></span><i class="p-caret" style="display:inline-block;width:4px;height:42px;background:#22E06F;vertical-align:-8px;margin-left:4px"></i></div></div>
  <div class="abs p-send pill" style="right:50px;top:476px;background:var(--lime);color:#030403;font-size:30px;font-weight:900;padding:14px 30px">Send <svg width="28" height="28" viewBox="0 0 24 24"><path d="M12 20V5M5 11l7-7 7 7" stroke="#030403" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
- <div class="abs mono p-gen" style="left:60px;top:494px;font-size:26px;color:#8E9890">WRITING 30 HOOKS<span class="p-dots"></span></div>`;
+ <div class="abs mono p-gen" style="left:60px;top:494px;font-size:26px;color:#8E9890">ALL 30 IN THE CAPTION ↓</div>`;
 
-const SL=itemScene('list','STEP 02 · THE OUTPUT','30','30 hooks','UNDER 8 WORDS','READY TO COPY','Every one ready to <b>post</b>.');
-$('.s-ui',SL).innerHTML=`
- <div class="abs" style="left:50px;right:50px;top:40px;display:flex;justify-content:space-between;align-items:baseline"><span class="mono" style="font-size:26px;color:#8E9890">CHATGPT · ANSWER</span><span class="l-cnt" style="font:900 64px Mont;color:var(--lime)">00/30</span></div>
- <div class="abs" style="left:40px;right:40px;top:130px;bottom:30px;overflow:hidden;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 40px,#000 calc(100% - 60px),transparent)">
-   <div class="l-rows" style="position:relative">${HOOKS.map((h,i)=>`<div class="l-r" style="display:flex;gap:20px;align-items:center;height:62px;padding:0 18px;border-radius:16px;font:600 32px Inter;white-space:nowrap"><span class="mono" style="font-size:26px;color:var(--lime);width:44px">${String(i+1).padStart(2,'0')}</span>${h}</div>`).join('')}</div></div>`;
-
-const FS=FEAT.map(F=>{
-  const s=itemScene(F.key,`HOOK ${String(F.n).padStart(2,'0')} / 30`,'#'+F.n,'Hook #'+String(F.n).padStart(2,'0'),F.angle,`${HOOKS[F.n-1].split(' ').length} WORDS`,F.why);
-  const h=HOOKS[F.n-1].replace(F.hi,`<span style="color:var(--lime)">${F.hi}</span>`);
-  $('.s-ui',s).innerHTML=`
-   <div class="abs f-ph" style="left:60px;top:60px;width:290px;height:520px;border-radius:40px;background:#0A0D0B;border:6px solid #1C231F;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.5)">
-     <div class="abs" style="inset:0;background:radial-gradient(300px 260px at 50% 40%,#0E7A3C,#06331A 60%,#030403)"></div>
-     <div class="abs f-mini" style="left:22px;right:22px;top:120px;font:900 34px/1.05 Mont;text-transform:uppercase;letter-spacing:-.01em">${h}</div>
-     <div class="abs" style="left:22px;bottom:26px;display:flex;align-items:center;gap:10px;font:800 26px Inter"><svg width="22" height="24" viewBox="0 0 22 24"><path d="M2 2l18 10L2 22z" fill="#fff"/></svg><span class="f-v">0</span></div>
-   </div>
+// 5-7) Three examples it wrote
+const ES=EX.map(F=>{
+  const s=itemScene(F.key,`EXAMPLE ${F.n} / 3`,'#'+F.n,'Hook #'+F.n,F.angle,`${F.h.split(' ').length} WORDS`,F.why);
+  const h=F.h.replace(F.hi,`<span style="color:var(--lime)">${F.hi}</span>`);
+  $('.s-ui',s).innerHTML=PHONE(`<div class="abs" style="left:22px;right:22px;top:120px;font:900 34px/1.05 Mont;text-transform:uppercase;letter-spacing:-.01em">${h}</div>
+     <div class="abs" style="left:22px;bottom:26px;display:flex;align-items:center;gap:10px;font:800 26px Inter"><svg width="22" height="24" viewBox="0 0 22 24"><path d="M2 2l18 10L2 22z" fill="#fff"/></svg><span class="f-v">0</span></div>`,'f-ph')+`
    <div class="abs f-big" style="left:400px;right:50px;top:96px;font:900 62px/1.02 Mont;letter-spacing:-.02em">${h}</div>
    <div class="abs f-chk" style="left:400px;right:50px;bottom:60px;display:flex;flex-direction:column;gap:14px">
-     ${['8 words or fewer','Speaks to one viewer','Makes you want the answer'].map(c=>`<div class="f-c" style="display:flex;gap:14px;align-items:center;font:700 28px Inter;color:#C8D0CA"><svg width="30" height="30" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="#22E06F" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>${c}</div>`).join('')}</div>`;
+     ${['Names a real problem','8 words or fewer','Makes them need the answer'].map(c=>`<div class="f-c" style="display:flex;gap:14px;align-items:center;font:700 28px Inter;color:#C8D0CA">${CHECK}${c}</div>`).join('')}</div>`;
   return s;});
+const ANGLES=['Pain','Curiosity','Twist','Mistake','Shortcut','Result'];
 
 /* ---------- CTA ---------- */
 const cta=mk(`<div class="scene" id="s-cta">
-  <div class="abs mono" style="top:250px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)" id="c-tag">ALL 30 · IN THE CAPTION</div>
+  <div class="abs mono" style="top:250px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)" id="c-tag">ALL 30 HOOKS · IN THE CAPTION</div>
   <div class="abs" id="c-grid" style="top:330px;left:90px;right:90px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
    ${ANGLES.map((a,i)=>`<div class="c-g ghost" style="border-radius:28px;padding:18px 26px;display:flex;align-items:center;gap:20px"><span class="tile" style="width:64px;height:64px;border-radius:18px;font:700 26px Mono">${String(i+1).padStart(2,'0')}</span><span style="font:800 38px Inter">${a}</span></div>`).join('')}</div>
   <div class="abs title" id="c-t" style="top:1010px;left:0;right:0;text-align:center;font-size:110px">Follow for more</div>
-  <div class="abs" id="c-s" style="top:1135px;left:0;right:0;text-align:center;font-family:ISerif;font-size:80px;color:#D8E0DA">AI tips that actually help</div>
+  <div class="abs" id="c-s" style="top:1135px;left:0;right:0;text-align:center;font-family:ISerif;font-size:80px;color:#D8E0DA">send this to a creator stuck at 200</div>
   <div class="abs pill" id="c-btn" style="top:1290px;left:50%;width:380px;margin-left:-190px;height:110px;justify-content:center;font-size:44px;font-weight:900;background:var(--lime);color:#030403">Follow</div>
   <svg class="abs" id="c-cur" style="top:1352px;left:700px" width="70" height="80" viewBox="0 0 70 80"><path d="M6 4 L6 62 L22 48 L34 74 L46 68 L34 43 L56 43 Z" fill="#fff" stroke="#000" stroke-width="4" stroke-linejoin="round"/></svg>
 </div>`);
@@ -150,12 +173,12 @@ scenesEl.appendChild(cta);
 /* ---------- timeline (voice-driven) ---------- */
 const S=D.segs, segBy=Object.fromEntries(S.map(s=>[s.key,s]));
 const LEAD=0.18;
-const order=['hook','prompt','list','f1','f2','f3','cta'];
-const els={hook,prompt:SP,list:SL,cta}; FEAT.forEach((F,i)=>els[F.key]=FS[i]);
+const order=['hook','how','bad','good','prompt','e1','e2','e3','cta'];
+const els={hook,how:SH,bad:SB,good:SG,prompt:SP,cta}; EX.forEach((F,i)=>els[F.key]=ES[i]);
 const starts=order.map((k,i)=>i===0?0:segBy[k].start-LEAD);
 const END=D.end;
 const TR=0.42;
-const TRTYPE=['whip','zoom','wipe','whip','zoom','whip'];
+const TRTYPE=['whip','zoom','whip','wipe','whip','zoom','whip','wipe'];
 const NSEG=order.length-2;
 for(let i=0;i<NSEG;i++) $('#prog').appendChild(mk('<div class="seg"><i></i></div>'));
 
@@ -204,23 +227,37 @@ function renderItemShell(t,el){
   rise($('.s-one',el),t,.3,.45,40);
   const pc=eo5(P(t,.25,.6)); st($('.s-card',el),{opacity:clamp(pc*2),transform:`translateY(${(1-pc)*160}px) rotateX(${(1-pc)*20}deg) scale(${lerp(.92,1,pc)})`});
 }
+function renderHow(t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.5;
+  pop($('.h-reel',U),u,0,.45,.6); $('.h-arr',U).style.strokeDashoffset=1-eo(P(u,.4,.4));
+  const dots=$$('.h-d',U); const keep=[3,12];
+  dots.forEach((d,i)=>{const a=.6+i*.04; const p=back(P(u,a,.35)); const gone=!keep.includes(i)&&u>2.6+((i*7)%20)*.06;
+    const g=gone?eo(P(u,2.6+((i*7)%20)*.06,.4)):0;
+    st(d,{opacity:clamp(P(u,a,.15))*(1-g*.8),transform:`translateX(${g*60}px) scale(${lerp(.3,1,p)*(1-g*.3)})`,background:gone?'#3A433D':'#22E06F',boxShadow:gone?'none':'0 0 20px rgba(34,224,111,.5)'});});
+  $('.h-v',U).textContent=Math.round(200*eo(P(u,.6,2.4)));
+  pop($('.h-stop',U),u,4.0,.45,.5);
+}
+function renderBad(t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.45;
+  typed($('.b-cap',U),'Hey guys, today I want to show you…',u,.1,16);
+  const sec=clamp(u*1.1,0,3); $('.b-t',U).textContent='0:0'+Math.floor(sec); $('.b-bar',U).style.width=(sec/3*100)+'%';
+  const sw=P(u,2.9,.5); st($('.b-ph',U),{transform:`translateY(${-eio(sw)*700}px)`,opacity:1-sw});
+  rise($('.b-sw',U),u,2.9,.4,30);
+}
+function renderGood(t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.45;
+  pop($('.g-ph',U),u,0,.5,.7);
+  const sec=clamp(u*1.4,0,4); $('.g-t',U).textContent='0:0'+Math.floor(sec); $('.g-bar',U).style.width=(Math.min(sec,3)/3*100)+'%';
+  $$('.g-c',U).forEach((c,k)=>rise(c,u,1.3+k*.45,.4,30));
+}
 function renderPrompt(t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.5;
-  const typing=typed($('.p-q',U),PROMPT,u,0,62); $('.p-caret',U).style.opacity=(typing||Math.floor(u*3)%2)?1:0;
-  const done=PROMPT.length/62; pop($('.p-send',U),u,done+.05,.35,.5);
+  const cps=40; const typing=typed($('.p-q',U),PROMPT,u,0,cps); $('.p-caret',U).style.opacity=(typing||Math.floor(u*3)%2)?1:0;
+  const done=PROMPT.length/cps; pop($('.p-send',U),u,done+.05,.35,.5);
   const press=P(u,done+.45,.2); $('.p-send',U).style.transform+=` scale(${1-Math.sin(press*Math.PI)*.1})`;
-  st($('.p-gen',U),{opacity:u>done+.6?1:0}); $('.p-dots',U).textContent='.'.repeat(1+(Math.floor(Math.max(0,u)*4)%3));
+  rise($('.p-gen',U),u,done+.6,.4,20);
 }
-function renderList(t,el,dur){renderItemShell(t,el);const U=$('.s-ui',el);
-  const a=.55, b=dur-.35; const n=Math.round(30*eio(P(t,a,b-a)));
-  $('.l-cnt',U).textContent=String(n).padStart(2,'0')+'/30';
-  const rows=$$('.l-r',U); rows.forEach((r,i)=>{const on=i<n; const fresh=i===n-1&&n<30; st(r,{opacity:on?1:0,background:fresh?'rgba(34,224,111,.16)':'transparent'});});
-  const vis=7; const y=Math.max(0,(n-vis))*62; $('.l-rows',U).style.transform=`translateY(${-y}px)`;
-}
-function renderFeat(i,t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.45;
+function renderEx(i,t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.45;
   pop($('.f-ph',U),u,0,.5,.7);
   rise($('.f-big',U),u,.15,.45,40);
-  const v=FEAT[i].views*eo(P(u,.3,1.6)); $('.f-v',U).textContent=v.toFixed(1)+'K';
-  $$('.f-c',U).forEach((c,k)=>rise(c,u,.7+k*.2,.4,30));
+  const target=parseFloat(EX[i].views); $('.f-v',U).textContent=(target*eo(P(u,.3,1.6))).toFixed(1)+'K';
+  $$('.f-c',U).forEach((c,k)=>rise(c,u,.7+k*.25,.4,30));
 }
 function renderCta(t,el){
   rise($('#c-tag',el),t,0,.3,20);
@@ -228,10 +265,10 @@ function renderCta(t,el){
   const pt=eo5(P(t,.3,.45)); st($('#c-t',el),{opacity:pt,transform:`scale(${lerp(1.2,1,pt)})`});
   rise($('#c-s',el),t,.5,.4,30);
   const b=$('#c-btn',el); pop(b,t,.7,.45,.4);
-  const click=P(t,1.75,.2); const followed=t>1.85;
+  const click=P(t,2.6,.2); const followed=t>2.7;
   st(b,{background:followed?'rgba(255,255,255,.12)':'#22E06F',color:followed?'#fff':'#030403',border:followed?'2px solid rgba(255,255,255,.4)':'none'}); b.innerHTML=followed?'Following <svg width="34" height="34" viewBox="0 0 34 34" style="margin-left:10px"><path d="M6 18l7 7L28 9" stroke="#22E06F" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>':'Follow';
   b.style.transform+=` scale(${1-Math.sin(click*Math.PI)*.08})`;
-  const pc=eio(P(t,1.0,.75)); st($('#c-cur',el),{opacity:clamp(P(t,.95,.2)),transform:`translate(${(1-pc)*220}px,${(1-pc)*260}px)`});
+  const pc=eio(P(t,1.8,.75)); st($('#c-cur',el),{opacity:clamp(P(t,1.75,.2)),transform:`translate(${(1-pc)*220}px,${(1-pc)*260}px)`});
 }
 
 window.seek=function(t){
@@ -241,8 +278,8 @@ window.seek=function(t){
     st(el,{transform:tf.tr,filter:tf.f||'none',opacity:tf.o});
     const lt=t-starts[idx];
     if(k==='hook')renderHook(lt,el); else if(k==='cta')renderCta(lt,el);
-    else if(k==='prompt')renderPrompt(lt,el); else if(k==='list')renderList(lt,el,starts[idx+1]-starts[idx]);
-    else renderFeat(FEAT.findIndex(F=>F.key===k),lt,el);
+    else if(k==='how')renderHow(lt,el); else if(k==='bad')renderBad(lt,el); else if(k==='good')renderGood(lt,el);
+    else if(k==='prompt')renderPrompt(lt,el); else renderEx(EX.findIndex(F=>F.key===k),lt,el);
   });
   [...$('#prog').children].forEach((s,i)=>{const a=starts[i+1],b=starts[i+2];s.firstChild.style.width=`${clamp((t-a)/(b-a))*100}%`;});
   const pv=t<starts[1]-.2?eo(P(t,.2,.4)):(t>starts[order.length-1]?1-eo(P(t,starts[order.length-1],.3)):1); st($('#prog'),{opacity:pv});

@@ -30,7 +30,7 @@ for key, text in lines:
     wt = [{"w": w, "s": round(t + m(s0), 3), "e": round(t + m(s1 - 1), 3)} for w, (s0, s1) in zip(words, bounds)]
     d = len(A) / sr
     segs.append({"key": key, "text": text, "start": round(t, 3), "dur": round(d, 3), "words": wt})
-    g = {'hook': .25, 'prompt': .35, 'list': 1.7, 'f1': .3, 'f2': .3, 'f3': .35}.get(key, 0)
+    g = {'hook': .6, 'how': .6, 'bad': .5, 'good': .6, 'prompt': 1.9, 'e1': .7, 'e2': .7, 'e3': .7}.get(key, 0)
     out.append(A); out.append(np.zeros(int(g * sr), np.float32)); t += d + g
 y = np.concatenate(out); y = y / np.max(np.abs(y)) * 0.89
 sf.write('voice.wav', y, sr)
