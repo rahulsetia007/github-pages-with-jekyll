@@ -1,0 +1,18 @@
+/* House look for @tech_blogcorner Reels. Canvas is 1080x1920 at 1 CSS px = 1 video px. */
+@font-face { font-family: "Anton"; src: url(fonts/Anton.ttf); }
+@font-face { font-family: "Caveat Brush"; src: url(fonts/CaveatBrush.ttf); }
+@font-face { font-family: "JB"; src: url(fonts/JetBrainsMono-Regular.ttf); font-weight: 400; }
+@font-face { font-family: "JB"; src: url(fonts/JetBrainsMono-Bold.ttf); font-weight: 700; }
+:root { --bg:#050805; --green:#22C55E; --brush:#1E9447; --neon:#7CFF5A; --text:#F5F5F5; --panel:#0b130c; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); color: var(--text); }
+.glow { position: absolute; inset: 0; background: radial-gradient(55% 35% at 50% 55%, #22c55e26, transparent 70%); }
+.grid { position: absolute; inset: 0; background-image: linear-gradient(#22c55e0d 1px, transparent 1px), linear-gradient(90deg, #22c55e0d 1px, transparent 1px); background-size: 54px 54px; }
+.abs { position: absolute; }
+/* Safe area for text: x 70..960, y 250..1500 */
+.hook { position: absolute; left: 70px; width: 890px; top: 320px; font-family: "Anton"; text-transform: uppercase; font-size: 138px; line-height: .98; color: var(--text); text-shadow: 7px 7px 0 #3c423d; transform-origin: 0 50%; }
+.hook .g { color: var(--green); }
+.mono { font-family: "JB"; }
+.hand { font-family: "Caveat Brush"; color: var(--neon); }
+.pill { position: absolute; font-family: "JB"; font-weight: 700; font-size: 44px; color: var(--bg); background: var(--green); padding: 10px 30px; border-radius: 99px; font-variant-numeric: tabular-nums; }

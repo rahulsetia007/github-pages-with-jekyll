@@ -1,0 +1,134 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Day 6: 1 prompt = 30 Reel hooks</title>
+<link rel="stylesheet" href="../base.css">
+<style>
+#list { position: absolute; left: 70px; width: 890px; overflow: hidden; }
+#rows { position: relative; }
+.row { font-family: "JB"; font-size: 40px; line-height: 1.3; color: var(--green); padding: 8px 14px; border-radius: 10px; display: flex; gap: 22px; }
+.row b { color: var(--brush); font-weight: 700; min-width: 54px; font-variant-numeric: tabular-nums; }
+.row.new { background: var(--neon); color: var(--bg); }
+.row.new b { color: var(--bg); }
+#card { position: absolute; left: 70px; top: 610px; width: 890px; background: var(--panel); border: 3px solid var(--green); border-radius: 28px; padding: 44px 46px 52px; box-shadow: 0 0 90px #22c55e44; transform-origin: 50% 40%; }
+#card .lab { font-family: "JB"; font-weight: 700; font-size: 32px; color: var(--neon); letter-spacing: .08em; margin-bottom: 28px; display: flex; justify-content: space-between; }
+#card .txt { font-family: "JB"; font-size: 46px; line-height: 1.5; color: var(--text); }
+#card .txt span { padding: 2px 6px; border-radius: 8px; transition: none; }
+#card .txt span.on { background: var(--neon); color: var(--bg); }
+#card .txt span.done { background: #22c55e33; }
+#feat { position: absolute; left: 70px; top: 780px; width: 890px; background: var(--bg); border: 4px solid var(--neon); border-radius: 30px; padding: 46px 48px 54px; box-shadow: 0 0 120px #7cff5a55; transform-origin: 50% 50%; }
+#feat .n { font-family: "JB"; font-weight: 700; font-size: 38px; color: var(--neon); margin-bottom: 18px; }
+#feat .h { font-family: "Anton"; font-size: 104px; line-height: 1.02; text-transform: uppercase; color: var(--text); text-shadow: 6px 6px 0 #3c423d; }
+#title { position: absolute; left: 70px; top: 405px; font-family: "Anton"; font-size: 92px; text-transform: uppercase; line-height: 1; text-shadow: 6px 6px 0 #3c423d; }
+#title .g { color: var(--green); }
+#bm { position: absolute; left: 390px; top: 700px; width: 300px; height: 380px; transform-origin: 50% 50%; }
+#tag1 { position: absolute; left: 70px; width: 890px; top: 1150px; text-align: center; font-size: 88px; transform: rotate(-3deg); }
+#tag2 { position: absolute; left: 70px; width: 890px; top: 1320px; text-align: center; font-family: "JB"; font-size: 38px; color: var(--green); }
+#flash { position: absolute; inset: 0; background: var(--neon); pointer-events: none; }
+</style>
+<div id="stage">
+  <div class="glow"></div><div class="grid"></div>
+  <div id="list"><div id="rows"></div></div>
+  <div class="hook" id="h1">I stopped<br>writing hooks</div>
+  <div class="hook" id="h2">This prompt<br>writes <span class="g">30</span></div>
+  <div class="hook" id="h3" style="font-size:110px">The prompt</div>
+  <div class="pill" id="pill">00/30</div>
+  <div id="card">
+    <div class="lab"><span>PROMPT</span><span>ChatGPT</span></div>
+    <div class="txt"><span id="c1">Give me 30 short, scroll-stopping Reel hooks</span> <span id="c2">for an account that shares simple AI tips for marketers, creators and small businesses.</span> <span id="c3">Max 8 words each. Numbered list.</span></div>
+  </div>
+  <div id="title">1 prompt <span class="g">=</span> 30 hooks</div>
+  <div id="feat"><div class="n" id="fn">#08</div><div class="h" id="fh"></div></div>
+  <div class="hook" id="h4" style="font-size:170px">Save this</div>
+  <svg id="bm" viewBox="0 0 300 380"><path d="M30 20 h240 a14 14 0 0 1 14 14 v330 l-134 -92 l-134 92 v-330 a14 14 0 0 1 14 -14z" fill="#22C55E" stroke="#7CFF5A" stroke-width="8"/><path d="M95 150 l45 45 l80 -90" fill="none" stroke="#050805" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="hand" id="tag1">for your next blank day</div>
+  <div id="tag2">prompt + all 30 hooks in the caption ↓</div>
+  <div id="flash"></div>
+</div>
+<script src="../engine.js"></script>
+<script>
+const HOOKS = ["Stop posting until you watch this","This AI prompt saves me 5 hours weekly","Nobody talks about this free AI tool","Your captions are losing you followers","I let AI plan my whole month","Copy this prompt. Thank me later.","3 AI tricks small businesses ignore","You're using ChatGPT wrong. Here's why.","This prompt writes better ads than me","Steal my exact content system","One prompt. A week of posts.","Marketers, stop doing this by hand","The laziest way to grow on Instagram","I tested 10 AI tools. Keep these 2.","Save this before your next post","Your bio is why nobody follows","AI wrote this whole Reel script","Small business? Try this tonight.","This took me 30 seconds with AI","The prompt I use every Monday","Stop staring at a blank caption","Turn one idea into ten posts","No design skills? Use this instead.","Why your Reels stop at 200 views","Write a week of emails in minutes","Most creators skip this simple step","Your competitors already use this prompt","Do this before you hit post","The 10-second fix for boring hooks","Bookmark this. You'll need it Friday."];
+const FEATURED = [8, 11, 24];
+const DURATION = 14;
+// Reveal schedule: 30 rows between 5.0s and 11.0s with a 0.6s pause after each featured row (~7 rows/s).
+const PAUSE = 0.6, LIST_START = 5.0, LIST_END = 11.0;
+const DT = (LIST_END - LIST_START - PAUSE * FEATURED.length) / HOOKS.length;
+const ROW_T = []; const PAUSES = [];
+{ let t = LIST_START; for (let i = 1; i <= 30; i++) { ROW_T[i] = t; t += DT; if (FEATURED.includes(i)) { PAUSES.push([t, t + PAUSE, i]); t += PAUSE; } } }
+const CUES = [[0, 'hit'], [1.5, 'pop'], [3.0, 'whoosh'], [3.4, 'tick'], [3.9, 'tick'], [4.4, 'tick'], [4.95, 'whoosh', .8],
+  ...[5, 10, 15, 20, 25, 30].map(i => [ROW_T[i], 'pop', .8]),
+  ...PAUSES.map(p => [p[0], 'popbig']),
+  [11.0, 'reveal'], [11.3, 'pop'], [11.8, 'pop', .6], [12.4, 'pop', .6], [13.0, 'whoosh']];
+const STILLS = [0.1, 2.2, 4.2, 6.0, PAUSES[0][0] + 0.3, 12.6];
+
+const rowsEl = $('#rows');
+rowsEl.innerHTML = HOOKS.map((h, i) => `<div class="row" id="r${i + 1}"><b>${String(i + 1).padStart(2, '0')}</b><span>${h}</span></div>`).join('');
+const rowTop = i => $('#r' + i).offsetTop, rowBottom = i => { const r = $('#r' + i); return r.offsetTop + r.offsetHeight; };
+
+function render(t) {
+  const list = $('#list');
+  // --- List: dim background scroll at the open, live reveal in the middle, rewind at the end
+  if (t < 3.0) {
+    show(list, true); list.style.top = '760px'; list.style.height = '760px';
+    list.style.opacity = (0.38 * (1 - prog(t, 2.6, 3.0))).toFixed(3);
+    rowsEl.style.transform = `translateY(${-700 * t}px)`;
+    for (let i = 1; i <= 30; i++) { const r = $('#r' + i); r.style.visibility = 'visible'; r.classList.remove('new'); }
+  } else if (t >= 4.95 && t < 11.0) {
+    show(list, true); list.style.top = '560px'; list.style.height = '930px';
+    let n = 0; for (let i = 1; i <= 30; i++) if (t >= ROW_T[i]) n = i;
+    const inPause = PAUSES.find(p => t >= p[0] && t < p[1]);
+    list.style.opacity = inPause ? (1 - 0.75 * Math.min(prog(t, inPause[0], inPause[0] + .1), 1 - prog(t, inPause[1] - .1, inPause[1]))).toFixed(3) : (t < 5.0 ? prog(t, 4.95, 5.0) : 1);
+    for (let i = 1; i <= 30; i++) { const r = $('#r' + i); r.style.visibility = i <= n ? 'visible' : 'hidden'; r.classList.toggle('new', i === n && t - ROW_T[i] < 0.12); }
+    const target = n ? Math.max(0, rowBottom(n) - 930 + 20) : 0;
+    rowsEl.style.transform = `translateY(${-target}px)`;
+  } else if (t >= 13.0) {
+    show(list, true); list.style.top = '760px'; list.style.height = '760px';
+    list.style.opacity = (0.38 + 0.4 * (1 - prog(t, 13.0, 13.5))).toFixed(3);
+    for (let i = 1; i <= 30; i++) { const r = $('#r' + i); r.style.visibility = 'visible'; r.classList.remove('new'); }
+    // rewind from the end of the list back to row 01, landing where frame 1 starts
+    // y(14) = 0 and moving at +700px/s, which is exactly frame 1's scroll
+    const from = rowBottom(30) - 760, p = easeOut(prog(t, 13.0, 13.8));
+    const y = from * (1 - p) + (-700 * (14 - t)) * p;
+    rowsEl.style.transform = `translateY(${-y}px)`;
+  } else show(list, false);
+
+  // --- Hooks
+  const h1 = $('#h1'), h2 = $('#h2'), h3 = $('#h3'), h4 = $('#h4');
+  show(h1, t < 1.5); h1.style.transform = `scale(${t < 1.5 ? 1 + 0.25 * (1 - easeOut(prog(t, 0, 0.18))) : 1})`;
+  show(h2, t >= 1.5 && t < 3.0); h2.style.transform = `scale(${slam(t, 1.5)}) translateX(${shake(t, 1.5, .25, 8)}px)`;
+  const pill = $('#pill');
+  if (t >= 1.75 && t < 3.0) { show(pill, true); pill.style.top = '640px'; pill.style.left = '70px'; pill.style.transform = `scale(${backOut(prog(t, 1.75, 2.0))})`; pill.textContent = '00/30'; }
+  else if (t >= 5.0 && t < 11.0) { let n = 0; for (let i = 1; i <= 30; i++) if (t >= ROW_T[i]) n = i; show(pill, true); pill.style.top = '300px'; pill.style.left = '70px'; pill.style.transform = 'scale(1)'; pill.textContent = String(n).padStart(2, '0') + '/30'; }
+  else show(pill, false);
+
+  // --- Prompt card 3.0-5.0
+  const card = $('#card');
+  show(h3, t >= 3.0 && t < 5.0); h3.style.top = '330px'; h3.style.transform = `scale(${slam(t, 3.0, .2)})`;
+  if (t >= 3.0 && t < 5.0) {
+    show(card, true);
+    const s = 0.72 + 0.28 * easeOut(prog(t, 3.0, 3.35)) + 0.05 * prog(t, 3.35, 5.0);
+    card.style.transform = `scale(${s})`; card.style.opacity = prog(t, 3.0, 3.12) * (1 - prog(t, 4.85, 5.0));
+    [[3.4, '#c1'], [3.9, '#c2'], [4.4, '#c3']].forEach(([at, id], k, arr) => { const el = $(id); const next = arr[k + 1] ? arr[k + 1][0] : 99; el.className = t >= at && t < next ? 'on' : t >= next ? 'done' : ''; });
+  } else show(card, false);
+
+  // --- List title
+  const title = $('#title'); show(title, t >= 5.0 && t < 11.0); title.style.opacity = prog(t, 5.0, 5.15);
+
+  // --- Featured hook enlarges during each pause
+  const feat = $('#feat'); const fp = PAUSES.find(p => t >= p[0] && t < p[1]);
+  if (fp) { show(feat, true); $('#fn').textContent = '#' + String(fp[2]).padStart(2, '0'); $('#fh').textContent = HOOKS[fp[2] - 1];
+    const a = backOut(prog(t, fp[0], fp[0] + .18)), z = 1 - easeIn(prog(t, fp[1] - .1, fp[1]));
+    feat.style.transform = `scale(${0.6 + 0.4 * a})`; feat.style.opacity = Math.min(prog(t, fp[0], fp[0] + .06), z); }
+  else show(feat, false);
+
+  // --- End card 11.0-13.0
+  show(h4, t >= 11.0 && t < 13.2); h4.style.transform = `scale(${slam(t, 11.0, .25)}) translateY(${-120 * easeIn(prog(t, 13.0, 13.2))}px)`; h4.style.opacity = 1 - prog(t, 13.0, 13.2);
+  const bm = $('#bm'); show(bm, t >= 11.3 && t < 13.2);
+  bm.style.transform = `scale(${backOut(prog(t, 11.3, 11.6))}) rotate(${Math.sin((t - 11.3) * 3) * 4}deg)`; bm.style.opacity = 1 - prog(t, 13.0, 13.2);
+  const t1 = $('#tag1'); show(t1, t >= 11.8 && t < 13.2); t1.style.opacity = prog(t, 11.8, 11.95) * (1 - prog(t, 13.0, 13.2)); t1.style.transform = `rotate(-3deg) scale(${backOut(prog(t, 11.8, 12.05))})`;
+  const t2 = $('#tag2'); show(t2, t >= 12.4 && t < 13.2); t2.style.opacity = prog(t, 12.4, 12.55) * (1 - prog(t, 13.0, 13.2)); t2.style.transform = `translateY(${30 * (1 - easeOut(prog(t, 12.4, 12.7)))}px)`;
+
+  // --- Flash on the big reveal
+  const f = $('#flash'); const fl = t >= 11.0 && t < 11.15 ? 0.35 * (1 - prog(t, 11.0, 11.15)) : 0; f.style.opacity = fl;
+}
+render(0);
+</script>
