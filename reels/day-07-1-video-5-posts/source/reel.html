@@ -174,16 +174,33 @@ const cta=mk(`<div class="scene" id="s-cta">
 </div>`);
 scenesEl.appendChild(cta);
 
+/* ---------- THESIS: takes over from the cover at 1.4s and finishes the opening line ---------- */
+const HOOK_HOLD=1.4;
+const thesis=mk(`<div class="scene" id="s-thesis">
+  <div class="abs mono" id="t-tag" style="top:470px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">THE REAL PROBLEM</div>
+  <div class="abs" id="t-q" style="top:560px;left:90px;right:90px;text-align:center;font:900 92px/1 Mont;letter-spacing:-.03em;text-transform:uppercase">Still <span style="color:var(--lime)">burnt out?</span></div>
+  <div class="abs" id="t-s1" style="top:760px;left:70px;right:70px;text-align:center;font:900 116px/.98 Mont;letter-spacing:-.035em;text-transform:uppercase;background:linear-gradient(180deg,#fff 35%,#22E06F);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 20px 60px rgba(34,224,111,.35))">You don't need more ideas.</div>
+  <div class="abs" id="t-s2" style="top:1090px;left:60px;right:60px;text-align:center;font-family:ISerif;font-size:92px;color:#D8E0DA">reuse the ones you have</div>
+</div>`);
+scenesEl.appendChild(thesis);
+function renderThesis(t,el){const w=segBy.hook.words; const a1=w[7].s-HOOK_HOLD-.05, a2=w[12].s-HOOK_HOLD-.05;
+  rise($('#t-tag',el),t,0,.3,20);
+  const q=$('#t-q',el); const pq=eo5(P(t,0,.35)); st(q,{opacity:clamp(pq*2)*(t>a1?lerp(1,.35,eo(P(t,a1,.3))):1),transform:`scale(${lerp(1.15,1,pq)})`});
+  const p1=eo5(P(t,a1,.4)); st($('#t-s1',el),{opacity:clamp(p1*2),transform:`scale(${lerp(1.25,1,p1)})`});
+  const s1=$('#t-s1',el); $('#t-s2',el).style.top=(s1.offsetTop+s1.offsetHeight+36)+'px';
+  rise($('#t-s2',el),t,a2,.45,30);
+}
+
 /* ---------- timeline (voice-driven) ---------- */
 const S=D.segs, segBy=Object.fromEntries(S.map(s=>[s.key,s]));
 const LEAD=0.18;
-const order=['hook','how','bad','good','prompt','e1','e2','e3','cta'];
-const els={hook,how:SH,bad:SB,good:SG,prompt:SP,e1:E1,e2:E2,e3:E3,cta};
-const starts=order.map((k,i)=>i===0?0:segBy[k].start-LEAD);
+const order=['hook','thesis','how','bad','good','prompt','e1','e2','e3','cta'];
+const els={hook,thesis,how:SH,bad:SB,good:SG,prompt:SP,e1:E1,e2:E2,e3:E3,cta};
+const starts=order.map((k,i)=>i===0?0:k==='thesis'?HOOK_HOLD:segBy[k].start-LEAD);
 const END=D.end;
 const TR=0.42;
-const TRTYPE=['whip','zoom','whip','wipe','whip','zoom','whip','wipe'];
-const NSEG=order.length-2;
+const TRTYPE=['zoom','whip','zoom','whip','wipe','whip','zoom','whip','wipe'];
+const NSEG=order.length-3;
 for(let i=0;i<NSEG;i++) $('#prog').appendChild(mk('<div class="seg"><i></i></div>'));
 
 /* captions from the real word timings */
@@ -278,12 +295,12 @@ window.seek=function(t){
     if(!tf){el.style.display='none';return;} el.style.display='block';
     st(el,{transform:tf.tr,filter:tf.f||'none',opacity:tf.o});
     const lt=t-starts[idx];
-    if(k==='hook')renderHook(lt,el); else if(k==='cta')renderCta(lt,el);
+    if(k==='hook')renderHook(lt,el); else if(k==='thesis')renderThesis(lt,el); else if(k==='cta')renderCta(lt,el);
     else if(k==='how')renderHow(lt,el); else if(k==='bad')renderBad(lt,el); else if(k==='good')renderGood(lt,el);
     else if(k==='prompt')renderPrompt(lt,el); else renderEx(['e1','e2','e3'].indexOf(k),lt,el);
   });
-  [...$('#prog').children].forEach((s,i)=>{const a=starts[i+1],b=starts[i+2];s.firstChild.style.width=`${clamp((t-a)/(b-a))*100}%`;});
-  const pv=t<starts[1]-.2?eo(P(t,.2,.4)):(t>starts[order.length-1]?1-eo(P(t,starts[order.length-1],.3)):1); st($('#prog'),{opacity:pv});
+  [...$('#prog').children].forEach((s,i)=>{const a=starts[i+2],b=starts[i+3];s.firstChild.style.width=`${clamp((t-a)/(b-a))*100}%`;});
+  const pv=t<starts[2]-.2?0:t<starts[2]+.2?eo(P(t,starts[2]-.2,.4)):(t>starts[order.length-1]?1-eo(P(t,starts[order.length-1],.3)):1); st($('#prog'),{opacity:pv});
   const cap=$('#cap'); const ch=chunks.find(c=>t>=c[0].s-.05&&t<c[c.length-1].e+.08);
   if(!ch){cap.innerHTML='';} else {
     const pin=eo5(P(t,ch[0].s-.05,.18));

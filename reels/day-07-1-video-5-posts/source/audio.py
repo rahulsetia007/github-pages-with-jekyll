@@ -43,7 +43,7 @@ pad = lp(pad, 1600); arp = lp(arp, 4500)
 music = music + (pad * .5 + bl * .55 + arp) * side; music /= np.max(np.abs(music))
 # sfx: whoosh + sub hit on each scene change, pops for list rows, tap for Follow
 sfx = np.zeros(N)
-starts = [S[k]['start'] - 0.18 for k in ORDER[1:]]
+starts = [1.4] + [S[k]['start'] - 0.18 for k in ORDER[1:]]   # 1.4 = cover hands over to the thesis scene
 for b in starts:
     l = int(.45 * sr); et = np.arange(l) / sr; x = rng.standard_normal(l); out = np.zeros(l); C = 9
     for j in range(C):

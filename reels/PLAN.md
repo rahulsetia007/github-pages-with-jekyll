@@ -6,15 +6,18 @@ Look: follow `_brand/STYLE_GUIDE.md` exactly. This file covers story, hooks and 
 Instagram first shows a Reel to a small test group. Its main signals are watch time,
 likes, and sends (shares in DMs), and sends matter most for reaching people who don't follow you.
 So every video:
-1. **Hook in second 1 = the viewer's problem**, said out loud and on screen. Like
+1. **Opening slide (the cover) holds 1–1.5 s only** (`HOOK_HOLD=1.4`), then a text scene ("thesis")
+   finishes the opening line: the question small on top, the statement big, the serif line under it,
+   timed to the voice. Copy this from Day 6/7.
+2. **Hook in second 1 = the viewer's problem**, said out loud and on screen. Like
    "Your Reels are stuck at 200 views?" No intros, no "hey guys", no logo.
-2. **One idea per scene, 3–6 s each.** Never more than one new thing to read at once.
+3. **One idea per scene, 3–6 s each.** Never more than one new thing to read at once.
    Leave a short breath between lines. 30–45 s total is fine when it holds attention.
-3. **Open loop early**: the hook pills preview the steps, so people stay for the payoff.
-4. **Show the fix working** (before/after, a number moving, a check appearing).
-5. **Give real value**: the actual prompt and real example output, all of it in the caption.
-6. **End with a send**: "Send this to a [person] who [has the problem]", then Follow.
-7. Captions for all three platforms in CAPTION.md (first line repeats the problem, then the prompt, the output, a send line):
+4. **Open loop early**: the hook pills preview the steps, so people stay for the payoff.
+5. **Show the fix working** (before/after, a number moving, a check appearing).
+6. **Give real value**: the actual prompt and real example output, all of it in the caption.
+7. **End with a send**: "Send this to a [person] who [has the problem]", then Follow.
+8. Captions for all three platforms in CAPTION.md (first line repeats the problem, then the prompt, the output, a send line):
    - **Instagram**: under 2,200 characters, save + send line, 3–5 specific hashtags (only as many as fit the topic).
    - **TikTok**: search keywords written into the text (e.g. "ChatGPT prompt for…"), 3–5 hashtags.
    - **YouTube Shorts**: title under 100 characters with the main search phrase, a description with the
@@ -31,5 +34,5 @@ So every video:
 | 11 | 7 prompts = free marketing team | You're paying for marketing ChatGPT does free. | a small business owner |
 | 12 | Better ad headlines | Your ad isn't bad. Your headline is. | someone running ads |
 
-Flow template: hook (the problem) → why it happens → what most people do (fails) → the fix →
+Flow template: cover 1.4 s → thesis (finishes the opening line) → hook problem explained → why it happens → what most people do (fails) → the fix →
 the prompt → 2–3 real examples, one per scene → send line + Follow.
