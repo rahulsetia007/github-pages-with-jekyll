@@ -16,4 +16,3 @@ theme: jekyll-theme-leap-day
 # Reel production files (not part of the site)
 exclude:
   - reels
-  - exports

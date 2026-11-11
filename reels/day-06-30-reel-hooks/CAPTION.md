@@ -1,9 +1,9 @@
 30 Reel hooks from 1 ChatGPT prompt (copy it below) 👇
 
 THE PROMPT:
-"Give me 30 short, scroll-stopping Reel hooks for an account that shares simple AI tips for [your audience]. Max 8 words each. Numbered list."
+"Give me 30 short, scroll-stopping Reel hooks for an account that shares simple AI tips for [your niche]. Max 8 words each. Numbered list."
 
-Swap in your audience, paste it into ChatGPT, done.
+Swap in your niche, paste it into ChatGPT, done.
 
 Here are the 30 it gave me:
 1. Stop posting until you watch this
@@ -37,6 +37,6 @@ Here are the 30 it gave me:
 29. The 10-second fix for boring hooks
 30. Bookmark this. You'll need it Friday.
 
-Save this for your next blank day 🔖
+Save this for your next blank day 🔖 and follow @tech_blogcorner for more simple AI tips.
 
 #reelhooks #contentcreatortips #chatgptprompts #instagramgrowth #techblogcorner

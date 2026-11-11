@@ -1,0 +1,7 @@
+hook|I stopped writing hooks. This one prompt writes thirty.
+prompt|Paste it in, add your niche, and you're done.
+list|Here's what it gave me.
+f1|You're using ChatGPT wrong. Here's why.
+f2|One prompt. A week of posts.
+f3|Why your Reels stop at two hundred views.
+cta|Save this for your next blank day.
