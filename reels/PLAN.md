@@ -1,5 +1,7 @@
 # @tech_blogcorner Reels plan (Days 6–12)
 
+Account focus: fixing Google and Meta ads with simple AI shortcuts.
+
 Look: follow `_brand/STYLE_GUIDE.md` exactly. This file covers story, hooks and pacing.
 
 ## How every Reel is built (for how Instagram ranks Reels)
@@ -23,16 +25,30 @@ So every video:
    - **YouTube Shorts**: title under 100 characters with the main search phrase, a description with the
      prompt and output, "subscribe" instead of "follow", and 2–3 hashtags (only the first 3 show above the title).
 
+## Audience (updated from the doc, 12 Nov)
+Marketers, creators and small business owners who want to fix their **Google and Meta ads** with simple AI shortcuts.
+Source of truth for each day's topic, facts, example data and voiceover lines: the doc
+"Reel Scripts for Claude Code: Days 6 to 12" (https://claude.ai/artifact/8Bxbf3729j6M5HEk2uwx4X).
+Use its story beats, example rows, settings names and voiceover lines, but build them in the house style
+(`_brand/STYLE_GUIDE.md`) with the flow and pacing rules above. The doc's master brief look
+(Anton, #22C55E, terminal style, 13–15 s) is replaced by the style guide and this plan.
+Keep the doc's call to action as written (send line, or "Comment PMAX / AUDIT").
+Never show real Google or Meta interfaces or logos: draw simple original cards marked "Example".
+Blur or leave out account IDs and client names.
+
 ## Days
-| Day | Topic | Hook (problem first) | Send line |
+| Day | Topic (from the doc) | Hook (problem first) | Call to action |
 |---|---|---|---|
-| 6 ✅ | Hooks | Your Reels are stuck at 200 views? | a creator stuck at 200 views |
-| 7 ✅ | 1 video → 5 posts | Posting every day and still burnt out? | a creator who's always out of ideas |
-| 8 | Reply to a 1-star review | One bad review is costing you customers. | a business owner with a bad review |
-| 9 | 30 promo ideas | Slow week? Your customers forgot you exist. | a shop owner having a slow week |
-| 10 | Phone photo → studio shot | Your product photos are losing you sales. | someone who sells online |
-| 11 | 7 prompts = free marketing team | You're paying for marketing ChatGPT does free. | a small business owner |
-| 12 | Better ad headlines | Your ad isn't bad. Your headline is. | someone running ads |
+| 6 | Google Ads paying for junk searches | Your Google Ads are paying for this. | Save this |
+| 7 ✅ posted | 1 video → 5 posts | Posting every day and still burnt out? | a creator out of ideas |
+| 8 | Google Ads showing outside your city | Your Google Ads are showing outside your city. | Send this to a local business owner |
+| 9 | 7 Google Ads settings burning your budget | 7 settings are burning your budget. | Save this and audit your account |
+| 10 | Google Ads says 40 leads, inbox says 12 | Google Ads says 40 leads. Your inbox says 12. | Send this to someone running Google Ads |
+| 11 | Performance Max paying for your brand name | You paid for this click. | Comment PMAX for the checklist |
+| 12 | Find wasted spend in 5 minutes with AI | Stop checking your search terms by hand. | Comment AUDIT for the prompt |
+
+The earlier Day 6 build (`day-06-30-reel-hooks`, "Stuck at 200 views?") stays in the repo as a bonus video.
+The new Day 6 (junk searches) gets its own folder when it's built.
 
 Flow template: cover 1.4 s → thesis (finishes the opening line) → hook problem explained → why it happens → what most people do (fails) → the fix →
 the prompt → 2–3 real examples, one per scene → send line + Follow.
