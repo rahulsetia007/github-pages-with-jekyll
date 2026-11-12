@@ -45,7 +45,7 @@ Blur or leave out account IDs and client names.
 |---|---|---|---|
 | 6 | Google Ads paying for junk searches | Your Google Ads are paying for this. | Save this |
 | 7 ✅ posted | 1 video → 5 posts | Posting every day and still burnt out? | a creator out of ideas |
-| 8 | Google Ads showing outside your city | Your Google Ads are showing outside your city. | Send this to a local business owner |
+| 8 ✅ | Google Ads showing outside your city | Your Google Ads are showing outside your city. | Send this to a local business owner |
 | 9 | 7 Google Ads settings burning your budget | 7 settings are burning your budget. | Save this and audit your account |
 | 10 | Google Ads says 40 leads, inbox says 12 | Google Ads says 40 leads. Your inbox says 12. | Send this to someone running Google Ads |
 | 11 | Performance Max paying for your brand name | You paid for this click. | Comment PMAX for the checklist |
