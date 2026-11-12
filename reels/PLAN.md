@@ -33,6 +33,10 @@ Use its story beats, example rows, settings names and voiceover lines, but build
 (`_brand/STYLE_GUIDE.md`) with the flow and pacing rules above. The doc's master brief look
 (Anton, #22C55E, terminal style, 13–15 s) is replaced by the style guide and this plan.
 Keep the doc's call to action as written (send line, or "Comment PMAX / AUDIT").
+Keyword calls to action per platform (the DM texts live in `_dm/`, sent by ManyChat on Instagram):
+- **Instagram**: "Comment PMAX" in the video and caption.
+- **TikTok**: "DM me PMAX" in the caption (TikTok has no comment-to-DM; set a keyword auto-reply in DMs).
+- **YouTube Shorts**: "Checklist in the description", with the full `_dm/` text pasted into the description.
 Never show real Google or Meta interfaces or logos: draw simple original cards marked "Example".
 Blur or leave out account IDs and client names.
 
