@@ -64,7 +64,15 @@ f0 = S['find']['start'] - .18 + .45
 for i in range(4): tick(f0 + .3 + i * .75, 1600 + i * 120, .2)                        # steps light up
 e0 = S['e1']['start'] - .18 + .45
 for k in range(3): tick(e0 + 1.0 + k * .55, 2100, .22)                                # campaigns flip
-for i in range(3): tick(.05 + i * .07, 1700, .14)                                      # hook pills
+for i in range(3): tick(.05 + i * .07, 1700, .14)
+# money counter: ticks speed up as the wasted total climbs, then a thud when it lands (0-4.6s)
+tt = 0.15
+while tt < 4.5:
+    tick(tt, 2600 + 900 * tt / 4.6, .10 + .06 * tt / 4.6)
+    tt += max(.045, .16 * (1 - tt / 4.6) ** 1.2)
+hl2 = int(.5 * sr); ht2 = np.arange(hl2) / sr
+place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), 4.6, .35)
+                                      # hook pills
 tick(S['cta']['start'] - .18 + 2.6, 2200, .35)                                       # Follow tap
 hl = int(.9 * sr); ht = np.arange(hl) / sr
 place(sfx, np.sin(2 * np.pi * (44 * ht + 80 * (1 - np.exp(-ht * 25)) / 25)) * np.exp(-ht * 6), 0, .3)  # opening hit

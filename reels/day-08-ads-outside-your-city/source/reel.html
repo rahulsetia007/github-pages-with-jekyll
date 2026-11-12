@@ -76,6 +76,7 @@ const CHECK=`<svg width="30" height="30" viewBox="0 0 26 26"><path d="M4 14l6 6L
 
 /* ---------- HOOK (cover frame) ---------- */
 const hook=mk(`<div class="scene" id="s-hook">
+  <div class="abs" id="h-burn" style="top:150px;left:0;right:0;margin:0 auto;width:fit-content;display:flex;align-items:center;gap:14px;padding:12px 28px;border-radius:999px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);white-space:nowrap"><span class="mono" style="font-size:26px;color:#8A938C">WASTED</span><span class="h-v" style="font:900 44px Mont;font-variant-numeric:tabular-nums">−$0</span></div>
   <div class="abs mono" id="h-tag" style="top:250px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">LOCAL BUSINESS? CHECK THIS</div>
   <div class="abs" id="h-n" style="top:300px;left:0;right:0;text-align:center;font-family:Mont;font-weight:900;font-size:560px;line-height:1;letter-spacing:-.06em;background:linear-gradient(180deg,#fff 30%,#22E06F);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 20px 80px rgba(34,224,111,.35))">1</div>
   <div class="abs title" id="h-t1" style="top:860px;left:0;right:0;text-align:center;font-size:118px">SETTING</div>
@@ -180,10 +181,16 @@ scenesEl.appendChild(cta);
 
 /* ---------- THESIS: takes over from the cover at 1.4s and finishes the opening line ---------- */
 const HOOK_HOLD=1.4;
+const BURN_END=4.6, BURN_MAX=1240;
+const burn=T=>Math.round(BURN_MAX*Math.pow(clamp(T/BURN_END),1.6));
+const money=v=>'−$'+v.toLocaleString('en-US');
 const thesis=mk(`<div class="scene" id="s-thesis">
   <div class="abs mono" id="t-tag" style="top:470px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">THE REAL PROBLEM</div>
   <div class="abs" id="t-q" style="top:560px;left:90px;right:90px;text-align:center;font:900 92px/1 Mont;letter-spacing:-.03em;text-transform:uppercase">Other <span style="color:var(--lime)">cities?</span></div>
   <div class="abs" id="t-s1" style="top:760px;left:70px;right:70px;text-align:center;font:900 116px/.98 Mont;letter-spacing:-.035em;text-transform:uppercase;background:linear-gradient(180deg,#fff 35%,#22E06F);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 20px 60px rgba(34,224,111,.35))">You pay for every click.</div>
+  ${[[120,330],[860,420],[150,1600],[880,1180],[90,820],[930,760],[640,1640],[300,240]].map(([x,y])=>`<div class="abs t-pin" style="left:${x}px;top:${y}px;opacity:0"><svg width="44" height="58" viewBox="0 0 44 58"><path d="M22 2C11 2 3 10 3 21c0 14 19 34 19 34s19-20 19-34C41 10 33 2 22 2z" fill="#C8D0CA" stroke="#030403" stroke-width="3"/><circle cx="22" cy="21" r="7" fill="#030403"/></svg></div>`).join('')}
+  <div class="abs" id="t-burn" style="top:1235px;left:0;right:0;text-align:center"><div class="t-v" style="font:900 150px Mont;letter-spacing:-.04em;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 50px rgba(255,255,255,.25)">−$0</div><div class="mono" style="margin-top:6px;font-size:26px;color:#8A938C">WASTED THIS MONTH · EXAMPLE</div></div>
+  <div class="abs pill" id="t-fix" style="top:1470px;left:0;right:0;margin:0 auto;width:fit-content;background:var(--lime);color:#030403;font-size:32px;font-weight:900;white-space:nowrap">FIX IN 30 SEC ↓</div>
   <div class="abs" id="t-s2" style="top:1090px;left:60px;right:60px;text-align:center;font-family:ISerif;font-size:92px;color:#D8E0DA">from people who can't buy</div>
 </div>`);
 scenesEl.appendChild(thesis);
@@ -193,6 +200,10 @@ function renderThesis(t,el){const w=segBy.hook.words; const a1=w[11].s-HOOK_HOLD
   const p1=eo5(P(t,a1,.4)); st($('#t-s1',el),{opacity:clamp(p1*2),transform:`scale(${lerp(1.25,1,p1)})`});
   const s1=$('#t-s1',el); $('#t-s2',el).style.top=(s1.offsetTop+s1.offsetHeight+36)+'px';
   rise($('#t-s2',el),t,a2,.45,30);
+  const T=t+HOOK_HOLD; const v=$('.t-v',el); v.textContent=money(burn(T));
+  rise($('#t-burn',el),t,0,.3,30); const land=P(T,BURN_END,.25); v.style.transform=`scale(${1+Math.sin(land*Math.PI)*.12})`;
+  $$('.t-pin',el).forEach((p,i)=>{const a=.15+i*.32; const q=back(P(t,a,.35)); st(p,{opacity:clamp(P(t,a,.12))*.45,transform:`scale(${lerp(.3,1,q)})`});});
+  pop($('#t-fix',el),T,BURN_END+.1,.4,.5);
 }
 
 /* ---------- timeline (voice-driven) ---------- */
@@ -243,6 +254,7 @@ function renderHook(t,el){
   {const q=eo(P(t,0,.4));st($('#h-t2',el),{opacity:clamp(.5+q),transform:`translateY(${(1-q)*20}px)`});}
   [...$('#h-list',el).children].forEach((c,i)=>pop(c,t,.05+i*.07,.35,.5));
   pop($('#h-save',el),t,1.0,.45,.4);
+  pop($('#h-burn',el),t,0,.3,.6); $('.h-v',el).textContent=money(burn(t));
   const sv=$('#h-save',el); const pulse=1+Math.max(0,Math.sin((t-1.5)*6))*0.04*(t>1.5?1:0); sv.style.transform+=` scale(${pulse})`;
 }
 function renderItemShell(t,el){
