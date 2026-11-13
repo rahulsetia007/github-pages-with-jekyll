@@ -37,7 +37,9 @@ Keyword calls to action per platform (the DM texts live in `_dm/`, sent by ManyC
 - **Instagram**: "Comment PMAX" in the video and caption.
 - **TikTok**: "DM me PMAX" in the caption (TikTok has no comment-to-DM; set a keyword auto-reply in DMs).
 - **YouTube Shorts**: "Checklist in the description", with the full `_dm/` text pasted into the description.
-Never show real Google or Meta interfaces or logos: draw simple original cards marked "Example".
+Never show real Google or Meta interfaces: draw simple original cards marked "Example".
+Tool logos are fine (the style guide asks for them): put them on white rounded tiles. Logo SVGs come from
+Simple Icons (CC0, `npm pack simple-icons`) recolored to the brand color; see `bonus-shopify-google-ads/source/logos/`.
 Blur or leave out account IDs and client names.
 
 ## Days

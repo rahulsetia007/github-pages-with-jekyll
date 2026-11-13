@@ -74,6 +74,9 @@ const PROMPT='Turn this video script into 5 posts: an Instagram caption, a 5-sli
 const OUTS=['Caption','Carousel','LinkedIn','X thread','Email'];
 const CHECK=`<svg width="30" height="30" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="#22E06F" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
+const LOGO_SHOP=`<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#95BF47" d="M15.337 23.979l7.216-1.561s-2.604-17.613-2.625-17.73c-.018-.116-.114-.192-.211-.192s-1.929-.136-1.929-.136-1.275-1.274-1.439-1.411c-.045-.037-.075-.057-.121-.074l-.914 21.104h.023zM11.71 11.305s-.81-.424-1.774-.424c-1.447 0-1.504.906-1.504 1.141 0 1.232 3.24 1.715 3.24 4.629 0 2.295-1.44 3.76-3.406 3.76-2.354 0-3.54-1.465-3.54-1.465l.646-2.086s1.245 1.066 2.28 1.066c.675 0 .975-.545.975-.932 0-1.619-2.654-1.694-2.654-4.359-.034-2.237 1.571-4.416 4.827-4.416 1.257 0 1.875.361 1.875.361l-.945 2.715-.02.01zM11.17.83c.136 0 .271.038.405.135-.984.465-2.064 1.639-2.508 3.992-.656.213-1.293.405-1.889.578C7.697 3.75 8.951.84 11.17.84V.83zm1.235 2.949v.135c-.754.232-1.583.484-2.394.736.466-1.777 1.333-2.645 2.085-2.971.193.501.309 1.176.309 2.1zm.539-2.234c.694.074 1.141.867 1.429 1.755-.349.114-.735.231-1.158.366v-.252c0-.752-.096-1.371-.271-1.871v.002zm2.992 1.289c-.02 0-.06.021-.078.021s-.289.075-.714.21c-.423-1.233-1.176-2.37-2.508-2.37h-.115C12.135.209 11.669 0 11.265 0 8.159 0 6.675 3.877 6.21 5.846c-1.194.365-2.063.636-2.16.674-.675.213-.694.232-.772.87-.075.462-1.83 14.063-1.83 14.063L15.009 24l.927-21.166z"/></svg>`;
+const LOGO_GADS=`<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><line x1="56" y1="150" x2="102" y2="56" stroke="#FBBC04" stroke-width="46" stroke-linecap="round"/><line x1="102" y1="56" x2="148" y2="150" stroke="#4285F4" stroke-width="46" stroke-linecap="round"/><circle cx="56" cy="150" r="25" fill="#34A853"/></svg>`;
+const LT=(svg,size,r)=>`<span class="tile" style="width:${size}px;height:${size}px;border-radius:${r}px;padding:${Math.round(size*.17)}px;background:#fff">${svg}</span>`;
 /* ---------- HOOK (cover frame) ---------- */
 const hook=mk(`<div class="scene" id="s-hook">
   <div class="abs" id="h-burn" style="top:150px;left:0;right:0;margin:0 auto;width:fit-content;display:flex;align-items:center;gap:14px;padding:12px 28px;border-radius:999px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);white-space:nowrap"><span class="mono" style="font-size:26px;color:#8A938C">SALES GOOGLE CAN'T SEE</span><span class="h-v" style="font:900 44px Mont;font-variant-numeric:tabular-nums">0</span></div>
@@ -82,7 +85,7 @@ const hook=mk(`<div class="scene" id="s-hook">
   <div class="abs title" id="h-t1" style="top:860px;left:0;right:0;text-align:center;font-size:118px">SECONDS</div>
   <div class="abs" id="h-t2" style="top:990px;left:0;right:0;text-align:center;font-family:ISerif;font-size:92px;color:#D8E0DA">to connect Shopify to Ads</div>
   <div class="abs" id="h-list" style="top:1140px;left:40px;right:40px;display:flex;flex-wrap:wrap;justify-content:center;gap:14px">
-    ${['Why it matters','4 steps','What you get'].map((a,i)=>`<div class="pill ghost" style="font-size:29px;padding:8px 22px 8px 8px;gap:10px"><span class="tile" style="width:46px;height:46px;border-radius:23px;font:700 20px Mono">${String(i+1).padStart(2,'0')}</span>${a}</div>`).join('')}</div>
+    ${[[LOGO_SHOP,'Shopify'],[null,'→'],[LOGO_GADS,'Google Ads']].map(([l,a])=>l?`<div class="pill ghost" style="font-size:34px;padding:8px 26px 8px 8px;gap:12px">${LT(l,58,29)}${a}</div>`:`<div style="font:900 44px Mont;color:var(--lime);align-self:center">${a}</div>`).join('')}</div>
   <div class="abs pill" id="h-save" style="top:1400px;left:50%;margin-left:-160px;width:320px;justify-content:center;background:var(--lime);color:#030403;font-size:34px;font-weight:900">
     <svg width="30" height="36" viewBox="0 0 30 36"><path d="M3 2h24v32l-12-8-12 8z" fill="#030403"/></svg> SAVE THIS</div>
 </div>`);
@@ -93,7 +96,7 @@ const CARD_TOP=760, CARD_H=640;
 function itemScene(key,idx,tileTxt,name,pillTxt,monoTxt,one,pillMuted){
   const s=mk(`<div class="scene" id="s-${key}">
     <div class="abs mono s-idx" style="top:230px;left:90px;font-size:32px;color:var(--lime)">${idx}</div>
-    <div class="abs s-logo" style="top:292px;left:90px"><span class="tile" style="width:132px;height:132px;border-radius:34px;font-size:${tileTxt.length>2?50:68}px">${tileTxt}</span></div>
+    <div class="abs s-logo" style="top:292px;left:90px">${tileTxt.startsWith('<svg')?LT(tileTxt,132,34):`<span class="tile" style="width:132px;height:132px;border-radius:34px;font-size:${tileTxt.length>2?50:68}px">${tileTxt}</span>`}</div>
     <div class="abs title s-name" style="top:300px;left:252px;font-size:${name.length>12?80:name.length>11?96:112}px">${name}</div>
     <div class="abs s-by" style="top:430px;left:90px;display:flex;gap:16px;align-items:center">
       <span class="pill" style="background:${pillMuted?'rgba(255,255,255,.14)':'var(--lime)'};color:${pillMuted?'#fff':'#030403'};font-size:28px;padding:10px 22px;font-weight:900">${pillTxt}</span>
@@ -110,17 +113,17 @@ const ORDERS=[['#1042','$64.00'],['#1043','$118.50'],['#1044','$39.90'],['#1045'
 // 1) Why it matters: sales happen, Google sees nothing
 const SH=itemScene('how','STEP 00 · WHY IT MATTERS','?','Bidding blind','NO SALES DATA','GOOGLE CAN\'T LEARN','Can\'t see sales = <b>can\'t learn</b>.',true);
 $('.s-ui',SH).innerHTML=`
- <div class="abs" style="left:50px;top:44px;width:390px"><div class="mono" style="font-size:22px;color:#8E9890">SHOPIFY · ORDERS · EXAMPLE</div>
+ <div class="abs" style="left:50px;top:44px;width:390px"><div class="mono" style="font-size:22px;color:#8E9890;display:flex;align-items:center;gap:12px">${LT(LOGO_SHOP,44,12)}ORDERS · EXAMPLE</div>
   <div style="margin-top:16px;display:flex;flex-direction:column;gap:14px">${ORDERS.map(([n,v])=>`<div class="o-r" style="display:flex;justify-content:space-between;padding:18px 22px;border-radius:20px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14);font:800 30px Inter"><span>Order ${n}</span><span style="color:var(--lime)">${v}</span></div>`).join('')}</div></div>
  <svg class="abs" style="left:450px;top:240px" width="70" height="60"><path class="o-arr" d="M5 30 H55 M38 12 L58 30 L38 48" stroke="#8A938C" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8 10"/></svg>
- <div class="abs" style="left:530px;right:50px;top:44px"><div class="mono" style="font-size:22px;color:#8E9890">GOOGLE ADS · EXAMPLE</div>
+ <div class="abs" style="left:530px;right:50px;top:44px"><div class="mono" style="font-size:22px;color:#8E9890;display:flex;align-items:center;gap:12px">${LT(LOGO_GADS,44,12)}GOOGLE ADS</div>
   <div style="margin-top:16px;padding:30px 26px;border-radius:24px;background:rgba(0,0,0,.35);border:1.5px solid rgba(255,255,255,.16)">
    <div class="mono" style="font-size:22px;color:#8E9890">CONVERSIONS</div>
    <div style="font:900 120px Mont;line-height:1">0</div>
    <div class="o-q" style="margin-top:14px;font:800 30px Inter;color:#C8D0CA">Who bought? ???</div></div></div>`;
 
 // 2) Step 1: install the app
-const S1=itemScene('s1','STEP 01 · IN SHOPIFY','1','Install the app','FREE','GOOGLE & YOUTUBE APP','Search <b>Google</b> in Shopify.');
+const S1=itemScene('s1','STEP 01 · IN SHOPIFY',LOGO_SHOP,'Install the app','FREE','GOOGLE & YOUTUBE APP','Search <b>Google</b> in Shopify.');
 $('.s-ui',S1).innerHTML=`
  <div class="abs" style="left:50px;right:50px;top:50px;height:84px;border-radius:42px;background:#F5F8F6;color:#0B1A10;display:flex;align-items:center;gap:18px;padding:0 30px;font:600 36px Inter"><svg width="34" height="34" viewBox="0 0 40 40"><circle cx="17" cy="17" r="12" stroke="#0B1A10" stroke-width="5" fill="none"/><path d="M26 26l10 10" stroke="#0B1A10" stroke-width="5" stroke-linecap="round"/></svg><span class="i-q"></span></div>
  <div class="abs i-res" style="left:50px;right:50px;top:170px;padding:26px 30px;border-radius:26px;background:rgba(34,224,111,.12);border:3px solid #22E06F;display:flex;align-items:center;gap:24px">
@@ -130,14 +133,14 @@ $('.s-ui',S1).innerHTML=`
  <div class="abs i-ok" style="left:50px;top:470px;display:flex;align-items:center;gap:14px;font:800 32px Inter">${CHECK} Installed</div>`;
 
 // 3) Step 2: connect accounts
-const S2=itemScene('s2','STEP 02 · IN THE APP','2','Connect','3 ACCOUNTS','ONE SCREEN','Link Google, Ads and <b>Merchant Center</b>.');
+const S2=itemScene('s2','STEP 02 · IN THE APP',LOGO_SHOP,'Connect','3 ACCOUNTS','ONE SCREEN','Link Google, Ads and <b>Merchant Center</b>.');
 $('.s-ui',S2).innerHTML=`<div class="abs" style="left:50px;right:50px;top:50px;display:flex;flex-direction:column;gap:18px">
  ${['Google account','Google Ads account','Google Merchant Center'].map(x=>ROW(`<span class="c-ic" style="flex:none;width:52px;height:52px;border-radius:50%;border:4px solid #8A938C;display:flex;align-items:center;justify-content:center"></span><span style="flex:1;font:800 36px Inter">${x}</span><span class="c-st mono" style="font-size:24px;color:#8E9890">NOT CONNECTED</span>`,'c-r')).join('')}
  ${ROW(`<span style="flex:1;font:800 32px Inter;color:#C8D0CA">Conversion tracking</span><span class="c-tr pill" style="font-size:24px;padding:8px 20px;background:rgba(255,255,255,.12);color:#fff">Off</span>`,'c-t')}</div>`;
 
 // 4) Step 3: Data manager → Shopify → Direct connection
 const PATH=['Tools','Data manager','Shopify','Direct connection'];
-const S3=itemScene('s3','STEP 03 · IN GOOGLE ADS','3','Data manager','DIRECT CONNECTION','THEN AUTHORIZE','Connect the <b>store itself</b>.');
+const S3=itemScene('s3','STEP 03 · IN GOOGLE ADS',LOGO_GADS,'Data manager','DIRECT CONNECTION','THEN AUTHORIZE','Connect the <b>store itself</b>.');
 $('.s-ui',S3).innerHTML=`
  <div class="abs" style="left:50px;right:50px;top:44px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
   ${PATH.map((x,i)=>`<div class="d-s" style="display:flex;align-items:center;gap:16px;padding:20px 22px;border-radius:22px;border:2px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05)"><span class="tile" style="width:52px;height:52px;border-radius:14px;font:700 22px Mono">${String(i+1).padStart(2,'0')}</span><span style="font:800 32px Inter">${x}</span></div>`).join('')}</div>
@@ -146,7 +149,7 @@ $('.s-ui',S3).innerHTML=`
  <div class="abs d-ok" style="left:50px;top:400px;display:flex;align-items:center;gap:14px;font:800 32px Inter">${CHECK} Store connected</div>`;
 
 // 5) Step 4: customer match
-const S4=itemScene('s4','STEP 04 · CUSTOMER MATCH','4','Customer match','TURN ON','AUDIENCES FROM BUYERS','Show ads to people <b>like your buyers</b>.');
+const S4=itemScene('s4','STEP 04 · IN GOOGLE ADS',LOGO_GADS,'Customer match','TURN ON','AUDIENCES FROM BUYERS','Show ads to people <b>like your buyers</b>.');
 $('.s-ui',S4).innerHTML=`
  <div class="abs" style="left:50px;right:50px;top:50px">${ROW(`<span style="flex:1;font:800 38px Inter">Customer match</span><span class="m-tg" style="flex:none;width:120px;height:64px;border-radius:32px;background:rgba(255,255,255,.18);position:relative"><i class="m-k" style="position:absolute;top:7px;left:7px;width:50px;height:50px;border-radius:50%;background:#fff"></i></span>`)}</div>
  <div class="abs" style="left:50px;right:50px;top:200px;padding:28px 30px;border-radius:24px;background:rgba(0,0,0,.35);border:1.5px solid rgba(255,255,255,.16)">
@@ -155,7 +158,7 @@ $('.s-ui',S4).innerHTML=`
  <div class="abs m-note" style="left:50px;right:50px;bottom:40px;font:600 28px/1.35 Inter;color:#A9B2AB">Only upload customers who agreed to it. Shopify asks you to confirm.</div>`;
 
 // 6) Result: purchases come back as conversions
-const E1=itemScene('e1','THE RESULT','✓','Every sale counts','NEW CONVERSION','ADDED FOR YOU','Google finally <b>sees the sale</b>.');
+const E1=itemScene('e1','THE RESULT · IN GOOGLE ADS',LOGO_GADS,'Every sale counts','NEW CONVERSION','ADDED FOR YOU','Google finally <b>sees the sale</b>.');
 $('.s-ui',E1).innerHTML=`
  <div class="abs" style="left:50px;right:50px;top:44px"><div class="mono" style="font-size:22px;color:#8E9890">GOOGLE ADS · CONVERSIONS · EXAMPLE</div>
   <div class="r-row" style="margin-top:14px;display:flex;align-items:center;gap:18px;padding:24px 26px;border-radius:24px;border:3px solid #22E06F;background:rgba(34,224,111,.12)"><span style="flex:1;font:800 34px Inter">Google Shopping App Purchase</span><span class="pill" style="font-size:22px;padding:8px 18px;background:var(--lime);color:#030403">Primary</span></div></div>
@@ -163,12 +166,13 @@ $('.s-ui',E1).innerHTML=`
   <div style="flex:1;padding:26px;border-radius:24px;background:rgba(0,0,0,.35);border:1.5px solid rgba(255,255,255,.16)"><div class="mono" style="font-size:22px;color:#8E9890">CONVERSIONS</div><div class="r-n" style="font:900 110px Mont;line-height:1;color:var(--lime)">0</div></div>
   <div style="flex:1;padding:26px;border-radius:24px;background:rgba(0,0,0,.35);border:1.5px solid rgba(255,255,255,.16)"><div class="mono" style="font-size:22px;color:#8E9890">SALES SEEN</div><div class="r-v" style="font:900 80px Mont;line-height:1.3">$0</div></div></div>`;
 const ANGLES=['Google & YouTube app','Connect accounts','Data manager','Direct connection','Customer match','Purchase tracking'];
+const ANGLE_LOGO=[LOGO_SHOP,LOGO_SHOP,LOGO_GADS,LOGO_GADS,LOGO_GADS,LOGO_GADS];
 
 /* ---------- CTA ---------- */
 const cta=mk(`<div class="scene" id="s-cta">
   <div class="abs mono" style="top:250px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)" id="c-tag">SHOPIFY + GOOGLE ADS · 4 STEPS</div>
   <div class="abs" id="c-grid" style="top:330px;left:90px;right:90px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
-   ${ANGLES.map((a,i)=>`<div class="c-g ghost" style="border-radius:28px;padding:18px 26px;display:flex;align-items:center;gap:20px"><span class="tile" style="width:64px;height:64px;border-radius:18px;font:700 26px Mono">${String(i+1).padStart(2,'0')}</span><span style="font:800 38px Inter">${a}</span></div>`).join('')}</div>
+   ${ANGLES.map((a,i)=>`<div class="c-g ghost" style="border-radius:28px;padding:18px 26px;display:flex;align-items:center;gap:20px">${LT(ANGLE_LOGO[i],64,18)}<span style="font:800 34px Inter">${a}</span></div>`).join('')}</div>
   <div class="abs title" id="c-t" style="top:1010px;left:0;right:0;text-align:center;font-size:110px">Follow for more</div>
   <div class="abs" id="c-s" style="top:1135px;left:0;right:0;text-align:center;font-family:ISerif;font-size:80px;color:#D8E0DA">send this to a Shopify store owner</div>
   <div class="abs pill" id="c-btn" style="top:1290px;left:50%;width:380px;margin-left:-190px;height:110px;justify-content:center;font-size:44px;font-weight:900;background:var(--lime);color:#030403">Follow</div>
