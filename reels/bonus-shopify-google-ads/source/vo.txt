@@ -1,0 +1,8 @@
+hook|Your Google Ads might not see a single Shopify sale. And it takes sixty seconds to fix.
+how|If Google can't see who buys, it can't learn who to show your ads to. So it bids blind.
+s1|Step one. In Shopify, search Google, and install the free Google and YouTube app.
+s2|Step two. Connect your Google account, your Google Ads account, and Merchant Center.
+s3|Step three. In Google Ads, go to Tools, then Data manager. Pick Shopify, hit Direct connection, and authorize your store.
+s4|Step four. Turn on customer match, so Google can build audiences from your real customers.
+e1|Now every sale comes back as a conversion, called Google Shopping app purchase.
+cta|Send this to someone running a Shopify store.
