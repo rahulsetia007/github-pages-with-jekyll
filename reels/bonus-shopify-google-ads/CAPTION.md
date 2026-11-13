@@ -1,9 +1,9 @@
 # Bonus captions: connect Shopify to Google Ads
 
 ## Instagram Reel
-Your Google Ads might not see a single Shopify sale 🛒
+Your Shopify store made a sale. Google Ads has no idea 🛒
 
-If Google can't see who buys, it can't learn who to show your ads to. Here's the 60-second fix:
+Without sales data, Google can't tell buyers from browsers, so it guesses and you pay for every guess. Here's the 60-second fix:
 
 1️⃣ In Shopify, search "Google" and install the free Google & YouTube app
 2️⃣ Connect your Google account, Google Ads account and Merchant Center (conversion tracking turns on in the app's settings)
@@ -22,7 +22,7 @@ If Google can't see who buys, it can't learn who to show your ads to. Here's the
 ## TikTok
 How to connect Shopify to Google Ads in 60 seconds 🛒
 
-Google Ads can't optimize for sales it can't see. Shopify Google Ads conversion tracking setup:
+Your Shopify sales come in, but Google Ads shows 0 conversions? Shopify Google Ads conversion tracking setup:
 
 1️⃣ In Shopify, search "Google" and install the free Google & YouTube app
 2️⃣ Connect your Google account, Google Ads account and Merchant Center (conversion tracking turns on in the app's settings)
@@ -42,7 +42,7 @@ Send this to a Shopify store owner 📩
 How to Connect Shopify to Google Ads in 60 Seconds (Conversion Tracking)
 
 **Description**
-If Google Ads can't see your Shopify sales, it can't learn who buys, so it bids blind. Here's how to connect Shopify to Google Ads and track purchases in about a minute.
+Your Shopify store is making sales, but Google Ads shows 0 conversions. Without sales data, Google can't tell buyers from browsers, so it guesses. Here's how to connect Shopify to Google Ads and track purchases in about a minute.
 
 1️⃣ In Shopify, search "Google" and install the free Google & YouTube app
 2️⃣ Connect your Google account, Google Ads account and Merchant Center (conversion tracking turns on in the app's settings)

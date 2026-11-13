@@ -10,16 +10,20 @@ likes, and sends (shares in DMs), and sends matter most for reaching people who 
 So every video:
 1. **Opening slide (the cover) holds 1–1.5 s only** (`HOOK_HOLD=1.4`), then a text scene ("thesis")
    finishes the opening line: the question small on top, the statement big, the serif line under it,
-   timed to the voice. Copy this from Day 6/7.
-2. **Hook in second 1 = the viewer's problem**, said out loud and on screen. Like
-   "Your Reels are stuck at 200 views?" No intros, no "hey guys", no logo.
-3. **One idea per scene, 3–6 s each.** Never more than one new thing to read at once.
+   timed to the voice. Best example: `bonus-shopify-google-ads` (approved hook).
+2. **Frame 1 names the world and shows a gap the viewer feels.** Put the tools in the first frame
+   (logos on the cover), and show a contradiction they recognise from their own account: orders piling
+   up in Shopify while Google Ads sits at 0. A vague promise ("60 seconds") is not a hook.
+   The anticipation element (counter or meter) must be part of that gap, landing on the key word.
+3. **Hook in second 1 = the viewer's problem**, said out loud and on screen. Like
+   "Your Reels are stuck at 200 views?" No intros, no "hey guys".
+4. **One idea per scene, 3–6 s each.** Never more than one new thing to read at once.
    Leave a short breath between lines. 30–45 s total is fine when it holds attention.
-4. **Open loop early**: the hook pills preview the steps, so people stay for the payoff.
-5. **Show the fix working** (before/after, a number moving, a check appearing).
-6. **Give real value**: the actual prompt and real example output, all of it in the caption.
-7. **End with a send**: "Send this to a [person] who [has the problem]", then Follow.
-8. Captions for all three platforms in CAPTION.md (first line repeats the problem, then the prompt, the output, a send line):
+5. **Open loop early**: the hook pills preview the steps, so people stay for the payoff.
+6. **Show the fix working** (before/after, a number moving, a check appearing).
+7. **Give real value**: the actual prompt and real example output, all of it in the caption.
+8. **End with a send**: "Send this to a [person] who [has the problem]", then Follow.
+9. Captions for all three platforms in CAPTION.md (first line repeats the problem, then the prompt, the output, a send line):
    - **Instagram**: under 2,200 characters, save + send line, 3–5 specific hashtags (only as many as fit the topic).
    - **TikTok**: search keywords written into the text (e.g. "ChatGPT prompt for…"), 3–5 hashtags.
    - **YouTube Shorts**: title under 100 characters with the main search phrase, a description with the
