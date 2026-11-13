@@ -1,0 +1,330 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- Bonus: Meta Ads creative diversity metric. Built from reels/_brand/reference_reel.html (house look). -->
+<style>
+@font-face{font-family:Inter;src:url(fonts/Inter.ttf);font-weight:100 900}
+@font-face{font-family:Mont;src:url(fonts/Montserrat.ttf);font-weight:100 900}
+@font-face{font-family:Mono;src:url(fonts/SpaceMono-Bold.ttf)}
+@font-face{font-family:ISerif;src:url(fonts/InstrumentSerif-Italic.ttf);font-style:normal;font-weight:400}
+:root{
+  --ink:#030403; --ink2:#0A0D0B; --line:rgba(255,255,255,.08);
+  --text:#F5F8F6; --muted:#8A938C; --lime:#22E06F; --violet:#0E7A3C; --deep:#06331A;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ink)}
+body{font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+#stage{position:absolute;inset:0;overflow:hidden}
+.bg{position:absolute;inset:-200px}
+.blob{position:absolute;border-radius:50%;filter:blur(140px);opacity:.42}
+.grid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:90px 90px;-webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 45%,#000 30%,transparent 80%);opacity:.55}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse 85% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.65) 100%);pointer-events:none}
+.scene{position:absolute;inset:0;will-change:transform,filter,opacity}
+.abs{position:absolute}
+.mono{font-family:Mono,monospace;letter-spacing:.04em}
+#prog{position:absolute;top:118px;left:90px;right:90px;display:flex;gap:12px}
+#prog .seg{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
+#prog .seg i{display:block;height:100%;width:0;background:var(--lime);border-radius:8px;box-shadow:0 0 18px var(--lime)}
+.card{position:absolute;left:90px;width:900px;border-radius:44px;background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.14);box-shadow:0 40px 120px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.18);backdrop-filter:blur(30px);overflow:hidden}
+.pill{display:inline-flex;align-items:center;gap:12px;padding:14px 26px;border-radius:999px;font-weight:700;font-size:30px}
+.title{font-family:Mont;font-weight:900;font-size:128px;line-height:.92;letter-spacing:-.035em}
+.sub{font-size:44px;font-weight:500;color:#C8D0CA;line-height:1.25}
+.sub b{color:var(--lime);font-weight:800}
+.bar{height:22px;border-radius:12px;background:rgba(255,255,255,.14)}
+#cap{position:absolute;left:60px;right:60px;top:1500px;text-align:center;font-family:Mont;font-weight:900;font-size:66px;line-height:1.1;letter-spacing:-.01em;text-transform:uppercase}
+#cap span{display:inline-block;margin:0 10px;text-shadow:0 6px 30px rgba(0,0,0,.7)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;mix-blend-mode:overlay}
+#wipe{position:absolute;left:0;right:0;height:2400px;top:-2400px;background:var(--lime)}
+.ghost{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.16)}
+.tile{display:inline-flex;align-items:center;justify-content:center;flex:none;background:#fff;color:#030403;font-family:Mont;font-weight:900;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+</style></head>
+<body><div id="stage">
+  <div class="bg" id="bg">
+    <div class="blob" id="b1" style="width:900px;height:900px;background:var(--violet)"></div>
+    <div class="blob" id="b2" style="width:800px;height:800px;background:var(--deep)"></div>
+    <div class="blob" id="b3" style="width:600px;height:600px;background:var(--lime);opacity:.18"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div id="scenes"></div>
+  <div id="prog"></div>
+  <div id="cap"></div>
+  <div id="wipe"></div>
+  <div id="flash"></div>
+  <div class="vig"></div>
+</div>
+<script>
+const D = window.__DATA__;
+const $ = (s,el=document)=>el.querySelector(s);
+const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-clamp(t),3);
+const eo5=t=>1-Math.pow(1-clamp(t),5);
+const eio=t=>{t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+const back=t=>{t=clamp(t);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
+const P=(t,a,d)=>clamp((t-a)/d);
+function st(el,o){for(const k in o) el.style[k]=o[k];}
+function pop(el,t,a,d=.45,from=.6){const p=P(t,a,d);st(el,{opacity:clamp(p*3),transform:`scale(${lerp(from,1,back(p))})`});}
+function rise(el,t,a,d=.5,dy=60){const p=eo(P(t,a,d));st(el,{opacity:p,transform:`translateY(${(1-p)*dy}px)`,filter:`blur(${(1-p)*10}px)`});}
+function typed(el,txt,t,a,cps=26){const n=Math.floor(clamp((t-a)*cps,0,txt.length));el.textContent=txt.slice(0,n);return n<txt.length;}
+function mk(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
+const scenesEl=$('#scenes');
+
+/* ---------- content ---------- */
+const PROMPT='Turn this video script into 5 posts: an Instagram caption, a 5-slide carousel, a LinkedIn post, a 4-post X thread and a short email. Keep each one simple. Script: [paste]';
+const OUTS=['Caption','Carousel','LinkedIn','X thread','Email'];
+const CHECK=`<svg width="30" height="30" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="#22E06F" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+/* ---------- HOOK (cover frame) ---------- */
+const hook=mk(`<div class="scene" id="s-hook">
+  <div class="abs" id="h-burn" style="top:150px;left:0;right:0;margin:0 auto;width:fit-content;display:flex;align-items:center;gap:14px;padding:12px 28px;border-radius:999px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);white-space:nowrap"><span class="mono" style="font-size:26px;color:#8A938C">YOUR SCORE</span><span class="h-v" style="font:900 44px Mont">???</span></div>
+  <div class="abs mono" id="h-tag" style="top:250px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">META ADS · NEW METRIC</div>
+  <div class="abs" id="h-n" style="top:300px;left:0;right:0;text-align:center;font-family:Mont;font-weight:900;font-size:560px;line-height:1;letter-spacing:-.06em;background:linear-gradient(180deg,#fff 30%,#22E06F);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 20px 80px rgba(34,224,111,.35))">1</div>
+  <div class="abs title" id="h-t1" style="top:860px;left:0;right:0;text-align:center;font-size:118px">NEW SCORE</div>
+  <div class="abs" id="h-t2" style="top:990px;left:0;right:0;text-align:center;font-family:ISerif;font-size:92px;color:#D8E0DA">Meta is grading your ads on</div>
+  <div class="abs" id="h-list" style="top:1140px;left:40px;right:40px;display:flex;flex-wrap:wrap;justify-content:center;gap:14px">
+    ${['What it is','How to raise it','Where to find it'].map((a,i)=>`<div class="pill ghost" style="font-size:29px;padding:8px 22px 8px 8px;gap:10px"><span class="tile" style="width:46px;height:46px;border-radius:23px;font:700 20px Mono">${String(i+1).padStart(2,'0')}</span>${a}</div>`).join('')}</div>
+  <div class="abs pill" id="h-save" style="top:1400px;left:50%;margin-left:-160px;width:320px;justify-content:center;background:var(--lime);color:#030403;font-size:34px;font-weight:900">
+    <svg width="30" height="36" viewBox="0 0 30 36"><path d="M3 2h24v32l-12-8-12 8z" fill="#030403"/></svg> SAVE THIS</div>
+</div>`);
+scenesEl.appendChild(hook);
+
+/* ---------- item scene shell (same layout as the tool scenes) ---------- */
+const CARD_TOP=760, CARD_H=640;
+function itemScene(key,idx,tileTxt,name,pillTxt,monoTxt,one,pillMuted){
+  const s=mk(`<div class="scene" id="s-${key}">
+    <div class="abs mono s-idx" style="top:230px;left:90px;font-size:32px;color:var(--lime)">${idx}</div>
+    <div class="abs s-logo" style="top:292px;left:90px"><span class="tile" style="width:132px;height:132px;border-radius:34px;font-size:${tileTxt.length>2?50:68}px">${tileTxt}</span></div>
+    <div class="abs title s-name" style="top:300px;left:252px;font-size:${name.length>14?76:name.length>11?96:112}px">${name}</div>
+    <div class="abs s-by" style="top:430px;left:90px;display:flex;gap:16px;align-items:center">
+      <span class="pill" style="background:${pillMuted?'rgba(255,255,255,.14)':'var(--lime)'};color:${pillMuted?'#fff':'#030403'};font-size:28px;padding:10px 22px;font-weight:900">${pillTxt}</span>
+      <span class="mono" style="font-size:30px;color:var(--muted)">${monoTxt}</span></div>
+    <div class="abs sub s-one" style="top:540px;left:90px;right:90px;font-size:56px;font-weight:700;color:#fff">${one}</div>
+    <div class="card s-card" style="top:${CARD_TOP}px;height:${CARD_H}px"><div class="abs" style="inset:0;background:radial-gradient(600px 300px at 80% 0%,#0E7A3C55,transparent 70%)"></div><div class="abs s-ui" style="inset:0"></div></div>
+  </div>`);
+  scenesEl.appendChild(s); return s;
+}
+
+const TILE=(label,bg,inner,cls='')=>`<div class="${cls}" style="position:relative;border-radius:22px;overflow:hidden;background:${bg};border:1.5px solid rgba(255,255,255,.16);aspect-ratio:3/4">${inner}<div class="mono" style="position:absolute;left:12px;right:12px;bottom:10px;font-size:18px;color:#fff;text-shadow:0 2px 8px #000">${label}</div></div>`;
+const FACE=(c)=>`<div style="position:absolute;left:50%;top:30%;width:76px;height:76px;margin-left:-38px;border-radius:50%;background:${c}"></div><div style="position:absolute;left:50%;top:52%;width:120px;height:70px;margin-left:-60px;border-radius:60px 60px 10px 10px;background:${c};opacity:.8"></div>`;
+const BOX=`<div style="position:absolute;left:50%;top:26%;width:90px;height:110px;margin-left:-45px;border-radius:16px;background:#F5F8F6"></div><div style="position:absolute;left:50%;top:30%;width:50px;height:12px;margin-left:-25px;border-radius:6px;background:#0E7A3C"></div>`;
+const STYLES=[
+ ['PRODUCT SHOT','linear-gradient(160deg,#0E3B22,#06140C)',BOX],
+ ['COMPARISON','linear-gradient(90deg,#1d1b17 50%,#0E3B22 50%)',`<div style="position:absolute;left:25%;top:28%;width:56px;height:80px;margin-left:-28px;border-radius:12px;background:#8A938C"></div><div style="position:absolute;left:75%;top:28%;width:56px;height:80px;margin-left:-28px;border-radius:12px;background:#22E06F"></div><div class="mono" style="position:absolute;left:0;right:0;top:12%;text-align:center;font-size:20px">VS</div>`],
+ ['UGC','linear-gradient(160deg,#2A332D,#0A0D0B)',FACE('#C8A27A')],
+ ['LIFESTYLE','linear-gradient(160deg,#3B5A3F,#0E2016)',`<div style="position:absolute;left:0;right:0;bottom:22%;height:30%;background:#6B4A30"></div>${FACE('#E0B48C')}`],
+ ['BEFORE / AFTER','linear-gradient(90deg,#3A3A3A 50%,#22E06F 50%)',`<div class="mono" style="position:absolute;left:8%;top:12%;font-size:18px">BEFORE</div><div class="mono" style="position:absolute;right:8%;top:12%;font-size:18px;color:#030403">AFTER</div>`],
+ ['DEMO','linear-gradient(160deg,#06331A,#030403)',`<div style="position:absolute;left:18%;right:18%;top:22%;height:44%;border-radius:14px;background:#0A0D0B;border:3px solid #22E06F"></div><div style="position:absolute;left:50%;top:38%;margin-left:-14px;border-left:28px solid #fff;border-top:17px solid transparent;border-bottom:17px solid transparent"></div>`],
+];
+const METER=(cls)=>`<div class="${cls}" style="position:relative;height:30px;border-radius:16px;background:linear-gradient(90deg,#3A433D,#0E7A3C 55%,#22E06F)"><i class="mt-n" style="position:absolute;top:-12px;left:0;width:10px;height:54px;margin-left:-5px;border-radius:5px;background:#fff;box-shadow:0 0 18px rgba(255,255,255,.8)"></i></div><div class="mono" style="display:flex;justify-content:space-between;margin-top:10px;font-size:22px;color:#8E9890"><span>LOW</span><span>HIGH</span></div>`;
+
+// 1) What it is
+const SH=itemScene('how','STEP 01 · WHAT IT IS','?','Creative diversity','NEW · IN TESTING','AD SET LEVEL','How <b>different</b> your ads look.');
+$('.s-ui',SH).innerHTML=`
+ <div class="abs mono" style="left:50px;top:40px;font-size:22px;color:#8E9890">ADS MANAGER · AD SETS · EXAMPLE</div>
+ <div class="abs" style="left:50px;right:50px;top:90px;border-radius:24px;overflow:hidden;border:1.5px solid rgba(255,255,255,.16)">
+  <div style="display:grid;grid-template-columns:1.6fr 1fr 1.2fr;background:rgba(255,255,255,.08);padding:18px 24px;font:800 24px Inter;color:#A9B2AB"><span>Ad set</span><span>Results</span><span class="w-h" style="color:#fff">Creative diversity</span></div>
+  ${[['Summer sale · Broad','Low'],['Retargeting · 30 days','Low'],['New launch · Mixed ads','High']].map(([n,v])=>`<div class="w-r" style="display:grid;grid-template-columns:1.6fr 1fr 1.2fr;padding:22px 24px;border-top:1.5px solid rgba(255,255,255,.08);font:700 28px Inter;align-items:center"><span>${n}</span><span style="color:#8E9890">—</span><span><span class="w-v pill" style="font-size:24px;padding:8px 20px;background:${v==='High'?'#22E06F':'rgba(255,255,255,.14)'};color:${v==='High'?'#030403':'#fff'}">${v}</span></span></div>`).join('')}</div>
+ <div class="abs w-tip" style="left:50px;right:50px;bottom:40px;border-radius:22px;background:#F5F8F6;color:#0B1A10;padding:22px 26px;font:500 26px/1.35 Inter"><b>Creative diversity:</b> how visually varied an ad set's images and videos are from each other. <span style="color:#6B746E">Estimated, in development.</span></div>`;
+
+// 2) What it is not
+const SB=itemScene('bad','STEP 02 · WHAT IT\'S NOT','5','More creators','STILL LOW','5 FACES, SAME AD','Same ad, different <b>faces</b>.',true);
+$('.s-ui',SB).innerHTML=`
+ <div class="abs" style="left:50px;right:50px;top:50px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
+  ${['#C8A27A','#8D5A3B','#E0B48C','#B07A55','#F0C9A0'].map(c=>`<div class="b-t">${TILE('UGC',`linear-gradient(160deg,#2A332D,#0A0D0B)`,FACE(c))}</div>`).join('')}</div>
+ <div class="abs" style="left:60px;right:60px;top:340px"><div class="mono" style="font-size:24px;color:#8E9890;margin-bottom:14px">CREATIVE DIVERSITY</div>${METER('b-m')}</div>
+ <div class="abs b-lab pill" style="right:50px;bottom:40px;background:rgba(255,255,255,.14);color:#fff;font-size:30px;font-weight:900;border:2px solid rgba(255,255,255,.35)">Looks the same → Low</div>`;
+
+// 3) What raises it
+const SG=itemScene('good','STEP 03 · HOW TO RAISE IT','6','Mix the styles','RAISES IT','DIFFERENT FORMATS','Different <b>styles</b>, not faces.');
+$('.s-ui',SG).innerHTML=`
+ <div class="abs" style="left:50px;right:50px;top:40px;display:grid;grid-template-columns:repeat(6,1fr);gap:12px">
+  ${STYLES.map(([l,bg,inner])=>`<div class="g-t">${TILE(l,bg,inner)}</div>`).join('')}</div>
+ <div class="abs" style="left:60px;right:60px;top:330px"><div class="mono" style="font-size:24px;color:#8E9890;margin-bottom:14px">CREATIVE DIVERSITY</div>${METER('g-m')}</div>
+ <div class="abs g-lab pill" style="right:50px;bottom:40px;background:var(--lime);color:#030403;font-size:30px;font-weight:900">Varied → High</div>`;
+
+// 4) Meta's bet: mixed vs product-only
+const E1=itemScene('e1','META\'S BET','A/B','Mix vs same','HYPOTHESIS','NOT A GUARANTEE','A real mix has a <b>better chance</b>.');
+$('.s-ui',E1).innerHTML=`
+ <div class="abs" style="left:50px;top:50px;width:380px"><div class="mono" style="font-size:24px;color:#C8D0CA">AD SET A · PRODUCT SHOTS</div>
+  <div style="margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${[0,1,2,3,4,5].map(()=>`<div class="c-a">${TILE('',STYLES[0][1],BOX)}</div>`).join('')}</div>
+  <div class="c-ra pill" style="margin-top:18px;background:rgba(255,255,255,.14);color:#fff;font-size:26px;font-weight:900">Diversity: Low</div></div>
+ <div class="abs" style="left:470px;top:50px;width:380px"><div class="mono" style="font-size:24px;color:var(--lime)">AD SET B · MIXED</div>
+  <div style="margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${STYLES.map(([l,bg,inner])=>`<div class="c-b">${TILE('',bg,inner)}</div>`).join('')}</div>
+  <div class="c-rb pill" style="margin-top:18px;background:var(--lime);color:#030403;font-size:26px;font-weight:900">Diversity: High</div></div>`;
+
+// 5) Where to find it
+const STEPS=['Ads Manager','Ad sets','Columns → Customize','Search "creative diversity"'];
+const SF=itemScene('find','STEP 04 · WHERE TO FIND IT','4','Find it','ROLLING OUT','MAY NOT SHOW FOR EVERYONE YET','Add it as a <b>column</b>.');
+$('.s-ui',SF).innerHTML=`<div class="abs" style="left:90px;right:90px;top:60px;display:flex;flex-direction:column;gap:20px">
+ ${STEPS.map((x,i)=>`<div class="f-s" style="display:flex;align-items:center;gap:24px;padding:22px 28px;border-radius:24px;border:2px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05)"><span class="tile" style="width:64px;height:64px;border-radius:18px;font:700 26px Mono">${String(i+1).padStart(2,'0')}</span><span style="font:800 40px Inter">${x}</span></div>`).join('')}</div>`;
+
+// 6) Still in testing
+const E2=itemScene('e2','BEFORE YOU CHANGE EVERYTHING','!','Test it','IN DEVELOPMENT','WATCH YOUR RESULTS','Trust your <b>own numbers</b>.',true);
+$('.s-ui',E2).innerHTML=`<div class="abs mono" style="left:50px;top:44px;font-size:22px;color:#8E9890">2–4 WEEK CHECK</div>
+ <div class="abs" style="left:50px;right:50px;top:100px;display:flex;flex-direction:column;gap:20px">
+ ${['Add 2–3 new ad styles to one ad set','Keep the budget the same','Compare cost per result, not just the score'].map(x=>`<div class="x-a" style="display:flex;gap:16px;align-items:center;padding:24px 28px;border-radius:24px;border:2px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);font:800 34px Inter">${CHECK}${x}</div>`).join('')}</div>`;
+const ANGLES=['Product shot','Comparison','UGC','Lifestyle','Before / after','Demo'];
+
+/* ---------- CTA ---------- */
+const cta=mk(`<div class="scene" id="s-cta">
+  <div class="abs mono" style="top:250px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)" id="c-tag">COMMENT DIVERSITY FOR META'S UPDATE</div>
+  <div class="abs" id="c-grid" style="top:330px;left:90px;right:90px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+   ${ANGLES.map((a,i)=>`<div class="c-g ghost" style="border-radius:28px;padding:18px 26px;display:flex;align-items:center;gap:20px"><span class="tile" style="width:64px;height:64px;border-radius:18px;font:700 26px Mono">${String(i+1).padStart(2,'0')}</span><span style="font:800 38px Inter">${a}</span></div>`).join('')}</div>
+  <div class="abs title" id="c-t" style="top:1010px;left:0;right:0;text-align:center;font-size:110px">Follow for more</div>
+  <div class="abs" id="c-s" style="top:1135px;left:0;right:0;text-align:center;font-family:ISerif;font-size:80px;color:#D8E0DA">send this to your ads team</div>
+  <div class="abs pill" id="c-btn" style="top:1290px;left:50%;width:380px;margin-left:-190px;height:110px;justify-content:center;font-size:44px;font-weight:900;background:var(--lime);color:#030403">Follow</div>
+  <svg class="abs" id="c-cur" style="top:1352px;left:700px" width="70" height="80" viewBox="0 0 70 80"><path d="M6 4 L6 62 L22 48 L34 74 L46 68 L34 43 L56 43 Z" fill="#fff" stroke="#000" stroke-width="4" stroke-linejoin="round"/></svg>
+</div>`);
+scenesEl.appendChild(cta);
+
+/* ---------- THESIS: takes over from the cover at 1.4s and finishes the opening line ---------- */
+const HOOK_HOLD=1.4, LAND=4.6;
+const thesis=mk(`<div class="scene" id="s-thesis">
+  <div class="abs mono" id="t-tag" style="top:430px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">THE NEW SCORE</div>
+  <div class="abs" id="t-q" style="top:510px;left:90px;right:90px;text-align:center;font:900 92px/1 Mont;letter-spacing:-.03em;text-transform:uppercase">How <span style="color:var(--lime)">different</span> are your ads?</div>
+  <div class="abs" id="t-s1" style="top:760px;left:70px;right:70px;text-align:center;font:900 108px/.98 Mont;letter-spacing:-.035em;text-transform:uppercase;background:linear-gradient(180deg,#fff 35%,#22E06F);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 20px 60px rgba(34,224,111,.35))">Is yours low?</div>
+  <div class="abs" id="t-s2" style="top:1090px;left:60px;right:60px;text-align:center;font-family:ISerif;font-size:88px;color:#D8E0DA">it's called creative diversity</div>
+  <div class="abs" id="t-burn" style="top:1290px;left:130px;right:130px"><div class="mono" style="font-size:24px;color:#8A938C;text-align:center;margin-bottom:14px">CREATIVE DIVERSITY · EXAMPLE</div>${METER('t-m')}</div>
+  <div class="abs pill" id="t-fix" style="top:1470px;left:0;right:0;margin:0 auto;width:fit-content;background:var(--lime);color:#030403;font-size:32px;font-weight:900;white-space:nowrap">RAISE IT ↓</div>
+</div>`);
+scenesEl.appendChild(thesis);
+// needle: swings across the meter, then settles on LOW at LAND
+function needle(T){ if(T>=LAND) return .12; const k=T/LAND; return .5+.42*Math.sin(T*7.5)*(1-k*.6)*(k<.85?1:(1-(k-.85)/.15)) + (.12-.5)*Math.pow(k,3); }
+function setMeter(el,x){ el.querySelector('.mt-n').style.left=(clamp(x)*100)+'%'; }
+function renderThesis(t,el){const w=segBy.hook.words; const a1=w[8].s-HOOK_HOLD-.05, a2=w[14].s-HOOK_HOLD-.05;
+  rise($('#t-tag',el),t,0,.3,20);
+  const q=$('#t-q',el); const pq=eo5(P(t,0,.35)); st(q,{opacity:clamp(pq*2)*(t>a1?lerp(1,.35,eo(P(t,a1,.3))):1),transform:`scale(${lerp(1.15,1,pq)})`});
+  const p1=eo5(P(t,a1,.4)); st($('#t-s1',el),{opacity:clamp(p1*2),transform:`scale(${lerp(1.25,1,p1)})`});
+  const s1=$('#t-s1',el); $('#t-s2',el).style.top=(s1.offsetTop+s1.offsetHeight+36)+'px';
+  rise($('#t-s2',el),t,a2,.45,30);
+  const T=t+HOOK_HOLD; rise($('#t-burn',el),t,0,.3,30); setMeter($('.t-m',el),needle(T));
+  const land=P(T,LAND,.25); $('#t-burn',el).style.transform+=` scale(${1+Math.sin(land*Math.PI)*.06})`;
+  pop($('#t-fix',el),T,LAND+.1,.4,.5);
+}
+
+/* ---------- timeline (voice-driven) ---------- */
+const S=D.segs, segBy=Object.fromEntries(S.map(s=>[s.key,s]));
+const LEAD=0.18;
+const order=['hook','thesis','how','bad','good','e1','find','e2','cta'];
+const els={hook,thesis,how:SH,bad:SB,good:SG,e1:E1,find:SF,e2:E2,cta};
+const starts=order.map((k,i)=>i===0?0:k==='thesis'?HOOK_HOLD:segBy[k].start-LEAD);
+const END=D.end;
+const TR=0.42;
+const TRTYPE=['zoom','whip','zoom','whip','wipe','whip','zoom','wipe'];
+const NSEG=order.length-3;
+for(let i=0;i<NSEG;i++) $('#prog').appendChild(mk('<div class="seg"><i></i></div>'));
+
+/* captions from the real word timings */
+const capWords=[];
+S.forEach(s=>s.words.forEach((w,k)=>{const nx=s.words[k+1];capWords.push({w:w.w.replace(/[.,]$/,''),s:w.s,e:nx?nx.s:s.start+s.dur,seg:s.key,brk:/[.,!?]$/.test(w.w)});}));
+const chunks=[];let cur=[];
+capWords.forEach((w,i)=>{cur.push(w);const nx=capWords[i+1];if(cur.length>=3||w.brk||!nx||nx.seg!==w.seg){chunks.push(cur);cur=[];}});
+
+function renderBg(t){
+  st($('#b1'),{left:`${300+Math.sin(t*.35)*180}px`,top:`${200+Math.cos(t*.28)*160}px`});
+  st($('#b2'),{left:`${500+Math.cos(t*.3)*200}px`,top:`${1300+Math.sin(t*.4)*180}px`});
+  st($('#b3'),{left:`${100+Math.sin(t*.5+1)*120}px`,top:`${900+Math.cos(t*.45)*200}px`});
+  st($('#grid'),{transform:`translateY(${(t*30)%90}px)`});
+}
+function sceneTransform(idx,t){
+  const a=starts[idx], b=idx+1<order.length?starts[idx+1]:END+5;
+  if(t<a-TR*0.5||t>b+TR*0.5) return null;
+  let tr='',f='',o=1;
+  if(idx>0&&t<a+TR*0.5){const p=eio((t-(a-TR*0.5))/TR);const ty=TRTYPE[idx-1];
+    if(ty==='whip'){tr=`translateX(${(1-p)*1100}px)`;f=`blur(${(1-p)*(1-p)*40}px)`;}
+    if(ty==='zoom'){tr=`scale(${lerp(.55,1,p)})`;f=`blur(${(1-p)*30}px)`;o=clamp(p*2);}
+    if(ty==='wipe'){tr=`translateY(${(1-p)*400}px) scale(${lerp(1.1,1,p)})`;o=p>0.5?1:0;}
+  }
+  if(idx+1<order.length&&t>b-TR*0.5){const p=eio((t-(b-TR*0.5))/TR);const ty=TRTYPE[idx];
+    if(ty==='whip'){tr=`translateX(${-p*1100}px)`;f=`blur(${p*p*40}px)`;}
+    if(ty==='zoom'){tr=`scale(${lerp(1,2.2,p)})`;f=`blur(${p*30}px)`;o=1-clamp(p*1.6);}
+    if(ty==='wipe'){tr=`translateY(${-p*400}px)`;o=p<0.5?1:0;}
+  }
+  const life=t-a; tr+=` scale(${1+clamp(life/6)*0.03})`;
+  return {tr,f,o};
+}
+function renderHook(t,el){
+  const p7=eo5(P(t,0,.5));
+  st($('#h-n',el),{transform:`scale(${lerp(1.12,1,p7)})`,opacity:1});
+  const pt=eo5(P(t,0,.4)); st($('#h-t1',el),{transform:`scale(${lerp(1.08,1,pt)})`,opacity:1});
+  {const q=eo(P(t,0,.4));st($('#h-t2',el),{opacity:clamp(.5+q),transform:`translateY(${(1-q)*20}px)`});}
+  [...$('#h-list',el).children].forEach((c,i)=>pop(c,t,.05+i*.07,.35,.5));
+  pop($('#h-save',el),t,1.0,.45,.4);
+  pop($('#h-burn',el),t,0,.3,.6); $('.h-v',el).textContent=t<1.2?['???','HIGH','LOW','MED?','HIGH','LOW'][Math.floor(t*5)%6]:'LOW';
+  const sv=$('#h-save',el); const pulse=1+Math.max(0,Math.sin((t-1.5)*6))*0.04*(t>1.5?1:0); sv.style.transform+=` scale(${pulse})`;
+}
+function renderItemShell(t,el){
+  rise($('.s-idx',el),t,.0,.35,30); pop($('.s-logo',el),t,.02,.45,.3);
+  const pn=eo5(P(t,.0,.45)); st($('.s-name',el),{opacity:clamp(pn*2),transform:`translateX(${(1-pn)*-80}px)`,clipPath:`inset(0 ${(1-pn)*100}% 0 0)`});
+  rise($('.s-by',el),t,.15,.4,30);
+  rise($('.s-one',el),t,.3,.45,40);
+  const pc=eo5(P(t,.25,.6)); st($('.s-card',el),{opacity:clamp(pc*2),transform:`translateY(${(1-pc)*160}px) rotateX(${(1-pc)*20}deg) scale(${lerp(.92,1,pc)})`});
+}
+function renderHow(t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.5;
+  $$('.w-r',U).forEach((r,k)=>rise(r,u,.1+k*.2,.4,30));
+  const hl=P(u,.9,.4); $('.w-h',U).style.color=hl>0?'#22E06F':'#fff';
+  $$('.w-v',U).forEach((v,k)=>pop(v,u,1.1+k*.25,.4,.4));
+  rise($('.w-tip',U),u,3.6,.5,40);
+}
+function renderBad(t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.45;
+  $$('.b-t',U).forEach((c,k)=>pop(c,u,.2+k*.35,.4,.5));
+  setMeter($('.b-m',U), lerp(.5,.12,eo(P(u,2.4,1.2))) + Math.sin(u*9)*.04*(1-P(u,2.4,1.2)));
+  pop($('.b-lab',U),u,3.6,.45,.5);
+}
+function renderGood(t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.45;
+  const at=[1.6,2.0,2.4,2.9,3.6,4.1];
+  $$('.g-t',U).forEach((c,k)=>pop(c,u,at[k],.4,.4));
+  let n=0; at.forEach(a=>{if(u>=a)n++}); setMeter($('.g-m',U), lerp(.12,.92,eo(P(u,1.6,3.2))));
+  pop($('.g-lab',U),u,4.4,.45,.5);
+}
+function renderFind(t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.45;
+  $$('.f-s',U).forEach((r,i)=>{const a=[.8,2.6,3.5,4.6][i]; rise(r,u,a-.6,.35,30); const on=u>=a;
+    st(r,{borderColor:on?'#22E06F':'rgba(255,255,255,.14)',background:on?'rgba(34,224,111,.12)':'rgba(255,255,255,.05)'});});
+}
+function renderEx(i,t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.45;
+  if(i===0){$$('.c-a',U).forEach((c,k)=>pop(c,u,.3+k*.08,.35,.5));$$('.c-b',U).forEach((c,k)=>pop(c,u,1.6+k*.12,.35,.5));
+    pop($('.c-ra',U),u,1.2,.4,.5);pop($('.c-rb',U),u,2.6,.4,.5);}
+  if(i===1){$$('.x-a',U).forEach((r,k)=>rise(r,u,.4+k*.9,.45,30));}
+}
+function renderCta(t,el){
+  rise($('#c-tag',el),t,0,.3,20);
+  [...$('#c-grid',el).children].forEach((c,i)=>pop(c,t,.05+i*.06,.4,.6));
+  const pt=eo5(P(t,.3,.45)); st($('#c-t',el),{opacity:pt,transform:`scale(${lerp(1.2,1,pt)})`});
+  rise($('#c-s',el),t,.5,.4,30);
+  const b=$('#c-btn',el); pop(b,t,.7,.45,.4);
+  const click=P(t,2.6,.2); const followed=t>2.7;
+  st(b,{background:followed?'rgba(255,255,255,.12)':'#22E06F',color:followed?'#fff':'#030403',border:followed?'2px solid rgba(255,255,255,.4)':'none'}); b.innerHTML=followed?'Following <svg width="34" height="34" viewBox="0 0 34 34" style="margin-left:10px"><path d="M6 18l7 7L28 9" stroke="#22E06F" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>':'Follow';
+  b.style.transform+=` scale(${1-Math.sin(click*Math.PI)*.08})`;
+  const pc=eio(P(t,1.8,.75)); st($('#c-cur',el),{opacity:clamp(P(t,1.75,.2)),transform:`translate(${(1-pc)*220}px,${(1-pc)*260}px)`});
+}
+
+window.seek=function(t){
+  renderBg(t);
+  order.forEach((k,idx)=>{const el=els[k];const tf=sceneTransform(idx,t);
+    if(!tf){el.style.display='none';return;} el.style.display='block';
+    st(el,{transform:tf.tr,filter:tf.f||'none',opacity:tf.o});
+    const lt=t-starts[idx];
+    if(k==='hook')renderHook(lt,el); else if(k==='thesis')renderThesis(lt,el); else if(k==='cta')renderCta(lt,el);
+    else if(k==='how')renderHow(lt,el); else if(k==='bad')renderBad(lt,el); else if(k==='good')renderGood(lt,el);
+    else if(k==='find')renderFind(lt,el); else renderEx(['e1','e2'].indexOf(k),lt,el);
+  });
+  [...$('#prog').children].forEach((s,i)=>{const a=starts[i+2],b=starts[i+3];s.firstChild.style.width=`${clamp((t-a)/(b-a))*100}%`;});
+  const pv=t<starts[2]-.2?0:t<starts[2]+.2?eo(P(t,starts[2]-.2,.4)):(t>starts[order.length-1]?1-eo(P(t,starts[order.length-1],.3)):1); st($('#prog'),{opacity:pv});
+  const cap=$('#cap'); const ch=chunks.find(c=>t>=c[0].s-.05&&t<c[c.length-1].e+.08);
+  if(!ch){cap.innerHTML='';} else {
+    const pin=eo5(P(t,ch[0].s-.05,.18));
+    cap.innerHTML=ch.map(w=>{const on=t>=w.s&&t<w.e+.05; return `<span style="color:${on?'#22E06F':'#fff'};transform:scale(${on?1.08:1})">${w.w}</span>`}).join(' ');
+    st(cap,{transform:`translateY(${(1-pin)*30}px) scale(${lerp(.9,1,pin)})`,opacity:pin});
+    if(ch[0].seg==='hook'||ch[0].seg==='cta') cap.style.opacity=0;
+  }
+  let fl=0, wy=-2400;
+  for(let i=1;i<order.length;i++){const b=starts[i];const d=t-b;
+    if(Math.abs(d)<.12) fl=Math.max(fl,(1-Math.abs(d)/.12)*(TRTYPE[i-1]==='zoom'?.55:.3));
+    if(TRTYPE[i-1]==='wipe'&&Math.abs(d)<TR*0.5){const p=eio((d+TR*.5)/TR); wy=lerp(1920,-2400,p);}
+  }
+  $('#flash').style.opacity=fl; $('#wipe').style.top=`${wy}px`;
+  return true;
+};
+window.__ready=document.fonts.ready.then(()=>true);
+window.__starts=starts;
+</script></body></html>
