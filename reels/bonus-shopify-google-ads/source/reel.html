@@ -79,13 +79,13 @@ const LOGO_GADS=`<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/s
 const LT=(svg,size,r)=>`<span class="tile" style="width:${size}px;height:${size}px;border-radius:${r}px;padding:${Math.round(size*.17)}px;background:#fff">${svg}</span>`;
 /* ---------- HOOK (cover frame) ---------- */
 const hook=mk(`<div class="scene" id="s-hook">
-  <div class="abs" id="h-burn" style="top:150px;left:0;right:0;margin:0 auto;width:fit-content;display:flex;align-items:center;gap:14px;padding:12px 28px;border-radius:999px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);white-space:nowrap"><span class="mono" style="font-size:26px;color:#8A938C">SALES GOOGLE CAN'T SEE</span><span class="h-v" style="font:900 44px Mont;font-variant-numeric:tabular-nums">0</span></div>
-  <div class="abs mono" id="h-tag" style="top:250px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">SHOPIFY + GOOGLE ADS</div>
-  <div class="abs" id="h-n" style="top:300px;left:0;right:0;text-align:center;font-family:Mont;font-weight:900;font-size:560px;line-height:1;letter-spacing:-.06em;background:linear-gradient(180deg,#fff 30%,#22E06F);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 20px 80px rgba(34,224,111,.35))">60</div>
-  <div class="abs title" id="h-t1" style="top:860px;left:0;right:0;text-align:center;font-size:118px">SECONDS</div>
-  <div class="abs" id="h-t2" style="top:990px;left:0;right:0;text-align:center;font-family:ISerif;font-size:92px;color:#D8E0DA">to connect Shopify to Ads</div>
+  <div class="abs" id="h-burn" style="top:150px;left:0;right:0;margin:0 auto;width:fit-content;display:flex;align-items:center;gap:14px;padding:12px 28px;border-radius:999px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);white-space:nowrap"><span class="mono" style="font-size:26px;color:#8A938C">SHOPIFY ORDERS TODAY</span><span class="h-v" style="font:900 44px Mont;font-variant-numeric:tabular-nums">0</span></div>
+  <div class="abs mono" id="h-tag" style="top:250px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">SHOPIFY STORE OWNERS</div>
+  <div class="abs" id="h-n" style="top:300px;left:0;right:0;text-align:center;font-family:Mont;font-weight:900;font-size:560px;line-height:1;letter-spacing:-.06em;background:linear-gradient(180deg,#fff 30%,#22E06F);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 20px 80px rgba(34,224,111,.35))">0</div>
+  <div class="abs title" id="h-t1" style="top:860px;left:0;right:0;text-align:center;font-size:118px">SALES SEEN</div>
+  <div class="abs" id="h-t2" style="top:990px;left:0;right:0;text-align:center;font-family:ISerif;font-size:92px;color:#D8E0DA">by your Google Ads</div>
   <div class="abs" id="h-list" style="top:1140px;left:40px;right:40px;display:flex;flex-wrap:wrap;justify-content:center;gap:14px">
-    ${[[LOGO_SHOP,'Shopify'],[null,'→'],[LOGO_GADS,'Google Ads']].map(([l,a])=>l?`<div class="pill ghost" style="font-size:34px;padding:8px 26px 8px 8px;gap:12px">${LT(l,58,29)}${a}</div>`:`<div style="font:900 44px Mont;color:var(--lime);align-self:center">${a}</div>`).join('')}</div>
+    ${[[LOGO_SHOP,'Shopify'],[null,'✕'],[LOGO_GADS,'Google Ads']].map(([l,a])=>l?`<div class="pill ghost" style="font-size:34px;padding:8px 26px 8px 8px;gap:12px">${LT(l,58,29)}${a}</div>`:`<div style="font:900 44px Mont;color:#8A938C;align-self:center">${a}</div>`).join('')}</div>
   <div class="abs pill" id="h-save" style="top:1400px;left:50%;margin-left:-160px;width:320px;justify-content:center;background:var(--lime);color:#030403;font-size:34px;font-weight:900">
     <svg width="30" height="36" viewBox="0 0 30 36"><path d="M3 2h24v32l-12-8-12 8z" fill="#030403"/></svg> SAVE THIS</div>
 </div>`);
@@ -110,17 +110,14 @@ function itemScene(key,idx,tileTxt,name,pillTxt,monoTxt,one,pillMuted){
 const ROW=(inner,cls='')=>`<div class="${cls}" style="display:flex;align-items:center;gap:20px;padding:22px 26px;border-radius:24px;border:2px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05)">${inner}</div>`;
 const ORDERS=[['#1042','$64.00'],['#1043','$118.50'],['#1044','$39.90'],['#1045','$82.00']];
 
-// 1) Why it matters: sales happen, Google sees nothing
-const SH=itemScene('how','STEP 00 · WHY IT MATTERS','?','Bidding blind','NO SALES DATA','GOOGLE CAN\'T LEARN','Can\'t see sales = <b>can\'t learn</b>.',true);
+// 1) Why it matters: without sales data Google can't tell buyers from browsers
+const PEOPLE=['browse','buy','browse','browse','browse','buy','browse','browse','browse','browse'];
+const SH=itemScene('how','WHY IT MATTERS',LOGO_GADS,'Guessing','NO SALES DATA','BUYERS OR BROWSERS?','Every guess <b>costs you</b>.',true);
 $('.s-ui',SH).innerHTML=`
- <div class="abs" style="left:50px;top:44px;width:390px"><div class="mono" style="font-size:22px;color:#8E9890;display:flex;align-items:center;gap:12px">${LT(LOGO_SHOP,44,12)}ORDERS · EXAMPLE</div>
-  <div style="margin-top:16px;display:flex;flex-direction:column;gap:14px">${ORDERS.map(([n,v])=>`<div class="o-r" style="display:flex;justify-content:space-between;padding:18px 22px;border-radius:20px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14);font:800 30px Inter"><span>Order ${n}</span><span style="color:var(--lime)">${v}</span></div>`).join('')}</div></div>
- <svg class="abs" style="left:450px;top:240px" width="70" height="60"><path class="o-arr" d="M5 30 H55 M38 12 L58 30 L38 48" stroke="#8A938C" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8 10"/></svg>
- <div class="abs" style="left:530px;right:50px;top:44px"><div class="mono" style="font-size:22px;color:#8E9890;display:flex;align-items:center;gap:12px">${LT(LOGO_GADS,44,12)}GOOGLE ADS</div>
-  <div style="margin-top:16px;padding:30px 26px;border-radius:24px;background:rgba(0,0,0,.35);border:1.5px solid rgba(255,255,255,.16)">
-   <div class="mono" style="font-size:22px;color:#8E9890">CONVERSIONS</div>
-   <div style="font:900 120px Mont;line-height:1">0</div>
-   <div class="o-q" style="margin-top:14px;font:800 30px Inter;color:#C8D0CA">Who bought? ???</div></div></div>`;
+ <div class="abs mono" style="left:50px;top:40px;font-size:22px;color:#8E9890">WHO GOOGLE SHOWS YOUR AD TO · EXAMPLE</div>
+ <div class="abs" style="left:50px;right:50px;top:96px;display:grid;grid-template-columns:repeat(5,1fr);gap:18px">
+  ${PEOPLE.map(k=>`<div class="g-p" data-k="${k}" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 0;border-radius:22px;border:3px solid transparent"><svg width="70" height="80" viewBox="0 0 70 80"><circle cx="35" cy="22" r="17" fill="#C8D0CA"/><path d="M6 78c0-18 13-30 29-30s29 12 29 30z" fill="#C8D0CA"/></svg><span class="mono g-l" style="font-size:18px;color:#8E9890">?</span></div>`).join('')}</div>
+ <div class="abs" style="left:50px;right:50px;bottom:40px;display:flex;justify-content:space-between;align-items:baseline"><span class="mono" style="font-size:24px;color:#8E9890">SPENT ON BROWSERS</span><span class="g-sp" style="font:900 70px Mont;font-variant-numeric:tabular-nums">$0</span></div>`;
 
 // 2) Step 1: install the app
 const S1=itemScene('s1','STEP 01 · IN SHOPIFY',LOGO_SHOP,'Install the app','FREE','GOOGLE & YOUTUBE APP','Search <b>Google</b> in Shopify.');
@@ -180,27 +177,40 @@ const cta=mk(`<div class="scene" id="s-cta">
 </div>`);
 scenesEl.appendChild(cta);
 
-/* ---------- THESIS: takes over from the cover at 1.4s and finishes the opening line ---------- */
-const HOOK_HOLD=1.4, LAND=4.6, MISSED=37;
-const missed=T=>Math.round(MISSED*Math.pow(clamp(T/LAND),1.5));
+/* ---------- THESIS: from 1.4s, Shopify orders keep arriving while Google Ads stays at 0 ---------- */
+const HOOK_HOLD=1.4, LAND=4.9, ORD=12;
+const orders=T=>Math.round(ORD*Math.pow(clamp(T/LAND),1.15));
+const AMTS=['$64.00','$118.50','$39.90','$82.00','$45.00','$129.00','$58.40','$74.99','$96.00','$31.50','$142.00','$67.25'];
 const thesis=mk(`<div class="scene" id="s-thesis">
-  <div class="abs mono" id="t-tag" style="top:430px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">THE REAL PROBLEM</div>
-  <div class="abs" id="t-q" style="top:510px;left:90px;right:90px;text-align:center;font:900 92px/1 Mont;letter-spacing:-.03em;text-transform:uppercase">Ads running <span style="color:var(--lime)">blind?</span></div>
-  <div class="abs" id="t-s1" style="top:700px;left:70px;right:70px;text-align:center;font:900 108px/.98 Mont;letter-spacing:-.035em;text-transform:uppercase;background:linear-gradient(180deg,#fff 35%,#22E06F);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 20px 60px rgba(34,224,111,.35))">Google can't see your sales.</div>
-  <div class="abs" id="t-s2" style="top:1090px;left:60px;right:60px;text-align:center;font-family:ISerif;font-size:88px;color:#D8E0DA">fix it in 60 seconds</div>
-  <div class="abs" id="t-burn" style="top:1240px;left:0;right:0;text-align:center"><div class="t-v" style="font:900 150px Mont;letter-spacing:-.04em;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 50px rgba(255,255,255,.25)">0</div><div class="mono" style="margin-top:6px;font-size:26px;color:#8A938C">SALES GOOGLE ADS MISSED · EXAMPLE</div></div>
-  <div class="abs pill" id="t-fix" style="top:1470px;left:0;right:0;margin:0 auto;width:fit-content;background:var(--lime);color:#030403;font-size:32px;font-weight:900;white-space:nowrap">FIX IN 60 SEC ↓</div>
+  <div class="abs mono" id="t-tag" style="top:270px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">YOUR STORE RIGHT NOW</div>
+  <div class="abs" id="t-q" style="top:340px;left:70px;right:70px;text-align:center;font:900 92px/1 Mont;letter-spacing:-.03em;text-transform:uppercase">You made <span style="color:var(--lime)">a sale.</span></div>
+  <div class="abs" id="t-s1" style="top:470px;left:60px;right:60px;text-align:center;font:900 112px/.96 Mont;letter-spacing:-.035em;text-transform:uppercase;background:linear-gradient(180deg,#fff 35%,#22E06F);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 20px 60px rgba(34,224,111,.35))">Google Ads has no idea.</div>
+  <div class="abs" id="t-shop" style="left:70px;top:770px;width:450px;height:640px;border-radius:40px;background:#0A0D0B;border:6px solid #1C231F;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.5)">
+    <div style="display:flex;align-items:center;gap:14px;padding:26px 26px 10px">${LT(LOGO_SHOP,56,16)}<div><div style="font:800 30px Inter">Shopify</div><div class="mono" style="font-size:20px;color:#8E9890">ORDERS · EXAMPLE</div></div><div class="t-oc" style="margin-left:auto;font:900 58px Mont;color:var(--lime);font-variant-numeric:tabular-nums">0</div></div>
+    <div class="t-list" style="position:absolute;left:18px;right:18px;top:120px;bottom:16px;overflow:hidden"></div></div>
+  <div class="abs" id="t-gads" style="left:560px;top:770px;width:450px;height:640px;border-radius:40px;background:rgba(0,0,0,.4);border:1.5px solid rgba(255,255,255,.18);padding:26px">
+    <div style="display:flex;align-items:center;gap:14px">${LT(LOGO_GADS,56,16)}<div><div style="font:800 30px Inter">Google Ads</div><div class="mono" style="font-size:20px;color:#8E9890">EXAMPLE</div></div></div>
+    <div class="mono" style="margin-top:60px;font-size:24px;color:#8E9890">CONVERSIONS</div>
+    <div class="t-gz" style="font:900 260px Mont;line-height:1;color:#fff">0</div>
+    <div class="t-gq" style="margin-top:10px;font:800 34px Inter;color:#C8D0CA">Who bought? ???</div></div>
+  <div class="abs pill" id="t-fix" style="top:1440px;left:0;right:0;margin:0 auto;width:fit-content;background:var(--lime);color:#030403;font-size:34px;font-weight:900;white-space:nowrap;box-shadow:0 0 40px rgba(34,224,111,.6)">FIX IT IN 60 SEC ↓</div>
 </div>`);
 scenesEl.appendChild(thesis);
-function renderThesis(t,el){const w=segBy.hook.words; const a1=w[3].s-HOOK_HOLD-.05, a2=w[10].s-HOOK_HOLD-.05;
+function renderThesis(t,el){const w=segBy.hook.words; const a1=w[10].s-HOOK_HOLD-.05;
   rise($('#t-tag',el),t,0,.3,20);
-  const q=$('#t-q',el); const pq=eo5(P(t,0,.35)); st(q,{opacity:clamp(pq*2)*(t>a1?lerp(1,.35,eo(P(t,a1,.3))):1),transform:`scale(${lerp(1.15,1,pq)})`});
+  const q=$('#t-q',el); const pq=eo5(P(t,0,.35)); st(q,{opacity:clamp(pq*2)*(t>a1?lerp(1,.4,eo(P(t,a1,.3))):1),transform:`scale(${lerp(1.15,1,pq)})`});
   const p1=eo5(P(t,a1,.4)); st($('#t-s1',el),{opacity:clamp(p1*2),transform:`scale(${lerp(1.25,1,p1)})`});
-  const s1=$('#t-s1',el); $('#t-s2',el).style.top=(s1.offsetTop+s1.offsetHeight+30)+'px';
-  rise($('#t-s2',el),t,a2,.45,30);
-  const T=t+HOOK_HOLD; const v=$('.t-v',el); v.textContent=missed(T);
-  rise($('#t-burn',el),t,0,.3,30); const land=P(T,LAND,.25); v.style.transform=`scale(${1+Math.sin(land*Math.PI)*.12})`;
-  pop($('#t-fix',el),T,LAND+.1,.4,.5);
+  const T=t+HOOK_HOLD; const n=orders(T);
+  rise($('#t-shop',el),t,0,.35,60); rise($('#t-gads',el),t,.08,.35,60);
+  $('.t-oc',el).textContent=n;
+  const L=$('.t-list',el); if(L.dataset.n!=n){L.dataset.n=n; L.innerHTML=Array.from({length:n},(_,i)=>n-1-i).slice(0,6).map((k,j)=>`<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:16px 18px;border-radius:20px;background:${j===0?'rgba(34,224,111,.16)':'rgba(255,255,255,.07)'};border:1.5px solid ${j===0?'#22E06F':'rgba(255,255,255,.12)'}"><span style="font:900 30px Mont">🛒</span><div style="flex:1"><div style="font:800 28px Inter;white-space:nowrap">Order #${1042+k}</div><div class="mono" style="font-size:18px;color:#8E9890">FROM GOOGLE ADS</div></div><span style="font:900 28px Mont;color:var(--lime)">${AMTS[k%AMTS.length]}</span></div>`).join('');}
+  // the newest order slides in from the top
+  const fr=L.firstChild; if(fr){const ti=(n<=0)?0:LAND*Math.pow((n-.5)/ORD,1/1.15); fr.style.transform=`translateY(${(1-eo(P(T,ti,.18)))*-60}px)`; fr.style.opacity=clamp(P(T,ti,.12));}
+  // Google Ads stays at 0 and shakes a little with every order
+  const gz=$('.t-gz',el); const k=orders(T)>0?LAND*Math.pow((orders(T)-.5)/ORD,1/1.15):-9; const sh=Math.sin(P(T,k,.25)*Math.PI*4)*(1-P(T,k,.25))*10;
+  gz.style.transform=`translateX(${sh}px)`; const land=P(T,LAND,.3); gz.style.color=land>0&&land<1?'#C8D0CA':'#fff';
+  $('#t-gads',el).style.boxShadow=T>LAND?`0 0 ${40*Math.sin(Math.min(1,land)*Math.PI)}px rgba(255,255,255,.35)`:'none';
+  pop($('#t-fix',el),T,LAND+.05,.4,.5);
 }
 
 /* ---------- timeline (voice-driven) ---------- */
@@ -251,7 +261,7 @@ function renderHook(t,el){
   {const q=eo(P(t,0,.4));st($('#h-t2',el),{opacity:clamp(.5+q),transform:`translateY(${(1-q)*20}px)`});}
   [...$('#h-list',el).children].forEach((c,i)=>pop(c,t,.05+i*.07,.35,.5));
   pop($('#h-save',el),t,1.0,.45,.4);
-  pop($('#h-burn',el),t,0,.3,.6); $('.h-v',el).textContent=missed(t);
+  pop($('#h-burn',el),t,0,.3,.6); $('.h-v',el).textContent=orders(t);
   const sv=$('#h-save',el); const pulse=1+Math.max(0,Math.sin((t-1.5)*6))*0.04*(t>1.5?1:0); sv.style.transform+=` scale(${pulse})`;
 }
 function renderItemShell(t,el){
@@ -262,9 +272,15 @@ function renderItemShell(t,el){
   const pc=eo5(P(t,.25,.6)); st($('.s-card',el),{opacity:clamp(pc*2),transform:`translateY(${(1-pc)*160}px) rotateX(${(1-pc)*20}deg) scale(${lerp(.92,1,pc)})`});
 }
 function renderHow(t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.5;
-  $$('.o-r',U).forEach((r,k)=>rise(r,u,.1+k*.35,.4,30));
-  $('.o-arr',U).style.strokeDashoffset=-u*40;
-  rise($('.o-q',U),u,2.2,.4,20);
+  const ps=$$('.g-p',U); ps.forEach((p,i)=>{pop(p,u,.1+i*.08,.35,.5);});
+  // Google "picks" people at random-looking order; browsers turn grey, buyers green (revealed after the pick)
+  const order=[0,3,6,2,8,4,9,7,1,5];
+  order.forEach((idx,j)=>{const a=1.6+j*.42;const p=ps[idx];const on=u>=a;
+    p.style.borderColor=on?(p.dataset.k==='buy'?'#22E06F':'rgba(255,255,255,.35)'):'transparent';
+    p.querySelector('.g-l').textContent=on?(p.dataset.k==='buy'?'BUYER':'BROWSER'):'?';
+    p.querySelector('.g-l').style.color=on&&p.dataset.k==='buy'?'#22E06F':'#8E9890';
+    p.querySelectorAll('circle,path').forEach(x=>x.setAttribute('fill',on?(p.dataset.k==='buy'?'#22E06F':'#5A625C'):'#C8D0CA'));});
+  let n=0; order.forEach((idx,j)=>{if(u>=1.6+j*.42&&ps[idx].dataset.k!=='buy')n++;}); $('.g-sp',U).textContent='$'+(n*4.10).toFixed(2);
 }
 function renderS1(t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.45;
   typed($('.i-q',U),'google',u,.6,10);

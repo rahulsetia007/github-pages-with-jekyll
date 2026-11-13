@@ -55,7 +55,7 @@ for b in starts:
 def tick(at, f=1500, g=.25):
     l = int(.06 * sr); et = np.arange(l) / sr; place(sfx, np.sin(2 * np.pi * f * et) * np.exp(-et * 60), at, g)
 h0 = S['how']['start'] - .18 + .5
-for k in range(4): tick(h0 + .1 + k * .35, 1500 + k * 80, .16)                         # orders arrive
+for j in range(10): tick(h0 + 1.6 + j * .42, 1500 if j in (8, 9) else 900, .16)       # Google picks people
 s0 = S['s1']['start'] - .18 + .45
 tick(s0 + 1.6, 1800, .2); tick(s0 + 3.0, 2200, .3); tick(s0 + 3.3, 2600, .25)          # result, install, done
 c0 = S['s2']['start'] - .18 + .45
@@ -67,13 +67,13 @@ m0 = S['s4']['start'] - .18 + .45
 tick(m0 + 1.5, 2000, .3)                                                               # toggle on
 r0 = S['e1']['start'] - .18 + .45
 for k in range(8): tick(r0 + 1.2 + k * .3, 2000 + k * 60, .14)                         # conversions roll in
-# missed-sales counter: ticks speed up as it climbs, then a thud when it lands at 4.6s
-tt = 0.2
-while tt < 4.5:
-    tick(tt, 2600 + 900 * tt / 4.6, .10 + .06 * tt / 4.6)
-    tt += max(.06, .2 * (1 - tt / 4.6) ** 1.2)
+# order pings: one bright two-note chime per Shopify order (12 orders, 1.4s-4.9s), thud when the 0 lands
+for k in range(1, 13):
+    at = 4.9 * ((k - .5) / 12) ** (1 / 1.15)
+    if at < 1.3: continue
+    tick(at, 2637, .16); tick(at + .07, 3520, .14)
 hl2 = int(.5 * sr); ht2 = np.arange(hl2) / sr
-place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), 4.6, .35)
+place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), 4.9, .35)
                                       # hook pills
 tick(S['cta']['start'] - .18 + 2.6, 2200, .35)                                       # Follow tap
 hl = int(.9 * sr); ht = np.arange(hl) / sr
