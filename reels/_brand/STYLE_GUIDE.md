@@ -57,7 +57,8 @@ Do **not** use `#00FF66` or flat black.
   + serif italic subline → `Follow` button that a cursor taps and flips to `Following ✓`.
 
 ## Voice & audio
-- Kokoro TTS, voice **`am_michael`** (male), speed **1.06**, `en-us`, with the "AI" phoneme fix
+- Kokoro TTS, voice **`am_liam`** (male, chosen by the owner 14 Nov), speed **1.15**, `en-us`, with presence EQ +
+  compression on the voice, a speech-only respelling table (e.g. Recap → "Reecap"), and the "AI" phoneme fix
   (`ˌeɪˈaɪ` → `ˈeɪ ˈaɪ`). See `tts.py` in any reel.
 - Original synthesized music bed under the voice (ducked); loudness around -14 LUFS.
 

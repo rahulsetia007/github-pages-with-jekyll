@@ -57,9 +57,11 @@ def tick(at, f=1500, g=.25):
 # PAIN: graph line ticks, then a falling sweep + thud as viewers drop off the cliff at 1.44s ("here")
 for k in range(6): tick(.1 + k * .2, 1800 + k * 60, .1)
 fl = int(.6 * sr); ft = np.arange(fl) / sr
-place(sfx, np.sin(2 * np.pi * (900 * ft - 600 * ft * ft)) * np.exp(-ft * 4) * .5, 1.35, .35)
+CLIFF = next((w['s'] for w in S['pain']['words'] if w['w'].startswith('seconds')), 1.44)
+place(sfx, np.sin(2 * np.pi * (900 * ft - 600 * ft * ft)) * np.exp(-ft * 4) * .5, CLIFF - .09, .35)
 hl2 = int(.5 * sr); ht2 = np.arange(hl2) / sr
-place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), 1.44, .4)
+place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), CLIFF, .4)
+tick(next((w['s'] for w in S['pain']['words'] if w['w'].startswith('Here')), 2.3), 2400, .3)   # topic banner
 # POKE: views counter ticks, then a dull hit when it gets stuck
 pk = S['poke']['start'] - .18 + .45
 for k in range(10): tick(pk + .2 + k * .2, 1500 + k * 40, .1)
@@ -83,7 +85,9 @@ place(sfx, np.sin(2 * np.pi * (44 * ht + 80 * (1 - np.exp(-ht * 25)) / 25)) * np
 # voice
 v, vsr = sf.read('voice.wav'); v = resample_poly(v, 2, 1) if vsr == 24000 else v
 voice = np.zeros(N); voice[:min(N, len(v))] = v[:N]; voice = hp(voice, 90); voice = voice / np.max(np.abs(voice))
-voice = np.tanh(voice * 2.2) / np.tanh(2.2)
+voice = voice + 0.3 * sosfilt(butter(2, [2500, 5000], 'bandpass', fs=sr, output='sos'), voice)   # presence
+voice = voice / np.max(np.abs(voice))
+voice = np.tanh(voice * 2.4) / np.tanh(2.4)
 venv = lfilter([1 - np.exp(-1 / (sr * .06))], [1, -np.exp(-1 / (sr * .06))], np.abs(voice))
 duck = np.clip(1 - venv * 4, .35, 1); fade = np.clip((END - t) / 0.25, 0, 1)
 mix = voice + music * .12 * duck * fade + sfx * .4

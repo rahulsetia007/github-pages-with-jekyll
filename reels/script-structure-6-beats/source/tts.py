@@ -3,9 +3,12 @@ import json, os, re, numpy as np, soundfile as sf, librosa
 from kokoro_onnx import Kokoro
 M = os.environ.get('VOICE_DIR', os.path.expanduser('~/.cache/kokoro')) + '/'
 k = Kokoro(M + 'kokoro-v1.0.onnx', M + 'voices-v1.0.bin')
-V = 'am_michael'; SP = 1.06
+V = 'am_liam'; SP = 1.15
 lines = [l.split('|', 1) for l in open('vo.txt').read().strip().split('\n')]
+# speech-only respellings (captions keep the real word)
+PRON = {'Recap': 'Reecap'}
 def say(text):
+    for a, b in PRON.items(): text = re.sub(r'\b%s\b' % a, b, text)
     ph = k.tokenizer.phonemize(text, 'en-us').replace('ˌeɪˈaɪ', 'ˈeɪ ˈaɪ')
     a, sr = k.create(ph, voice=V, speed=SP, lang='en-us', is_phonemes=True)
     return np.asarray(a, np.float32), sr
@@ -30,7 +33,7 @@ for key, text in lines:
     wt = [{"w": w, "s": round(t + m(s0), 3), "e": round(t + m(s1 - 1), 3)} for w, (s0, s1) in zip(words, bounds)]
     d = len(A) / sr
     segs.append({"key": key, "text": text, "start": round(t, 3), "dur": round(d, 3), "words": wt})
-    g = {'pain': .5, 'poke': .6, 'fix0': .6, 'fix1': .5, 'fix2': .5, 'fix3': .5, 'fix4': .5, 'fix5': .5, 'fix6': .6, 'payoff': .6, 'recap': .6}.get(key, 0)
+    g = {'pain': .55, 'poke': .6, 'fix0': .6, 'fix1': .5, 'fix2': .5, 'fix3': .5, 'fix4': .5, 'fix5': .5, 'fix6': .6, 'payoff': .6, 'recap': .6}.get(key, 0)
     out.append(A); out.append(np.zeros(int(g * sr), np.float32)); t += d + g
 y = np.concatenate(out); y = y / np.max(np.abs(y)) * 0.89
 sf.write('voice.wav', y, sr)

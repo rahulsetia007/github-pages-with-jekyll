@@ -74,7 +74,7 @@ const LOGO_IG=`<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg
 let _gid=0;
 const LT=(svg,size,r)=>{const id='g'+(++_gid);return `<span class="tile" style="width:${size}px;height:${size}px;border-radius:${r}px;padding:${Math.round(size*.17)}px;background:#fff">${svg.replace(/igg/g,id)}</span>`;};
 const CHECK=`<svg width="30" height="30" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="#22E06F" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-const BEATS=['Pain','Poke','Fix','Payoff','Recap','CTA'];
+const BEATS=['Pain','Poke','Fix','Payoff','Recap','Ask'];
 
 /* ---------- the wave diagram (owner's structure), drawn in the house colors ---------- */
 const WP=[[80,200],[250,370],[420,250],[580,70],[740,330],[860,140]];
@@ -97,7 +97,7 @@ function setWave(root,draw,lit,cur,showLabels){root.querySelector('.wv-p').style
 /* ---------- 1) PAIN: frame 1 is already moving, a retention graph falling off a cliff at 0:02 ---------- */
 const GX=t=>40+800*t/15;            // 0..15 s across the graph
 const pain=mk(`<div class="scene" id="s-pain">
-  <div class="abs" id="p-big" style="top:190px;left:50px;right:50px;text-align:center;font:900 108px/.98 Mont;letter-spacing:-.035em;text-transform:uppercase">Most viewers<br>leave <span style="color:var(--lime)">here ↓</span></div>
+  <div class="abs" id="p-big" style="top:190px;left:50px;right:50px;text-align:center;font:900 108px/.98 Mont;letter-spacing:-.035em;text-transform:uppercase">Your Reel dies<br>in <span style="color:var(--lime)">2 seconds</span></div>
   <div class="card" id="p-card" style="top:500px;height:880px;left:70px;width:940px">
     <div class="abs" style="left:40px;top:34px;display:flex;align-items:center;gap:14px">${LT(LOGO_IG,56,16)}<div><div style="font:800 32px Inter">Your last Reel</div><div class="mono" style="font-size:20px;color:#8E9890">RETENTION · EXAMPLE</div></div></div>
     <div class="abs" style="right:40px;top:30px;text-align:right"><div class="mono" style="font-size:20px;color:#8E9890">VIEWS</div><div style="font:900 64px Mont">150</div></div>
@@ -111,14 +111,17 @@ const pain=mk(`<div class="scene" id="s-pain">
     <div class="abs pill" id="p-tag" style="left:${GX(2)+80}px;top:290px;background:var(--lime);color:#030403;font-size:30px;font-weight:900">−70% in 2 seconds</div>
     <div class="abs" style="left:40px;bottom:40px;display:flex;align-items:baseline;gap:18px"><span class="mono" style="font-size:24px;color:#8E9890">STILL WATCHING</span><span class="p-pct" style="font:900 96px Mont;font-variant-numeric:tabular-nums">100%</span></div>
   </div>
+  <div class="abs pill" id="p-topic" style="top:1410px;left:0;right:0;margin:0 auto;width:fit-content;background:var(--lime);color:#030403;font-size:36px;font-weight:900;white-space:nowrap;box-shadow:0 0 40px rgba(34,224,111,.6);opacity:0">HOW TO SCRIPT IT SO PEOPLE STAY ↓</div>
 </div>`);
 scenesEl.appendChild(pain);
-const CLIFF=1.44;   // the word "here"
+let CLIFF=1.44, TOPIC=2.3;   // set from the voice: "seconds" and "Here's"
 function renderPain(t,el){
+  const pw=segBy.pain.words; CLIFF=(pw.find(w=>/^seconds/.test(w.w))||{s:1.44}).s; TOPIC=(pw.find(w=>/^Here/.test(w.w))||{s:2.3}).s-.05;
+  pop($('#p-topic',el),t,TOPIC,.45,.6);
   const pb=eo5(P(t,0,.35)); st($('#p-big',el),{transform:`scale(${lerp(1.1,1,pb)})`,opacity:1});
   $('#p-big span',el).style.display='inline-block'; $('#p-big span',el).style.transform=`translateY(${Math.abs(Math.sin(t*5))*-14*(t<CLIFF+.4?1:0)}px)`;
   st($('#p-card',el),{opacity:1,transform:`translateY(${(1-eo(P(t,0,.4)))*40}px)`});
-  const d=t<CLIFF?lerp(.06,.36,P(t,0,CLIFF)):lerp(.36,1,eo(P(t,CLIFF,1.1))); $('.p-line',el).style.strokeDashoffset=1-d;
+  const d=t<CLIFF?lerp(.02,.1,P(t,0,CLIFF)):t<CLIFF+.25?lerp(.1,.36,P(t,CLIFF,.25)):lerp(.36,1,eo(P(t,CLIFF+.25,1.1))); $('.p-line',el).style.strokeDashoffset=1-d;
   $('.p-mark',el).setAttribute('opacity',t>CLIFF-.1?1:0);
   const k=P(t,CLIFF,.4); $('.p-dot',el).setAttribute('opacity',t>CLIFF?1:0); $('.p-dot',el).setAttribute('r',16+10*Math.sin(t*8)*(t>CLIFF?1:0));
   pop($('#p-tag',el),t,CLIFF+.15,.4,.5);
@@ -154,22 +157,22 @@ $('.s-ui',SPK).innerHTML=`
 // 3) FIX intro: the 6-beat script (labels hidden = open loop)
 const fix0=mk(`<div class="scene" id="s-fix0">
   <div class="abs mono" id="f-tag" style="top:300px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">THE FIX</div>
-  <div class="abs" id="f-big" style="top:370px;left:60px;right:60px;text-align:center;font:900 112px/.96 Mont;letter-spacing:-.035em;text-transform:uppercase">A 6-beat <span style="color:var(--lime)">script</span></div>
-  <div class="abs" id="f-sub" style="top:610px;left:0;right:0;text-align:center;font-family:ISerif;font-size:84px;color:#D8E0DA">not better editing</div>
+  <div class="abs" id="f-big" style="top:370px;left:60px;right:60px;text-align:center;font:900 112px/.96 Mont;letter-spacing:-.035em;text-transform:uppercase">A 6-step <span style="color:var(--lime)">script</span></div>
+  <div class="abs" id="f-sub" style="top:610px;left:0;right:0;text-align:center;font-family:ISerif;font-size:84px;color:#D8E0DA">every Reel that works has it</div>
   <div class="abs" id="f-wave" style="left:70px;width:940px;top:830px">${WAVE('wv',true,50)}</div>
 </div>`);
 scenesEl.appendChild(fix0);
 
 // 4-9) the six beats, each with a line from THIS video as the example
 const BD=[
- {pill:'SECONDS 0–2',mono:'THEIR PROBLEM FIRST',one:'Their problem, <b>not your intro</b>.',bad:'Hey guys, today I\'ll show you…',good:'Most of your viewers leave right here.'},
- {pill:'MAKE IT HURT',mono:'WHAT IT COSTS THEM',one:'Show what it\'s <b>costing them</b>.',good:'That\'s why you\'re stuck at 150 views.'},
- {pill:'STEP BY STEP',mono:'ONE IDEA PER SCENE',one:'Give the <b>answer</b>, step by step.',good:'It\'s a 6-beat script.'},
- {pill:'THE HIGH POINT',mono:'SHOW IT WORKING',one:'The reward for <b>staying</b>.',good:'Now people stay past second two.'},
- {pill:'SAVEABLE',mono:'ONE LINE',one:'One line they can <b>save</b>.',good:'Pain. Poke. Fix. Payoff. Recap. CTA.'},
- {pill:'ONE ASK',mono:'SAVE · SEND · COMMENT',one:'One clear <b>ask</b>.',good:'Save this for your next Reel.'},
+ {pill:'SECONDS 0–2',mono:'THEIR PROBLEM FIRST',one:'Their problem, <b>not your intro</b>.',bad:'Hey guys, today I\'ll show you…',good:'Your Reel is dying in the first 2 seconds.'},
+ {pill:'MAKE IT HURT',mono:'WHAT IT COSTS THEM',one:'Show what it\'s <b>costing them</b>.',good:'You\'re stuck at 150 views.'},
+ {pill:'STEP BY STEP',mono:'ONE IDEA PER SCENE',one:'Give the <b>answer</b>, step by step.',good:'Use this 6-step script.'},
+ {pill:'THE HIGH POINT',mono:'SHOW IT WORKING',one:'The reward for <b>staying</b>.',good:'People watch past 2 seconds.'},
+ {pill:'SAVEABLE',mono:'ONE LINE',one:'One line they can <b>save</b>.',good:'Pain. Poke. Fix. Payoff. Recap. Ask.'},
+ {pill:'CALL TO ACTION',mono:'SAVE · SHARE · COMMENT',one:'One clear <b>ask</b>.',good:'Save this for your next Reel.'},
 ];
-const FS=BD.map((B,i)=>{const sc=itemScene('fix'+(i+1),`BEAT 0${i+1} / 06`,String(i+1),BEATS[i],B.pill,B.mono,B.one);
+const FS=BD.map((B,i)=>{const sc=itemScene('fix'+(i+1),`STEP 0${i+1} / 06`,String(i+1),BEATS[i],B.pill,B.mono,B.one);
   $('.s-ui',sc).innerHTML=`
    <div class="abs b-w" style="left:70px;width:760px;top:26px">${WAVE('wv',false,40)}</div>
    <div class="abs mono" style="left:50px;top:370px;font-size:22px;color:#8E9890">EXAMPLE · FROM THIS VIDEO</div>
@@ -189,7 +192,7 @@ $('.s-ui',SPY).innerHTML=`
 // 11) RECAP: the whole wave lights up as each beat is said
 const recap=mk(`<div class="scene" id="s-recap">
   <div class="abs mono" id="r-tag" style="top:330px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">RECAP · SAVE THIS</div>
-  <div class="abs" id="r-big" style="top:400px;left:60px;right:60px;text-align:center;font:900 100px/.96 Mont;letter-spacing:-.035em;text-transform:uppercase">Every Reel.<br><span style="color:var(--lime)">6 beats.</span></div>
+  <div class="abs" id="r-big" style="top:400px;left:60px;right:60px;text-align:center;font:900 100px/.96 Mont;letter-spacing:-.035em;text-transform:uppercase">Every Reel.<br><span style="color:var(--lime)">6 steps.</span></div>
   <div class="abs" id="r-wave" style="left:70px;width:940px;top:780px">${WAVE('wv',true,50)}</div>
 </div>`);
 scenesEl.appendChild(recap);
