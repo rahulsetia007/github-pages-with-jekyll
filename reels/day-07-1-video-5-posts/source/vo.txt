@@ -1,0 +1,9 @@
+hook|Posting every day and still burnt out? You don't need more ideas. You need to reuse the ones you have.
+how|Most creators make every post from scratch. Seven days, seven new ideas. That's why you run out.
+bad|And each video gets posted once. After a couple of days, it's buried.
+good|Turn that one video into five posts. Same idea, five places to be seen.
+prompt|Paste your script into ChatGPT with this prompt.
+e1|Here's my last Reel, turned into a carousel.
+e2|A LinkedIn post that sounds like me.
+e3|And a short email, ready to send.
+cta|One video. Five posts. Send this to a creator who's always out of ideas.

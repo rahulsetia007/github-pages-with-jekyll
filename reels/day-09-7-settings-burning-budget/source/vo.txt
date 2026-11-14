@@ -1,0 +1,9 @@
+hook|Your Google Ads budget is gone by lunch. And you got zero leads.
+r1|One. Location. Switch Presence or interest to Presence, so only locals see your ads.
+r2|Two. Networks. In a Search campaign, turn off the Display Network.
+r3|Three. Negatives. Add negative keywords every week, like jobs, free, and DIY.
+r4|Four. Goals. Don't count page views as leads. Track real calls and forms.
+r5|Five. Auto-apply. Turn off auto-applied recommendations, and review them yourself.
+r6|Six. Structure. One ad group per service, not one for everything.
+r7|Seven. Schedule. Only run ads when someone can answer the phone.
+cta|Each one takes a minute. Save this, and audit your account tonight.
