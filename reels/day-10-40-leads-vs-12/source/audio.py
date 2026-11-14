@@ -54,31 +54,34 @@ for b in starts:
     place(sfx, np.sin(2 * np.pi * (55 * ht + 30 * (1 - np.exp(-ht * 30)) / 30)) * np.exp(-ht * 10), b, .18)
 def tick(at, f=1500, g=.25):
     l = int(.06 * sr); et = np.arange(l) / sr; place(sfx, np.sin(2 * np.pi * f * et) * np.exp(-et * 60), at, g)
-# PAIN: graph line ticks, then a falling sweep + thud as viewers drop off the cliff at 1.44s ("here")
-for k in range(6): tick(.1 + k * .2, 1800 + k * 60, .1)
-fl = int(.6 * sr); ft = np.arange(fl) / sr
-CLIFF = next((w['s'] for w in S['pain']['words'] if w['w'].startswith('seconds')), 1.44)
-place(sfx, np.sin(2 * np.pi * (900 * ft - 600 * ft * ft)) * np.exp(-ft * 4) * .5, CLIFF - .09, .35)
+def wt(seg, pre):
+    return next((w['s'] for w in S[seg]['words'] if w['w'].startswith(pre)), None)
+st0 = lambda k: S[k]['start'] - .18
+# PAIN: counters tick up (Google Ads fast to 40, inbox slow to 12), thud when 12 lands, ping on the topic banner
+fo, tw = wt('pain', 'forty') or .8, wt('pain', 'twelve') or 2.5
+for k in range(10): tick(k * (fo + .3) / 10, 2400, .08)
+for k in range(6): tick(.3 + k * (tw - .4) / 6, 1700, .1)
 hl2 = int(.5 * sr); ht2 = np.arange(hl2) / sr
-place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), CLIFF, .4)
-tick(next((w['s'] for w in S['pain']['words'] if w['w'].startswith('Here')), 2.3), 2400, .3)   # topic banner
-# POKE: views counter ticks, then a dull hit when it gets stuck
-pk = S['poke']['start'] - .18 + .45
-for k in range(10): tick(pk + .2 + k * .2, 1500 + k * 40, .1)
-tick(pk + 3.2, 700, .3)
-# FIX intro: nodes pop in along the wave
-f0 = S['fix0']['start'] - .18
-for k in range(6): tick(f0 + .7 + k * .33, 1600 + k * 140, .2)
-# each beat: node lights + example line typing
-for i in range(1, 7):
-    b = S['fix%d' % i]['start'] - .18 + .45
-    tick(b, 2000 + i * 90, .25)
-    for k in range(5): tick(b + .4 + k * .09, 3000, .05)
-# PAYOFF: rising views
-py = S['payoff']['start'] - .18 + .45
-for k in range(14): tick(py + 1.0 + k * .18, 1500 + k * 90, .12)
-# RECAP: a chime on every beat word
-for w in S['recap']['words']: tick(w['s'], 2600, .22); tick(w['s'] + .06, 3300, .16)
+place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), tw, .4)
+tick(tw + .15, 900, .25); tick(wt('pain', 'Here') or 3.2, 2400, .3)
+# POKE: two cost rows, then the warning pill
+tick(st0('poke') + .65, 1500, .2); tick(wt('poke', 'hunts') or 8.3, 1700, .2); tick(wt('poke', 'scale') or 10.1, 900, .3)
+# FIX intro: the customer, two arrows, two +1s, the count
+f0 = st0('fix0')
+for k, a in enumerate([.6, 1.0, 1.3, 1.6]): tick(f0 + a, 1600 + k * 200, .2)
+tick(wt('fix0', 'two') or 13.6, 2400, .3)
+# each fix: strike the old setting, then the new one lands
+for k, cue in [('fix1', 'primary'), ('fix2', 'secondary'), ('fix3', 'One')]:
+    c = (wt(k, cue) or st0(k) + 2.4) - .1
+    tick(c - .5, 900, .2); tick(c, 2000, .3); tick(c + .35, 2600, .22)
+# PAYOFF: count down 40 to 12, then the match
+pt = wt('payoff', 'twelve') or 31
+for k in range(10): tick(st0('payoff') + .65 + k * (pt - st0('payoff') - .9) / 10, 2200 - k * 60, .1)
+tick(S['payoff']['words'][8]['s'], 2600, .35)
+# RECAP: a chime on each of the three fixes
+for pre in ['One', 'Duplicates', 'Count']:
+    c = wt('recap', pre)
+    if c: tick(c, 2600, .22); tick(c + .06, 3300, .16)
 tick(S['cta']['start'] - .18 + 2.6, 2200, .35)                                       # Follow tap
 hl = int(.9 * sr); ht = np.arange(hl) / sr
 place(sfx, np.sin(2 * np.pi * (44 * ht + 80 * (1 - np.exp(-ht * 25)) / 25)) * np.exp(-ht * 6), 0, .3)  # opening hit

@@ -33,7 +33,7 @@ for key, text in lines:
     wt = [{"w": w, "s": round(t + m(s0), 3), "e": round(t + m(s1 - 1), 3)} for w, (s0, s1) in zip(words, bounds)]
     d = len(A) / sr
     segs.append({"key": key, "text": text, "start": round(t, 3), "dur": round(d, 3), "words": wt})
-    g = {'pain': .55, 'poke': .6, 'fix0': .6, 'fix1': .5, 'fix2': .5, 'fix3': .5, 'fix4': .5, 'fix5': .5, 'fix6': .6, 'payoff': .6, 'recap': .6}.get(key, 0)
+    g = {'pain': .55, 'poke': .6, 'fix0': .6, 'fix1': .6, 'fix2': .6, 'fix3': .7, 'payoff': .6, 'recap': .6}.get(key, 0)
     out.append(A); out.append(np.zeros(int(g * sr), np.float32)); t += d + g
 y = np.concatenate(out); y = y / np.max(np.abs(y)) * 0.89
 sf.write('voice.wav', y, sr)
