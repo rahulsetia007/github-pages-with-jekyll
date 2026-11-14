@@ -14,3 +14,12 @@ Every video script follows these 6 beats, in this order (diagram: `reels/_brand/
 6. **CTA** – one clear ask (send / save / comment KEYWORD), then Follow.
 Before writing any voiceover, label each line with its beat. If a beat is missing, the script isn't done.
 Details and pacing: `reels/PLAN.md`.
+
+## Voiceover check before finalizing (owner's rule, 14 Nov)
+Never finalize a voice without checking the script is read correctly.
+1. Write the TTS text for the ear, not the screen: every number, time, price and percent spelled out the way a
+   person says it ("a hundred and fifty", "two seconds", "four dollars ten", "seventy percent"), and abbreviations
+   spelled as spoken ("C T A", "U G C", "P Max", "D I Y"). Keep digits only in on-screen text and captions.
+2. Print the phonemes for every line (`k.tokenizer.phonemize`) and check each number, name and abbreviation.
+3. Send the owner a short audio check of the lines with numbers or names, and get a yes before rendering.
+4. Delivery must sound like an excited teacher, not a reader: short punchy lines, varied pace, emphasis words.
