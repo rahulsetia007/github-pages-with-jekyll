@@ -60,5 +60,11 @@ Blur or leave out account IDs and client names.
 The earlier Day 6 build (`day-06-30-reel-hooks`, "Stuck at 200 views?") stays in the repo as a bonus video.
 The new Day 6 (junk searches) gets its own folder when it's built.
 
-Flow template: cover 1.4 s → thesis (finishes the opening line) → hook problem explained → why it happens → what most people do (fails) → the fix →
-the prompt → 2–3 real examples, one per scene → send line + Follow.
+Flow template (owner's script structure, see CLAUDE.md and `_brand/script-structure.jpg`):
+**Pain** (cover 1.4 s + hook scene: the gap, counter lands on the key word) →
+**Poke** (what it costs them right now) →
+**Fix** (steps, one scene each) →
+**Payoff** (the result working, the high point) →
+**Recap** (one scene: all steps tick through as a checklist) →
+**CTA** (send / save / comment KEYWORD) + Follow.
+Label every voiceover line in vo.txt with its beat, e.g. `pain|…`, `poke|…`, `fix1|…`, `payoff|…`, `recap|…`, `cta|…`.
