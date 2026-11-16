@@ -57,30 +57,30 @@ def tick(at, f=1500, g=.25):
 def wt(seg, pre):
     return next((w['s'] for w in S[seg]['words'] if w['w'].startswith(pre)), None)
 st0 = lambda k: S[k]['start'] - .18
-# PAIN: counters tick up (Google Ads fast to 40, inbox slow to 12), thud when 12 lands, ping on the topic banner
-fo, tw = wt('pain', 'forty') or .8, wt('pain', 'twelve') or 2.5
-for k in range(10): tick(k * (fo + .3) / 10, 2400, .08)
-for k in range(6): tick(.3 + k * (tw - .4) / 6, 1700, .1)
+# PAIN: typing, the ad appears, the click + cost, counter climbs, thud on "you.", ping on the topic banner
+for k in range(12): tick(k * .08, 3000, .05)
+tick(.9, 1600, .2)
+al, yo = wt('pain', 'already') or 2.0, wt('pain', 'you.') or 2.85
+tick(al, 2200, .3); tick(al + .1, 1200, .25)
+for k in range(8): tick(al + k * (yo - al) / 8, 2400, .08)
 hl2 = int(.5 * sr); ht2 = np.arange(hl2) / sr
-place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), tw, .4)
-tick(tw + .15, 900, .25); tick(wt('pain', 'Here') or 3.2, 2400, .3)
-# POKE: two cost rows, then the warning pill
-tick(st0('poke') + .65, 1500, .2); tick(wt('poke', 'hunts') or 8.3, 1700, .2); tick(wt('poke', 'scale') or 10.1, 900, .3)
-# FIX intro: the customer, two arrows, two +1s, the count
+place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), yo, .4)
+tick(wt('pain', 'Here') or 3.0, 2400, .3)
+# POKE
+tick(wt('poke', 'click') or 9.2, 1500, .2); tick(wt('poke', 'But') or 10.2, 1700, .2); tick(wt('poke', 'anyway') or 11, 900, .3)
+# FIX intro: channels fan out
 f0 = st0('fix0')
-for k, a in enumerate([.6, 1.0, 1.3, 1.6]): tick(f0 + a, 1600 + k * 200, .2)
-tick(wt('fix0', 'two') or 13.6, 2400, .3)
-# each fix: strike the old setting, then the new one lands
-for k, cue in [('fix1', 'primary'), ('fix2', 'secondary'), ('fix3', 'One')]:
-    c = (wt(k, cue) or st0(k) + 2.4) - .1
-    tick(c - .5, 900, .2); tick(c, 2000, .3); tick(c + .35, 2600, .22)
-# PAYOFF: count down 40 to 12, then the match
-pt = wt('payoff', 'twelve') or 31
-for k in range(10): tick(st0('payoff') + .65 + k * (pt - st0('payoff') - .9) / 10, 2200 - k * 60, .1)
-tick(S['payoff']['words'][8]['s'], 2600, .35)
-# RECAP: a chime on each of the three fixes
-for pre in ['One', 'Duplicates', 'Count']:
-    c = wt('recap', pre)
+for k in range(5): tick(f0 + 1.1 + k * .12, 1600 + k * 120, .16)
+# checks: rows appear, the key row lights
+for k, cue in [('fix1', 'brand'), ('fix2', 'Search'), ('fix3', 'exclusion')]:
+    for j in range(4): tick(st0(k) + .55 + j * .12, 2000, .08)
+    c = wt(k, cue) or st0(k) + 2.4
+    tick(c, 2000, .3); tick(c + .35, 2600, .22)
+# PAYOFF: budget slides over
+for k in range(10): tick(st0('payoff') + .75 + k * .18, 1500 + k * 90, .12)
+# RECAP
+ws = S['recap']['words']
+for c in [ws[0]['s'], ws[3]['s'], wt('recap', 'Exclude')]:
     if c: tick(c, 2600, .22); tick(c + .06, 3300, .16)
 tick(S['cta']['start'] - .18 + 2.6, 2200, .35)                                       # Follow tap
 hl = int(.9 * sr); ht = np.arange(hl) / sr
