@@ -55,7 +55,7 @@ Blur or leave out account IDs and client names.
 | 9 ✅ | 7 Google Ads settings burning your budget | 7 settings are burning your budget. | Save this and audit your account |
 | 10 ✅ | Google Ads says 40 leads, inbox says 12 | Google Ads says 40 leads. Your inbox says 12. | Send this to someone running Google Ads |
 | 11 ✅ | Performance Max paying for your brand name | You paid for this click. | Comment PMAX for the checklist |
-| 12 | Find wasted spend in 5 minutes with AI | Stop checking your search terms by hand. | Comment AUDIT for the prompt |
+| 12 ✅ | Find wasted spend in 5 minutes with AI | Stop checking your search terms by hand. | Comment AUDIT for the prompt |
 
 The earlier Day 6 build (`day-06-30-reel-hooks`, "Stuck at 200 views?") stays in the repo as a bonus video.
 The new Day 6 (junk searches) gets its own folder when it's built.
