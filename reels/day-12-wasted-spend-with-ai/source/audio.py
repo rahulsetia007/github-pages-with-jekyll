@@ -57,30 +57,35 @@ def tick(at, f=1500, g=.25):
 def wt(seg, pre):
     return next((w['s'] for w in S[seg]['words'] if w['w'].startswith(pre)), None)
 st0 = lambda k: S[k]['start'] - .18
-# PAIN: typing, the ad appears, the click + cost, counter climbs, thud on "you.", ping on the topic banner
-for k in range(12): tick(k * .08, 3000, .05)
-tick(.9, 1600, .2)
-al, yo = wt('pain', 'already') or 2.0, wt('pain', 'you.') or 2.85
-tick(al, 2200, .3); tick(al + .1, 1200, .25)
-for k in range(8): tick(al + k * (yo - al) / 8, 2400, .08)
+# PAIN: rows flicking past, minutes counter, thud on "week?", ping on the topic banner
+wk = wt('pain', 'week') or 2.1
+for k in range(16): tick(k * wk / 16, 2800, .06)
 hl2 = int(.5 * sr); ht2 = np.arange(hl2) / sr
-place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), yo, .4)
-tick(wt('pain', 'Here') or 3.0, 2400, .3)
-# POKE
-tick(wt('poke', 'click') or 9.2, 1500, .2); tick(wt('poke', 'But') or 10.2, 1700, .2); tick(wt('poke', 'anyway') or 11, 900, .3)
-# FIX intro: channels fan out
+place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), wk, .4)
+tick(wt('pain', 'Here') or 2.7, 2400, .3)
+# POKE: each junk type lights up, then the waste counter
+for pre in ['Jobs', 'Free', 'D']:
+    c = wt('poke', pre)
+    if c: tick(c, 900, .25)
+ea = wt('poke', 'eating') or 11.7
+for k in range(8): tick((wt('poke', 'Jobs') or 8.5) + k * (ea - (wt('poke', 'Jobs') or 8.5)) / 8, 2200, .08)
+# FIX intro
 f0 = st0('fix0')
-for k in range(5): tick(f0 + 1.1 + k * .12, 1600 + k * 120, .16)
-# checks: rows appear, the key row lights
-for k, cue in [('fix1', 'brand'), ('fix2', 'Search'), ('fix3', 'exclusion')]:
-    for j in range(4): tick(st0(k) + .55 + j * .12, 2000, .08)
-    c = wt(k, cue) or st0(k) + 2.4
-    tick(c, 2000, .3); tick(c + .35, 2600, .22)
-# PAYOFF: budget slides over
-for k in range(10): tick(st0('payoff') + .75 + k * .18, 1500 + k * 90, .12)
+for k in range(3): tick(f0 + .4 + k * .15, 1700 + k * 200, .2)
+# steps
+c = wt('fix1', 'C') or st0('fix1') + 3; tick(c - .4, 2200, .25); tick(c, 2000, .3); tick(c + .35, 2600, .22)
+c = wt('fix2', 'groups') or st0('fix2') + 3.8
+for k in range(3): tick(c + k * .2, 1800 + k * 200, .25)
+c = wt('fix3', 'One') or st0('fix3') + 2.8
+for k in range(4): tick(st0('fix3') + .45 + .9 + k * .18, 2000, .12)
+tick(c, 900, .3)
+# PAYOFF: junk struck out, counter to zero
+bl = wt('payoff', 'blocked') or 32.1
+for k in range(6): tick(bl - .3 + k * .08, 1600, .12)
+tick(bl + .8, 2600, .3)
 # RECAP
-ws = S['recap']['words']
-for c in [ws[0]['s'], ws[3]['s'], wt('recap', 'Exclude')]:
+for pre in ['Download', 'Run', 'Check']:
+    c = wt('recap', pre)
     if c: tick(c, 2600, .22); tick(c + .06, 3300, .16)
 tick(S['cta']['start'] - .18 + 2.6, 2200, .35)                                       # Follow tap
 hl = int(.9 * sr); ht = np.arange(hl) / sr
