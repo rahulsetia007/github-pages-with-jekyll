@@ -1,6 +1,6 @@
 <!doctype html>
 <html><head><meta charset="utf-8">
-<!-- Day 12: find wasted Google Ads spend in 5 minutes with AI. Pain, Poke, Fix, Payoff, Recap, CTA. Built from reels/_brand/reference_reel.html (house look). -->
+<!-- SaaS ads: the 5-minute Monday routine (scale, fix, hold, get data). Pain, Poke, Fix, Payoff, Recap, CTA. Built from reels/_brand/reference_reel.html (house look). -->
 <style>
 @font-face{font-family:Inter;src:url(fonts/Inter.ttf);font-weight:100 900}
 @font-face{font-family:Mont;src:url(fonts/Montserrat.ttf);font-weight:100 900}
@@ -70,35 +70,45 @@ function mk(html){const d=document.createElement('div');d.innerHTML=html.trim();
 const scenesEl=$('#scenes');
 
 /* ---------- content ---------- */
-const LOGO_GADS=`<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><line x1="56" y1="150" x2="102" y2="56" stroke="#FBBC04" stroke-width="46" stroke-linecap="round"/><line x1="102" y1="56" x2="148" y2="150" stroke="#4285F4" stroke-width="46" stroke-linecap="round"/><circle cx="56" cy="150" r="25" fill="#34A853"/></svg>`;
-const LOGO_AI=`<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#030403" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg>`;
+const LOGO_GADS=`<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><line x1="56" y1="150" x2="102" y2="56" stroke="#FBBC04" stroke-width="46" stroke-linecap="round"/><line x1="102" y1="56" x2="148" y2="150" stroke="#4285F4" stroke-width="46" stroke-linecap="round"/><circle cx="56" cy="150" r="25" fill="#34A853"/></svg>`, LOGO_META=`<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0081FB" d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303zm10.16 2.053c1.147 0 2.188.758 2.992 1.999 1.132 1.748 1.647 4.195 1.647 6.4 0 1.548-.368 2.9-1.839 2.9-.58 0-1.027-.23-1.664-1.004-.496-.601-1.343-1.878-2.832-4.358l-.617-1.028a44.908 44.908 0 0 0-1.255-1.98c.07-.109.141-.224.211-.327 1.12-1.667 2.118-2.602 3.358-2.602zm-10.201.553c1.265 0 2.058.791 2.675 1.446.307.327.737.871 1.234 1.579l-1.02 1.566c-.757 1.163-1.882 3.017-2.837 4.338-1.191 1.649-1.81 1.817-2.486 1.817-.524 0-1.038-.237-1.383-.794-.263-.426-.464-1.13-.464-2.046 0-2.221.63-4.535 1.66-6.088.454-.687.964-1.226 1.533-1.533a2.264 2.264 0 0 1 1.088-.285z"/></svg>`, LOGO_CLAUDE=`<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#D97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg>`;
 let _gid=0;
 const LT=(svg,size,r)=>{const id='g'+(++_gid);return `<span class="tile" style="width:${size}px;height:${size}px;border-radius:${r}px;padding:${Math.round(size*.17)}px;background:#fff">${svg.replace(/igg/g,id)}</span>`;};
 const CHECK=`<svg width="30" height="30" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="#22E06F" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-const XMARK=`<svg width="30" height="30" viewBox="0 0 26 26"><path d="M6 6l14 14M20 6L6 20" stroke="#C8D0CA" stroke-width="4.5" stroke-linecap="round"/></svg>`;
 const W=(seg,re)=>{const w=segBy[seg].words.find(x=>re.test(x.w));return w?w.s:null;};
-const TERMS=[['emergency plumber toronto','$64.20',0],['plumber jobs near me','$41.10','JOBS'],['blocked drain repair','$38.90',0],['free plumbing course','$27.40','FREE'],['how to fix a leaky tap diy','$22.80','DIY'],['24 hour plumber','$51.30',0],['plumber salary ontario','$19.60','JOBS'],['water heater install','$44.70',0],['plumbing apprenticeship','$16.90','JOBS'],['toilet repair near me','$33.10',0],['free drain snake rental','$12.40','FREE'],['diy pipe repair kit','$18.20','DIY']];
-const ROW=(q,c,cls='',extra='')=>`<div class="${cls}" style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 22px;border-radius:16px;border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);font:700 28px Inter;white-space:nowrap" ${extra}><span>${q}</span><span style="font:800 28px Inter;color:#C8D0CA">${c}</span></div>`;
 
-/* ---------- 1) PAIN: frame 1 is already scrolling a long search terms sheet ---------- */
+const CARD=`<svg width="100%" height="100%" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2.5" fill="none" stroke="#030403" stroke-width="2.2"/><path d="M2 10h20" stroke="#030403" stroke-width="2.2"/></svg>`;
+const CAMPS=[
+ {n:'Search · Brand',paid:12,cost:'$200',call:'SCALE'},
+ {n:'Meta · Lookalike',paid:2,cost:'$900',call:'FIX'},
+ {n:'YouTube · Demo',paid:3,cost:'$200',call:'HOLD'},
+ {n:'Meta · Retargeting',paid:'?',cost:'?',call:'GET DATA'},
+];
+const CALLC={'SCALE':'#22E06F','FIX':'#F5F8F6','HOLD':'#8A938C','GET DATA':'#C8D0CA'};
+
+/* ---------- 1) PAIN: 50 trials vs 4 paying, counting from frame 1 ---------- */
 const pain=mk(`<div class="scene" id="s-pain">
-  <div class="abs" id="p-big" style="top:215px;left:30px;right:30px;text-align:center;font:900 72px/1.02 Mont;white-space:nowrap;letter-spacing:-.035em;text-transform:uppercase">Still checking this<br><span style="color:var(--lime)">by hand?</span></div>
-  <div class="card" id="p-card" style="top:450px;height:820px;left:70px;width:940px">
-    <div class="abs" style="left:36px;top:30px;display:flex;align-items:center;gap:14px">${LT(LOGO_GADS,52,14)}<div><div style="font:800 30px Inter">Search terms</div><div class="mono" style="font-size:20px;color:#8E9890">1,248 ROWS · EXAMPLE</div></div></div>
-    <div class="abs" style="left:36px;right:36px;top:120px;height:520px;overflow:hidden;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 30px,#000 calc(100% - 50px),transparent)"><div class="p-rows" style="display:flex;flex-direction:column;gap:10px">${[...TERMS,...TERMS,...TERMS].map(([q,c])=>ROW(q,c)).join('')}</div></div>
-    <div class="abs" style="left:36px;right:36px;bottom:36px;display:flex;justify-content:space-between;align-items:baseline"><span class="mono" style="font-size:24px;color:#8E9890">TIME SPENT EVERY WEEK</span><span class="p-n" style="font:900 86px Mont;font-variant-numeric:tabular-nums">0 min</span></div>
-  </div>
-  <div class="abs pill" id="p-topic" style="top:1300px;left:0;right:0;margin:0 auto;width:fit-content;background:var(--lime);color:#030403;font-size:36px;font-weight:900;white-space:nowrap;box-shadow:0 0 40px rgba(34,224,111,.6);opacity:0">AI DOES IT IN 5 MINUTES ↓</div>
+  <div class="abs" id="p-big" style="top:200px;left:40px;right:40px;text-align:center;font:900 104px/.98 Mont;letter-spacing:-.035em;text-transform:uppercase">50 trials…<br>4 <span style="color:var(--lime)">customers?</span></div>
+  <div class="abs" id="p-a" style="left:70px;top:520px;width:450px;height:640px;border-radius:40px;background:rgba(0,0,0,.4);border:1.5px solid rgba(255,255,255,.18);padding:30px">
+    <div style="display:flex;align-items:center;gap:10px">${LT(LOGO_GADS,56,15)}${LT(LOGO_META,56,15)}</div>
+    <div style="margin-top:14px;font:800 32px Inter">Your ads</div><div class="mono" style="font-size:20px;color:#8E9890">TRIALS THIS WEEK · EXAMPLE</div>
+    <div class="p-av" style="margin-top:40px;font:900 220px Mont;line-height:1.05;font-variant-numeric:tabular-nums">0</div>
+    <div class="p-cf" style="font:800 32px Inter;color:var(--lime)">🎉 Great week!</div></div>
+  <div class="abs" id="p-b" style="left:560px;top:520px;width:450px;height:640px;border-radius:40px;background:rgba(0,0,0,.4);border:1.5px solid rgba(255,255,255,.18);padding:30px">
+    <div style="display:flex;align-items:center;gap:10px">${LT(CARD,56,15)}</div>
+    <div style="margin-top:14px;font:800 32px Inter">Your billing</div><div class="mono" style="font-size:20px;color:#8E9890">PAYING CUSTOMERS</div>
+    <div class="p-bv" style="margin-top:40px;font:900 220px Mont;line-height:1.05;color:var(--lime);font-variant-numeric:tabular-nums">0</div></div>
+  <div class="abs pill" id="p-gap" style="top:1190px;left:0;right:0;margin:0 auto;width:fit-content;background:rgba(255,255,255,.14);color:#fff;font-size:34px;font-weight:900;border:2px solid rgba(255,255,255,.35);white-space:nowrap">46 trials never paid</div>
+  <div class="abs pill" id="p-topic" style="top:1300px;left:0;right:0;margin:0 auto;width:fit-content;background:var(--lime);color:#030403;font-size:36px;font-weight:900;white-space:nowrap;box-shadow:0 0 40px rgba(34,224,111,.6);opacity:0">THE 5-MIN MONDAY ROUTINE ↓</div>
 </div>`);
 scenesEl.appendChild(pain);
 function renderPain(t,el){
-  const wk=W('pain',/^week/)||2.1, hr=(W('pain',/^Here/)||2.7)-.05;
+  const fi=W('pain',/^fifty/)||.9, fo=W('pain',/^four/)||3.0, hr=(W('pain',/^Here/)||4.1)-.05;
   const pb=eo5(P(t,0,.35)); st($('#p-big',el),{transform:`scale(${lerp(1.08,1,pb)})`,opacity:1});
-  st($('#p-card',el),{opacity:1,transform:`translateY(${(1-eo(P(t,0,.35)))*40}px)`});
-  $('.p-rows',el).style.transform=`translateY(${-((t*620)%(TERMS.length*67))}px)`;
-  const m=Math.round(90*eo(P(t,0,wk+.1))); $('.p-n',el).textContent=m+' min';
-  const land=P(t,wk,.3); $('.p-n',el).style.transform=`scale(${1+Math.sin(land*Math.PI)*.12})`;
-  pop($('#p-topic',el),t,hr,.45,.6);
+  st($('#p-a',el),{opacity:1,transform:`translateY(${(1-eo(P(t,0,.35)))*50}px)`}); st($('#p-b',el),{opacity:1,transform:`translateY(${(1-eo(P(t,.05,.35)))*50}px)`});
+  $('.p-av',el).textContent=Math.round(50*eo(P(t,0,fi+.4))); pop($('.p-cf',el),t,fi+.3,.4,.5);
+  $('.p-bv',el).textContent=Math.round(4*eo(P(t,.6,fo-.6)));
+  const land=P(t,fo,.3); $('.p-bv',el).style.transform=`scale(${1+Math.sin(land*Math.PI)*.14})`;
+  pop($('#p-gap',el),t,fo+.4,.4,.5); pop($('#p-topic',el),t,hr,.45,.6);
 }
 
 /* ---------- item scenes ---------- */
@@ -122,74 +132,73 @@ function itemScene(key,idx,tileTxt,name,pillTxt,monoTxt,one,pillMuted){
 
 
 
-// 2) POKE: the junk hides in the rows
-const SPK=itemScene('poke','WHY IT HURTS',LOGO_GADS,'Hidden junk','EATS YOUR BUDGET','EVERY SINGLE WEEK','Junk hides in <b>hundreds of rows</b>.',true);
-$('.s-ui',SPK).innerHTML=`
- <div class="abs" style="left:40px;right:40px;top:36px;display:flex;flex-direction:column;gap:10px">${TERMS.slice(0,6).map(([q,c,j])=>ROW(q,c,'k-r',`data-j="${j||''}"`)).join('')}</div>
- <div class="abs" style="left:50px;right:50px;bottom:36px;display:flex;justify-content:space-between;align-items:baseline"><span class="mono" style="font-size:24px;color:#8E9890">WASTED THIS WEEK · EXAMPLE</span><span class="k-w" style="font:900 72px Mont;font-variant-numeric:tabular-nums">$0</span></div>`;
 
-// 3) FIX intro: one export, one prompt
+// 2) POKE: you scale the wrong campaign
+const SPK=itemScene('poke','WHY IT HURTS',LOGO_META,'Wrong winner','MOST SIGNUPS ≠ MOST BUYERS','TRIALS ARE NOT CUSTOMERS','You scale the <b>wrong campaign</b>.',true);
+$('.s-ui',SPK).innerHTML=`
+ <div class="abs mono" style="left:50px;top:40px;font-size:22px;color:#8E9890">CAMPAIGNS · EXAMPLE</div>
+ <div class="abs k-a" style="left:50px;right:50px;top:90px;display:flex;align-items:center;gap:18px;padding:26px 28px;border-radius:24px;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06)">
+   <div style="flex:1"><div style="font:800 34px Inter">Meta · Lookalike</div><div class="mono" style="font-size:22px;color:#8E9890">45 TRIALS · 2 PAID</div></div><span class="k-s1 pill" style="background:#fff;color:#030403;font-size:28px;font-weight:900">BUDGET ↑</span></div>
+ <div class="abs k-b" style="left:50px;right:50px;top:260px;display:flex;align-items:center;gap:18px;padding:26px 28px;border-radius:24px;border:3px solid #22E06F;background:rgba(34,224,111,.12)">
+   <div style="flex:1"><div style="font:800 34px Inter">Search · Brand</div><div class="mono" style="font-size:22px;color:var(--lime)">40 TRIALS · 12 PAID</div></div><span class="k-s2 pill" style="background:rgba(255,255,255,.14);color:#fff;font-size:28px;font-weight:900">BUDGET ↓</span></div>
+ <div class="abs k-n" style="left:50px;right:50px;bottom:44px;font:700 30px Inter;color:#C8D0CA">The ads platform calls both a win. Billing doesn't.</div>`;
+
+// 3) FIX intro: one export, one call per campaign
+const CALLS=['SCALE IT','FIX IT','HOLD IT','GET DATA'];
 const fix0=mk(`<div class="scene" id="s-fix0">
-  <div class="abs mono" id="f-tag" style="top:420px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">THE FIX</div>
-  <div class="abs" id="f-big" style="top:490px;left:60px;right:60px;text-align:center;font:900 120px/.96 Mont;letter-spacing:-.035em;text-transform:uppercase">1 export.<br>1 <span style="color:var(--lime)">prompt.</span></div>
-  <div class="abs" id="f-flow" style="left:0;right:0;top:860px;display:flex;justify-content:center;align-items:center;gap:40px">
-    <div class="f-c" style="display:flex;align-items:center;gap:16px;padding:20px 30px;border-radius:24px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.16)">${LT(LOGO_GADS,64,18)}<span style="font:800 36px Inter">.CSV</span></div>
-    <span class="f-c" style="font:900 60px Mont;color:var(--lime)">→</span>
-    <div class="f-c" style="display:flex;align-items:center;gap:16px;padding:20px 30px;border-radius:24px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.16)">${LT(LOGO_AI,64,18)}<span style="font:800 36px Inter">ChatGPT</span></div>
-  </div>
+  <div class="abs mono" id="f-tag" style="top:300px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">EVERY MONDAY</div>
+  <div class="abs" id="f-big" style="top:370px;left:60px;right:60px;text-align:center;font:900 104px/.96 Mont;letter-spacing:-.035em;text-transform:uppercase">1 export.<br>1 <span style="color:var(--lime)">call.</span></div>
+  <div class="abs f-l" style="left:0;right:0;top:640px;display:flex;justify-content:center;align-items:center;gap:22px">${LT(LOGO_GADS,90,24)}${LT(LOGO_META,90,24)}<span style="font:900 64px Mont;color:var(--lime)">→</span>${LT(LOGO_CLAUDE,90,24)}</div>
+  <div class="abs" style="left:110px;right:110px;top:820px;display:grid;grid-template-columns:1fr 1fr;gap:20px">${CALLS.map((c,i)=>`<div class="f-c" style="text-align:center;padding:30px 10px;border-radius:26px;font:900 46px Mont;background:${i===0?'#22E06F':'rgba(255,255,255,.08)'};color:${i===0?'#030403':'#fff'};border:2px solid ${i===0?'#22E06F':'rgba(255,255,255,.2)'}">${c}</div>`).join('')}</div>
 </div>`);
 scenesEl.appendChild(fix0);
 
-// 4-6) three steps
-const PROMPT='List the search terms that are clearly not customers. Group them by theme and suggest negative keywords.';
-const THEMES=[['JOBS','jobs · salary · apprenticeship'],['FREE','free · rental'],['DIY','diy · how to fix']];
-const NEG=[['jobs',1],['salary',1],['free',1],['diy',1],['emergency',0]];
+// 4-7) steps: download, ask for the numbers, make the calls (two scenes)
+const TABLE=`<div class="abs" style="left:40px;right:40px;top:96px;display:flex;flex-direction:column;gap:12px">
+  <div style="display:grid;grid-template-columns:2.2fr .8fr 1fr 1.3fr;gap:10px;padding:0 20px;font:700 22px Inter;color:#8E9890"><span>Campaign</span><span>Paid</span><span>Cost/paid</span><span>Call</span></div>
+  ${CAMPS.map(c=>`<div class="x-row" data-call="${c.call}" style="display:grid;grid-template-columns:2.2fr .8fr 1fr 1.3fr;gap:10px;align-items:center;padding:16px 20px;border-radius:18px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);font:800 28px Inter"><span>${c.n}</span><span>${c.paid}</span><span>${c.cost}</span><span class="x-call pill" style="justify-self:start;opacity:0;font-size:22px;padding:6px 14px;background:${CALLC[c.call]};color:#030403;white-space:nowrap">${c.call}</span></div>`).join('')}</div>`;
 const FX=[
- {k:'fix1',logo:LOGO_GADS,name:'Download',pill:'.CSV',mono:'SEARCH TERMS → DOWNLOAD',one:'Download the <b>search terms report</b>.',cue:/^C$/,
-  html:`<div class="abs" style="left:50px;right:50px;top:50px;padding:28px;border-radius:24px;background:rgba(0,0,0,.35);border:1.5px solid rgba(255,255,255,.16)">
-     <div style="display:flex;align-items:center;gap:14px">${LT(LOGO_GADS,48,13)}<div><div style="font:800 34px Inter">Search terms report</div><div class="mono" style="font-size:20px;color:#8E9890">LAST 30 DAYS · EXAMPLE</div></div>
-       <span class="x-btn pill" style="margin-left:auto;background:var(--lime);color:#030403;font-size:28px;font-weight:900">Download ↓</span></div></div>
-   <div class="abs x-chip" style="left:50px;top:250px;display:flex;align-items:center;gap:16px;padding:22px 28px;border-radius:22px;background:rgba(34,224,111,.12);border:3px solid #22E06F"><span style="font:900 40px Mont;color:var(--lime)">CSV</span><span style="font:800 34px Inter">search_terms.csv</span></div>
-   <div class="abs x-note" style="left:50px;top:380px;font:600 28px Inter;color:#A9B2AB">Remove client names before you upload.</div>`},
- {k:'fix2',logo:LOGO_AI,name:'Run the prompt',pill:'CHATGPT',mono:'UPLOAD + PROMPT',one:'AI groups the junk <b>by theme</b>.',cue:/^groups/,
-  html:`<div class="abs" style="left:50px;right:50px;top:40px;padding:22px 26px;border-radius:24px;background:rgba(0,0,0,.35);border:1.5px solid rgba(34,224,111,.5)">
-     <div style="display:flex;align-items:center;gap:12px"><span class="pill" style="font-size:22px;padding:6px 16px;background:rgba(255,255,255,.12);color:#fff">📎 search_terms.csv</span><span class="mono" style="font-size:20px;color:var(--lime)">PROMPT</span></div>
-     <div style="margin-top:12px;font:600 30px/1.35 Inter"><span class="x-typ"></span></div></div>
-   <div class="abs" style="left:50px;right:50px;top:300px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px">${THEMES.map(([h,ex])=>`<div class="x-th" style="padding:18px 20px;border-radius:20px;background:rgba(34,224,111,.12);border:2px solid #22E06F"><div style="font:900 36px Mont;color:var(--lime)">${h}</div><div style="margin-top:6px;font:600 22px Inter;color:#C8D0CA">${ex}</div></div>`).join('')}</div>`},
- {k:'fix3',logo:LOGO_GADS,name:'Check, then add',pill:'YOU DECIDE',mono:'KEYWORDS → NEGATIVE KEYWORDS',one:'One wrong negative can <b>block customers</b>.',cue:/^One/,
-  html:`<div class="abs mono" style="left:50px;top:40px;font-size:22px;color:#8E9890">SUGGESTED NEGATIVES · EXAMPLE</div>
-   <div class="abs" style="left:50px;right:50px;top:90px;display:flex;flex-direction:column;gap:12px">${NEG.map(([n,ok])=>`<div class="x-n" data-ok="${ok}" style="display:flex;align-items:center;gap:16px;padding:14px 22px;border-radius:18px;border:2px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05)"><span class="x-ic" style="width:30px;height:30px;display:flex"></span><span style="font:800 32px Inter;flex:1">${n}</span><span class="x-lb mono" style="font-size:20px;color:#8E9890"></span></div>`).join('')}</div>`},
+ {k:'fix1',logo:LOGO_GADS,name:'Download',pill:'SPEND + BILLING',mono:'SAME WEEK, BY CAMPAIGN',one:'Spend, signups and <b>billing</b>.',cue:/^billing/,
+  html:`<div class="abs mono" style="left:50px;top:40px;font-size:22px;color:#8E9890">YOUR EXPORTS · EXAMPLE</div>
+   <div class="abs" style="left:50px;right:50px;top:100px;display:flex;flex-direction:column;gap:16px">
+    ${[[LOGO_GADS,'google-ads-spend.csv'],[LOGO_META,'meta-spend.csv'],[CARD,'billing-paid.csv']].map(([l,f])=>`<div class="x-f" style="display:flex;align-items:center;gap:18px;padding:20px 24px;border-radius:22px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16)">${LT(l,52,14)}<span style="font:800 32px Inter">${f}</span></div>`).join('')}</div>`},
+ {k:'fix2',logo:LOGO_CLAUDE,name:'Ask Claude',pill:'2 NUMBERS',mono:'COST PER PAYING CUSTOMER',one:'Cost per <b>paying</b> customer. Trial to paid.',cue:/^campaign/,
+  html:`<div class="abs mono" style="left:50px;top:40px;font-size:22px;color:#8E9890;display:flex;align-items:center;gap:12px">${LT(LOGO_CLAUDE,40,11)}CLAUDE · EXAMPLE ANSWER</div>`+TABLE},
+ {k:'fix3',logo:LOGO_CLAUDE,name:'Scale or fix',pill:'THE CALL',mono:'UNDER TARGET? TRIALS UP, BUYERS FLAT?',one:'Under target: <b>scale</b>. Buyers flat: <b>fix</b>.',cue:/^Scale/,
+  html:`<div class="abs mono" style="left:50px;top:40px;font-size:22px;color:#8E9890">TARGET: $300 PER PAYING CUSTOMER · EXAMPLE</div>`+TABLE},
+ {k:'fix4',logo:LOGO_CLAUDE,name:'Hold or data',pill:'THE CALL',mono:'UNDER 10 BUYERS? NUMBERS DON\'T MATCH?',one:'Too early: <b>hold</b>. No match: <b>fix tracking</b>.',cue:/^Hold/,
+  html:`<div class="abs mono" style="left:50px;top:40px;font-size:22px;color:#8E9890">TARGET: $300 PER PAYING CUSTOMER · EXAMPLE</div>`+TABLE},
 ];
-const FS=FX.map((F,i)=>{const sc=itemScene(F.k,`STEP 0${i+1} / 03 · ${F.mono}`,F.logo,F.name,F.pill,i===1?'IN CHATGPT':'IN GOOGLE ADS',F.one);
-  $('.s-ui',sc).innerHTML=F.html+`
-   <div class="abs" style="left:50px;right:50px;bottom:40px">
-     <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="mono" style="font-size:22px;color:#8E9890">STEPS DONE</span><span class="r-c" style="font:900 52px Mont;color:var(--lime)">${i}/3</span></div>
-     <div style="display:flex;gap:10px;margin-top:12px">${FX.map((_,j)=>`<i class="r-d" data-j="${j}" style="flex:1;height:16px;border-radius:8px;background:${j<i?'#22E06F':'rgba(255,255,255,.14)'}"></i>`).join('')}</div></div>`;
+const FS=FX.map((F,i)=>{const sc=itemScene(F.k,`STEP 0${Math.min(i+1,3)} / 03`,F.logo,F.name,F.pill,F.mono,F.one);
+  $('.s-ui',sc).innerHTML=F.html+`<div class="abs" style="left:50px;right:50px;bottom:40px">
+     <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="mono" style="font-size:22px;color:#8E9890">STEPS DONE</span><span class="r-c" style="font:900 52px Mont;color:var(--lime)">${Math.min(i,2)}/3</span></div>
+     <div style="display:flex;gap:10px;margin-top:12px">${[0,1,2].map((_,j)=>`<i class="r-d" data-j="${j}" style="flex:1;height:16px;border-radius:8px;background:${j<Math.min(i,2)?'#22E06F':'rgba(255,255,255,.14)'}"></i>`).join('')}</div></div>`;
   return sc;});
 
-// 7) PAYOFF: junk blocked, wasted spend to zero
-const SPY=itemScene('payoff','THE PAYOFF',LOGO_GADS,'Junk blocked','5 MINUTES','EXAMPLE','Budget goes to <b>real buyers</b>.');
-$('.s-ui',SPY).innerHTML=`
- <div class="abs" style="left:40px;right:40px;top:36px;display:flex;flex-direction:column;gap:10px">${TERMS.slice(0,6).map(([q,c,j])=>ROW(q,c,'y-r',`data-j="${j||''}"`)).join('')}</div>
- <div class="abs" style="left:50px;right:50px;bottom:36px;display:flex;justify-content:space-between;align-items:baseline"><span class="mono" style="font-size:24px;color:#8E9890">WASTED NEXT WEEK</span><span class="y-w" style="font:900 72px Mont;color:var(--lime);font-variant-numeric:tabular-nums">$186</span></div>`;
+// 8) PAYOFF: budget follows paying customers
+const SPY=itemScene('payoff','THE PAYOFF',LOGO_CLAUDE,'Clear calls','EVERY MONDAY','EXAMPLE','Budget follows <b>paying customers</b>.');
+$('.s-ui',SPY).innerHTML=`<div class="abs mono" style="left:50px;top:40px;font-size:22px;color:#8E9890">BUDGET SPLIT · BEFORE → AFTER</div>
+ <div class="abs" style="left:50px;right:50px;top:100px;display:flex;flex-direction:column;gap:18px">
+  ${CAMPS.map((c,i)=>`<div style="display:flex;align-items:center;gap:18px"><span style="width:300px;font:800 28px Inter">${c.n}</span><div style="flex:1;height:34px;border-radius:17px;background:rgba(255,255,255,.08);overflow:hidden"><i class="y-b" data-a="${[25,45,10,20][i]}" data-b="${[60,10,15,15][i]}" style="display:block;height:100%;width:0;background:${i===0?'linear-gradient(90deg,#0E7A3C,#22E06F)':'#5A625C'}"></i></div><span class="y-p" style="width:80px;text-align:right;font:900 30px Mont">0%</span></div>`).join('')}</div>
+ <div class="abs y-n" style="left:50px;right:50px;bottom:40px;font:700 30px Inter;color:#C8D0CA">More budget where customers <b style="color:#fff">actually pay</b>.</div>`;
 
-// 8) RECAP
 const recap=mk(`<div class="scene" id="s-recap">
   <div class="abs mono" id="r-tag" style="top:330px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">RECAP · SAVE THIS</div>
-  <div class="abs" id="r-big" style="top:400px;left:60px;right:60px;text-align:center;font:900 100px/.96 Mont;letter-spacing:-.035em;text-transform:uppercase">3 steps.<br><span style="color:var(--lime)">5 minutes.</span></div>
-  <div class="abs" style="left:90px;right:90px;top:720px;display:flex;flex-direction:column;gap:22px">
-   ${['Download the report','Run the prompt','Check, then add negatives'].map(x=>`<div class="r-r" style="display:flex;align-items:center;gap:20px;padding:28px 30px;border-radius:26px;border:2px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06)"><span class="r-b" style="flex:none;width:56px;height:56px;border-radius:16px;border:4px solid #8A938C;display:flex;align-items:center;justify-content:center"></span><span style="font:800 42px Inter">${x}</span></div>`).join('')}</div>
+  <div class="abs" id="r-big" style="top:400px;left:60px;right:60px;text-align:center;font:900 100px/.96 Mont;letter-spacing:-.035em;text-transform:uppercase">5 minutes.<br><span style="color:var(--lime)">Every Monday.</span></div>
+  <div class="abs" style="left:90px;right:90px;top:720px;display:flex;flex-direction:column;gap:22px"><div class="r-r" style="display:flex;align-items:center;gap:20px;padding:28px 30px;border-radius:26px;border:2px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06)"><span class="r-b" style="flex:none;width:56px;height:56px;border-radius:16px;border:4px solid #8A938C;display:flex;align-items:center;justify-content:center"></span><span style="font:800 40px Inter">Download the numbers</span></div><div class="r-r" style="display:flex;align-items:center;gap:20px;padding:28px 30px;border-radius:26px;border:2px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06)"><span class="r-b" style="flex:none;width:56px;height:56px;border-radius:16px;border:4px solid #8A938C;display:flex;align-items:center;justify-content:center"></span><span style="font:800 40px Inter">Get cost per paying customer</span></div><div class="r-r" style="display:flex;align-items:center;gap:20px;padding:28px 30px;border-radius:26px;border:2px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06)"><span class="r-b" style="flex:none;width:56px;height:56px;border-radius:16px;border:4px solid #8A938C;display:flex;align-items:center;justify-content:center"></span><span style="font:800 40px Inter">Make one call per campaign</span></div></div>
 </div>`);
 scenesEl.appendChild(recap);
-const ANGLES=['Download report','Run the prompt','Check, then add'];
+
+const ANGLES=['Scale it','Fix it','Hold it','Get data'];
+const RECAP_CUES=()=>[W('recap',/^Download/),W('recap',/^Get/),W('recap',/^Make/)];
 
 /* ---------- CTA ---------- */
 const cta=mk(`<div class="scene" id="s-cta">
-  <div class="abs mono" style="top:250px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)" id="c-tag">COMMENT AUDIT FOR THE PROMPT</div>
+  <div class="abs mono" style="top:250px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)" id="c-tag">COMMENT SAAS FOR THE PROMPT</div>
   <div class="abs" id="c-grid" style="top:330px;left:90px;right:90px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
-   ${ANGLES.map((a,i)=>`<div class="c-g ghost" style="border-radius:28px;padding:18px 26px;display:flex;align-items:center;gap:20px${i===2?';grid-column:1/3;justify-content:center':''}"><span class="tile" style="width:64px;height:64px;border-radius:18px;font:700 26px Mono">${String(i+1).padStart(2,'0')}</span><span style="font:800 36px Inter">${a}</span></div>`).join('')}</div>
+   ${ANGLES.map((a,i)=>`<div class="c-g ghost" style="border-radius:28px;padding:18px 26px;display:flex;align-items:center;gap:20px"><span class="tile" style="width:64px;height:64px;border-radius:18px;font:700 26px Mono">${String(i+1).padStart(2,'0')}</span><span style="font:800 36px Inter">${a}</span></div>`).join('')}</div>
   <div class="abs title" id="c-t" style="top:1010px;left:0;right:0;text-align:center;font-size:110px">Follow for more</div>
-  <div class="abs" id="c-s" style="top:1135px;left:0;right:0;text-align:center;font-family:ISerif;font-size:80px;color:#D8E0DA">send this to a Google Ads user</div>
+  <div class="abs" id="c-s" style="top:1135px;left:0;right:0;text-align:center;font-family:ISerif;font-size:80px;color:#D8E0DA">send this to a SaaS founder</div>
   <div class="abs pill" id="c-btn" style="top:1290px;left:50%;width:380px;margin-left:-190px;height:110px;justify-content:center;font-size:44px;font-weight:900;background:var(--lime);color:#030403">Follow</div>
   <svg class="abs" id="c-cur" style="top:1352px;left:700px" width="70" height="80" viewBox="0 0 70 80"><path d="M6 4 L6 62 L22 48 L34 74 L46 68 L34 43 L56 43 Z" fill="#fff" stroke="#000" stroke-width="4" stroke-linejoin="round"/></svg>
 </div>`);
@@ -198,13 +207,13 @@ scenesEl.appendChild(cta);
 /* ---------- timeline (voice-driven, no title card) ---------- */
 const S=D.segs, segBy=Object.fromEntries(S.map(s=>[s.key,s]));
 const LEAD=0.18;
-const order=['pain','poke','fix0','fix1','fix2','fix3','payoff','recap','cta'];
+const order=['pain', 'poke', 'fix0', 'fix1', 'fix2', 'fix3', 'fix4', 'payoff', 'recap', 'cta'];
 const els={pain,poke:SPK,fix0,payoff:SPY,recap,cta}; FS.forEach((e,i)=>els['fix'+(i+1)]=e);
 const starts=order.map((k,i)=>i===0?0:segBy[k].start-LEAD);
 const END=D.end;
 const TR=0.42;
-const TRTYPE=['whip','zoom','whip','whip','whip','zoom','wipe','zoom'];
-const PB=order.indexOf('fix1'), NP=3;
+const TRTYPE=['whip', 'zoom', 'whip', 'whip', 'whip', 'whip', 'zoom', 'wipe', 'zoom'];
+const PB=order.indexOf('fix1'), NP=4;
 for(let i=0;i<NP;i++) $('#prog').appendChild(mk('<div class="seg"><i></i></div>'));
 const capWords=[];
 S.forEach(s=>s.words.forEach((w,k)=>{const nx=s.words[k+1];capWords.push({w:w.w.replace(/[.,]$/,''),s:w.s,e:nx?nx.s:s.start+s.dur,seg:s.key,brk:/[.,!?]$/.test(w.w)});}));
@@ -244,36 +253,41 @@ function renderItemShell(t,el){
 }
 const sceneStart=k=>starts[order.indexOf(k)];
 function renderPoke(t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.45;const s0=sceneStart('poke')+.45;
-  const cue={JOBS:W('poke',/^Jobs/)||8.5,FREE:W('poke',/^Free/)||8.9,DIY:W('poke',/^D$/)||9.2};
-  $$('.k-r',U).forEach((r,i)=>{rise(r,u,.1+i*.08,.3,20);const j=r.dataset.j;const on=j&&u>=cue[j]-s0;
-    r.style.borderColor=on?'rgba(255,255,255,.5)':'rgba(255,255,255,.1)';r.style.background=on?'rgba(255,255,255,.16)':'rgba(255,255,255,.04)';r.style.opacity=on?1:(j?.9:.55);});
-  const ea=(W('poke',/^eating/)||11.7)-s0; $('.k-w',U).textContent='$'+Math.round(186*eo(P(u,cue.JOBS-s0,ea-(cue.JOBS-s0)+.3)));
+  rise($('.k-a',U),u,.2,.4,30); rise($('.k-b',U),u,.4,.4,30);
+  pop($('.k-s1',U),u,(W('poke',/^scale/)||11.4)-s0,.4,.5); pop($('.k-s2',U),u,(W('poke',/^fewest/)||13.4)-s0,.4,.5);
+  rise($('.k-n',U),u,(W('poke',/^fewest/)||13.4)-s0+.4,.4,20);
 }
 function renderFix0(t,el){
   rise($('#f-tag',el),t,0,.3,20);
   const pb=eo5(P(t,.05,.35)); st($('#f-big',el),{opacity:clamp(pb*2),transform:`scale(${lerp(1.2,1,pb)})`});
-  $$('.f-c',el).forEach((c,i)=>pop(c,t,.4+i*.15,.35,.5));
+  pop($('.f-l',el),t,(W('fix0',/^Claude/)||16.4)-sceneStart('fix0')-.2,.4,.5);
+  const ws=segBy.fix0.words; const cues=[/^Scale/,/^fix/,/^hold/,/^get/].map(r=>{const w=ws.find((w,j)=>j>12&&r.test(w.w));return w?w.s:null;});
+  $$('.f-c',el).forEach((c,i)=>pop(c,t,(cues[i]||18+i*.6)-sceneStart('fix0')-.05,.35,.5));
 }
+const callAt={};
 function renderFix(i,t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.45;const F=FX[i];
   const fx=Math.max(1.2,(W(F.k,F.cue)||0)-sceneStart(F.k)-.45);
-  if(i===0){const b=$('.x-btn',U);pop(b,u,.4,.35,.5);b.style.transform+=` scale(${1-Math.sin(P(u,fx-.4,.2)*Math.PI)*.12})`;pop($('.x-chip',U),u,fx,.45,.5);rise($('.x-note',U),u,fx+.5,.4,20);}
-  if(i===1){typed($('.x-typ',U),PROMPT,u,.3,60);$$('.x-th',U).forEach((c,j)=>pop(c,u,fx+j*.2,.4,.5));}
-  if(i===2){$$('.x-n',U).forEach((r,j)=>{rise(r,u,.1+j*.12,.3,20);const ok=r.dataset.ok==='1';const done=u>=.9+j*.18;const flag=!ok&&u>=fx;
-    $('.x-ic',r).innerHTML=done?(ok?CHECK:(flag?XMARK:'')):'';$('.x-lb',r).textContent=flag?'KEEP · REAL CUSTOMERS SEARCH THIS':(done&&ok?'ADD':'');
-    r.style.borderColor=flag?'rgba(255,255,255,.55)':(done&&ok?'rgba(34,224,111,.6)':'rgba(255,255,255,.14)');r.style.background=flag?'rgba(255,255,255,.14)':(done&&ok?'rgba(34,224,111,.10)':'rgba(255,255,255,.05)');});}
-  const on=u>=fx+.35; $('.r-c',U).textContent=(on?i+1:i)+'/3';
-  $$('.r-d',U).forEach(d=>{const j=+d.dataset.j;d.style.background=(j<i||(j===i&&on))?'#22E06F':'rgba(255,255,255,.14)';});
+  if(i===0){$$('.x-f',U).forEach((c,j)=>pop(c,u,.3+j*.5,.4,.5));}
+  if(i>=1){
+    const T=t+sceneStart(F.k);
+    const at={'SCALE':W('fix3',/^Scale/),'FIX':W('fix3',/^Fix/),'HOLD':W('fix4',/^Hold/),'GET DATA':W('fix4',/^Get/)};
+    $$('.x-row',U).forEach((r,j)=>{rise(r,u,.1+j*.12,.3,20);const call=r.dataset.call;const show=i>=2&&at[call]!=null&&T>=at[call]-.05;
+      const c=$('.x-call',r); c.style.opacity=show?1:0; c.style.transform=`scale(${show?1+Math.sin(clamp((T-at[call])/.3)*Math.PI)*.12:1})`;
+      const lit=show&&((i===2&&(call==='SCALE'||call==='FIX'))||(i===3&&(call==='HOLD'||call==='GET DATA')));
+      r.style.borderColor=lit?'rgba(34,224,111,.7)':'rgba(255,255,255,.12)'; r.style.background=lit?'rgba(34,224,111,.10)':'rgba(255,255,255,.05)';});
+  }
+  const si=Math.min(i,2), on=i!==2&&u>=fx+.35; $('.r-c',U).textContent=(on?si+1:si)+'/3';
+  $$('.r-d',U).forEach(d=>{const j=+d.dataset.j;d.style.background=(j<si||(j===si&&on))?'#22E06F':'rgba(255,255,255,.14)';});
 }
 function renderPayoff(t,el){renderItemShell(t,el);const U=$('.s-ui',el);const u=t-.45;
-  const bl=(W('payoff',/^blocked/)||32.1)-sceneStart('payoff')-.45;
-  $$('.y-r',U).forEach((r,i)=>{rise(r,u,.05+i*.06,.3,20);const j=r.dataset.j;const k=P(u,bl-.3+i*.08,.3);
-    if(j){r.style.opacity=lerp(1,.3,k);r.firstChild.style.textDecoration=k>0?'line-through':'none';}else{r.style.borderColor=k>0?'rgba(34,224,111,.6)':'rgba(255,255,255,.1)';}});
-  $('.y-w',U).textContent='$'+Math.round(lerp(186,0,eio(P(u,bl-.3,1.0))));
+  const k=eio(P(u,1.0,1.6)); const g=eo(P(u,.2,.5));
+  $$('.y-b',U).forEach((b,i)=>{const v=lerp(+b.dataset.a,+b.dataset.b,k)*g; b.style.width=v+'%'; b.parentNode.nextSibling.textContent=Math.round(v)+'%';});
+  rise($('.y-n',U),u,2.8,.4,20);
 }
 function renderRecap(t,el){
   rise($('#r-tag',el),t,0,.3,20);
   const pb=eo5(P(t,.05,.4)); st($('#r-big',el),{opacity:clamp(pb*2),transform:`scale(${lerp(1.15,1,pb)})`});
-  const T=t+sceneStart('recap'); const cues=[W('recap',/^Download/),W('recap',/^Run/),W('recap',/^Check/)];
+  const T=t+sceneStart('recap'); const cues=RECAP_CUES();
   $$('.r-r',el).forEach((r,i)=>{rise(r,t,.15+i*.1,.35,30);const on=cues[i]!=null&&T>=cues[i]-.05;const b=$('.r-b',r);
     b.style.borderColor=on?'#22E06F':'#8A938C';b.style.background=on?'#22E06F':'transparent';
     b.innerHTML=on?'<svg width="34" height="34" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="#030403" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>':'';

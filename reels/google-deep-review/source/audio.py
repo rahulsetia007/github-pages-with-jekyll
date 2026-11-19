@@ -57,34 +57,31 @@ def tick(at, f=1500, g=.25):
 def wt(seg, pre):
     return next((w['s'] for w in S[seg]['words'] if w['w'].startswith(pre)), None)
 st0 = lambda k: S[k]['start'] - .18
-# PAIN: rows flicking past, minutes counter, thud on "week?", ping on the topic banner
-wk = wt('pain', 'week') or 2.1
-for k in range(16): tick(k * wk / 16, 2800, .06)
-hl2 = int(.5 * sr); ht2 = np.arange(hl2) / sr
-place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), wk, .4)
-tick(wt('pain', 'Here') or 2.7, 2400, .3)
-# POKE: each junk type lights up, then the waste counter
-for pre in ['Jobs', 'Free', 'D']:
-    c = wt('poke', pre)
-    if c: tick(c, 900, .25)
-ea = wt('poke', 'eating') or 11.7
-for k in range(8): tick((wt('poke', 'Jobs') or 8.5) + k * (ea - (wt('poke', 'Jobs') or 8.5)) / 8, 2200, .08)
+# PAIN: underline on "mistake", flag on "see", ping on the topic
+mi, se = wt('pain', 'mistake') or 1.57, wt('pain', 'see') or 2.9
+tick(mi, 2200, .25); tick(se - .15, 900, .3); tick(wt('pain', 'Here') or 3.33, 2400, .3)
+# POKE: trust drains
+s = wt('poke', 'stops') or 10.2
+for k in range(6): tick(s + k * .16, 1600 - k * 150, .12)
 # FIX intro
-f0 = st0('fix0')
-for k in range(3): tick(f0 + .4 + k * .15, 1700 + k * 200, .2)
+tick((wt('fix0', 'Google') or 14.1) - .1, 1800, .2)
+c = wt('fix0', 'two') or 15.7
+tick(c, 2400, .25); tick(c + .15, 2700, .25)
 # steps
-c = wt('fix1', 'C') or st0('fix1') + 3; tick(c - .4, 2200, .25); tick(c, 2000, .3); tick(c + .35, 2600, .22)
-c = wt('fix2', 'groups') or st0('fix2') + 3.8
-for k in range(3): tick(c + k * .2, 1800 + k * 200, .25)
-c = wt('fix3', 'One') or st0('fix3') + 2.8
-for k in range(4): tick(st0('fix3') + .45 + .9 + k * .18, 2000, .12)
-tick(c, 900, .3)
-# PAYOFF: junk struck out, counter to zero
-bl = wt('payoff', 'blocked') or 32.1
-for k in range(6): tick(bl - .3 + k * .08, 1600, .12)
-tick(bl + .8, 2600, .3)
+tick((wt('fix1', 'Sign') or 18.1), 2000, .2)
+u = wt('fix1', 'upload') or 19.6
+for k in range(6): tick(u + k * .18, 1700 + k * 120, .1)
+for pre in ['weak', 'missing', 'gaps']:
+    c = wt('fix2', pre)
+    if c: tick(c - .05, 900, .28)
+f = wt('fix3', 'fix') or 29.0
+for k in range(3): tick(f + k * .25, 2400 + k * 150, .2)
+tick((wt('fix3', 'double') or 30.35) - .05, 2000, .22)
+# PAYOFF
+for k in range(3): tick(st0('payoff') + .7 + k * .35, 2600, .15)
+tick(st0('payoff') + 2.6, 3000, .25)
 # RECAP
-for pre in ['Download', 'Run', 'Check']:
+for pre in ['Upload', 'Read', 'Fix']:
     c = wt('recap', pre)
     if c: tick(c, 2600, .22); tick(c + .06, 3300, .16)
 tick(S['cta']['start'] - .18 + 2.6, 2200, .35)                                       # Follow tap
