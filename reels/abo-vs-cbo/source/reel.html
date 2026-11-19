@@ -1,0 +1,215 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- ABO vs CBO (Meta ads). Fast-cut style: a new shot on every phrase, one metaphor (budget = water, ad sets = glasses). Pain, Poke, Fix, Payoff, Recap, CTA. -->
+<style>
+@font-face{font-family:Inter;src:url(fonts/Inter.ttf);font-weight:100 900}
+@font-face{font-family:Mont;src:url(fonts/Montserrat.ttf);font-weight:100 900}
+@font-face{font-family:Mono;src:url(fonts/SpaceMono-Bold.ttf)}
+@font-face{font-family:ISerif;src:url(fonts/InstrumentSerif-Italic.ttf);font-style:normal;font-weight:400}
+:root{
+  --ink:#030403; --ink2:#0A0D0B; --line:rgba(255,255,255,.08);
+  --text:#F5F8F6; --muted:#8A938C; --lime:#22E06F; --violet:#0E7A3C; --deep:#06331A;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ink)}
+body{font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+#stage{position:absolute;inset:0;overflow:hidden}
+.bg{position:absolute;inset:-200px}
+.blob{position:absolute;border-radius:50%;filter:blur(140px);opacity:.42}
+.grid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:90px 90px;-webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 45%,#000 30%,transparent 80%);opacity:.55}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse 85% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.65) 100%);pointer-events:none}
+.scene{position:absolute;inset:0;will-change:transform,filter,opacity}
+.abs{position:absolute}
+.mono{font-family:Mono,monospace;letter-spacing:.04em}
+#prog{position:absolute;top:118px;left:90px;right:90px;display:flex;gap:12px}
+#prog .seg{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
+#prog .seg i{display:block;height:100%;width:0;background:var(--lime);border-radius:8px;box-shadow:0 0 18px var(--lime)}
+.card{position:absolute;left:90px;width:900px;border-radius:44px;background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.14);box-shadow:0 40px 120px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.18);backdrop-filter:blur(30px);overflow:hidden}
+.pill{display:inline-flex;align-items:center;gap:12px;padding:14px 26px;border-radius:999px;font-weight:700;font-size:30px}
+.title{font-family:Mont;font-weight:900;font-size:128px;line-height:.92;letter-spacing:-.035em}
+.sub{font-size:44px;font-weight:500;color:#C8D0CA;line-height:1.25}
+.sub b{color:var(--lime);font-weight:800}
+.bar{height:22px;border-radius:12px;background:rgba(255,255,255,.14)}
+#cap{position:absolute;left:60px;right:60px;top:1500px;text-align:center;font-family:Mont;font-weight:900;font-size:66px;line-height:1.1;letter-spacing:-.01em;text-transform:uppercase}
+#cap span{display:inline-block;margin:0 10px;text-shadow:0 6px 30px rgba(0,0,0,.7)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;mix-blend-mode:overlay}
+#wipe{position:absolute;left:0;right:0;height:2400px;top:-2400px;background:var(--lime)}
+.ghost{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.16)}
+.tile{display:inline-flex;align-items:center;justify-content:center;flex:none;background:#fff;color:#030403;font-family:Mont;font-weight:900;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+</style></head>
+<body><div id="stage">
+  <div class="bg" id="bg">
+    <div class="blob" id="b1" style="width:900px;height:900px;background:var(--violet)"></div>
+    <div class="blob" id="b2" style="width:800px;height:800px;background:var(--deep)"></div>
+    <div class="blob" id="b3" style="width:600px;height:600px;background:var(--lime);opacity:.18"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div id="scenes"></div>
+  <div id="prog"></div>
+  <div id="cap"></div>
+  <div id="wipe"></div>
+  <div id="flash"></div>
+  <div class="vig"></div>
+</div>
+<script>
+const D = window.__DATA__;
+const $ = (s,el=document)=>el.querySelector(s);
+const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-clamp(t),3);
+const eo5=t=>1-Math.pow(1-clamp(t),5);
+const eio=t=>{t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+const back=t=>{t=clamp(t);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
+const P=(t,a,d)=>clamp((t-a)/d);
+function st(el,o){for(const k in o) el.style[k]=o[k];}
+function pop(el,t,a,d=.45,from=.6){const p=P(t,a,d);st(el,{opacity:clamp(p*3),transform:`scale(${lerp(from,1,back(p))})`});}
+function rise(el,t,a,d=.5,dy=60){const p=eo(P(t,a,d));st(el,{opacity:p,transform:`translateY(${(1-p)*dy}px)`,filter:`blur(${(1-p)*10}px)`});}
+function typed(el,txt,t,a,cps=26){const n=Math.floor(clamp((t-a)*cps,0,txt.length));el.textContent=txt.slice(0,n);return n<txt.length;}
+function mk(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
+const scenesEl=$('#scenes');
+
+/* ---------- content: fast-cut shots, one per phrase ---------- */
+const S=D.segs, segBy=Object.fromEntries(S.map(s=>[s.key,s]));
+const W=(seg,re,n=0)=>{const ws=segBy[seg].words.filter(x=>re.test(x.w));return ws[n]?ws[n].s:null;};
+let _gid=0;
+const LT=(svg,size,r)=>{const id='g'+(++_gid);return `<span class="tile" style="width:${size}px;height:${size}px;border-radius:${r}px;padding:${Math.round(size*.17)}px;background:#fff">${svg.replace(/igg/g,id)}</span>`;};
+const LOGO_META=`<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0081FB" d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303zm10.16 2.053c1.147 0 2.188.758 2.992 1.999 1.132 1.748 1.647 4.195 1.647 6.4 0 1.548-.368 2.9-1.839 2.9-.58 0-1.027-.23-1.664-1.004-.496-.601-1.343-1.878-2.832-4.358l-.617-1.028a44.908 44.908 0 0 0-1.255-1.98c.07-.109.141-.224.211-.327 1.12-1.667 2.118-2.602 3.358-2.602zm-10.201.553c1.265 0 2.058.791 2.675 1.446.307.327.737.871 1.234 1.579l-1.02 1.566c-.757 1.163-1.882 3.017-2.837 4.338-1.191 1.649-1.81 1.817-2.486 1.817-.524 0-1.038-.237-1.383-.794-.263-.426-.464-1.13-.464-2.046 0-2.221.63-4.535 1.66-6.088.454-.687.964-1.226 1.533-1.533a2.264 2.264 0 0 1 1.088-.285z"/></svg>`;
+const XM=`<svg width="100%" height="100%" viewBox="0 0 26 26"><path d="M6 6l14 14M20 6L6 20" stroke="#030403" stroke-width="4.5" stroke-linecap="round"/></svg>`;
+
+// cue times (word starts)
+const C={
+  ninety:W('pain',/^ninety/), one:W('pain',/^one/), other:W('pain',/^The/), never:W('pain',/^Never/), chance:W('pain',/^chance/),
+  bug:W('pain2',/^That/), sw:W('pain2',/^It's/), swW:W('pain2',/^switch/), abo:W('pain2',/^ABO/), cbo:W('pain2',/^CBO/),
+  pick:W('poke',/^Pick/), wrong:W('poke',/^wrong/), best:W('poke',/^your/), dies:W('poke',/^dies/), tested:W('poke',/^tested/),
+};
+const END=D.end;
+
+/* headline layer: small lead-in word + big punch line, swapped on every phrase */
+const HL=[
+  {a:0,            lead:'meta spent',      big:'<span style="color:var(--lime)">90%</span>', count:true},
+  {a:C.one-.12,    lead:'of your budget on',big:'ONE AD <span style="color:var(--lime)">SET.</span>'},
+  {a:C.other-.1,   lead:'the other two?',  big:'NEVER <span style="color:var(--lime)">TESTED.</span>'},
+  {a:C.sw-.08,     lead:"it's",            big:'ONE <span style="color:var(--lime)">SWITCH.</span>'},
+  {a:C.abo-.1,     lead:'',                big:'<span class="h-abo">ABO</span> <span class="h-or" style="font-size:.5em;color:#8A938C">or</span> <span class="h-cbo" style="color:var(--lime)">CBO?</span>'},
+  {a:C.pick-.1,    lead:'pick the',        big:'WRONG <span style="color:var(--lime)">ONE…</span>'},
+  {a:C.best-.1,    lead:'and your best ad',big:'<span style="color:var(--lime)">DIES.</span>'},
+];
+const hlEls=HL.map(h=>{const e=mk(`<div class="scene"><div class="abs h-l mono" style="top:250px;left:0;right:0;text-align:center;font-size:40px;color:#AEB7B0;text-transform:lowercase">${h.lead}</div>
+  <div class="abs h-b" style="top:310px;left:30px;right:30px;text-align:center;font:900 ${h.count?190:118}px/.95 Mont;letter-spacing:-.035em;text-transform:uppercase">${h.big}</div></div>`);scenesEl.appendChild(e);return e;});
+
+/* visual 1: three ad-set glasses, budget pours into one */
+const CUPS=['Ad set A','Ad set B','Ad set C'];
+const vCups=mk(`<div class="scene">
+  <div class="abs v-meta" style="left:90px;top:640px;display:flex;align-items:center;gap:14px">${LT(LOGO_META,64,18)}<span class="mono" style="font-size:24px;color:#8E9890">$500 BUDGET · EXAMPLE</span></div>
+  <i class="abs v-pour" style="left:${150+95}px;top:740px;width:28px;height:0;border-radius:14px;background:linear-gradient(#22E06F,#0E7A3C)"></i>
+  <div class="abs" style="left:90px;right:90px;top:880px;display:flex;justify-content:space-between">
+  ${CUPS.map((c,i)=>`<div class="v-c" style="width:250px;text-align:center">
+     <div style="position:relative;height:380px;border:6px solid rgba(255,255,255,.55);border-top:none;border-radius:0 0 46px 46px;overflow:hidden;background:rgba(255,255,255,.04)">
+       <i class="v-w" style="position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(#22E06F,#0E7A3C)"></i>
+       <i class="v-wave" style="position:absolute;left:-20px;right:-20px;height:16px;border-radius:50%;background:#5BF59A;opacity:0"></i></div>
+     <div style="margin-top:22px;font:800 34px Inter">${c}</div>
+     <div class="v-d" style="font:900 56px Mont;color:var(--lime)">$0</div>
+     <div class="v-x pill" style="margin-top:8px;opacity:0;background:#F5F8F6;color:#030403;font-size:22px;font-weight:900;padding:8px 16px">0 SALES</div></div>`).join('')}</div></div>`);
+scenesEl.appendChild(vCups);
+function rCups(t,el){
+  pop($('.v-meta',el),t,.05,.35,.6);
+  const fill=eio(P(t,.15,2.3)); const share=[.9,.05,.05];
+  $('.v-pour',el).style.height=(t<2.5?eo(P(t,.1,.3))*140:Math.max(0,140*(1-P(t,2.5,.25))))+'px';
+  $$('.v-c',el).forEach((c,i)=>{const lv=fill*share[i];
+    $('.v-w',c).style.height=(lv*100/.9*.92)+'%'; const wv=$('.v-wave',c); wv.style.bottom=`calc(${lv*100/.9*.92}% - 8px)`; wv.style.opacity=lv>.02?.7:0;
+    $('.v-d',c).textContent='$'+Math.round(500*lv);
+    const dead=i>0&&t>=C.never-.05; c.style.opacity=dead?lerp(1,.38,P(t,C.never,.4)):1;
+    pop($('.v-x',c),t,C.never+.15+(i-1)*.12,.35,.5); if(i===0)$('.v-x',c).style.opacity=0;
+    c.style.transform=i>0&&t>C.other&&t<C.never?`translateX(${Math.sin(t*60)*4}px)`:'none';});
+}
+
+/* shock frame: full-screen lime */
+const vBug=mk(`<div class="scene" style="background:#22E06F"><div class="abs b-t" style="top:720px;left:0;right:0;text-align:center;font:900 190px/.9 Mont;letter-spacing:-.04em;color:#030403;text-transform:uppercase">NOT A<br>BUG.</div>
+  <div class="abs b-s mono" style="top:1130px;left:0;right:0;text-align:center;font-size:36px;color:#030403">IT'S A SETTING</div></div>`);
+scenesEl.appendChild(vBug);
+function rBug(t,el){const p=eo5(P(t,0,.25)); st($('.b-t',el),{transform:`scale(${lerp(1.35,1,p)})`}); rise($('.b-s',el),t,.25,.3,20);}
+
+/* visual 2: the switch (example settings card) */
+const vSw=mk(`<div class="scene"><div class="abs" style="left:90px;right:90px;top:700px;padding:40px;border-radius:40px;background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.16)">
+  <div style="display:flex;align-items:center;gap:16px">${LT(LOGO_META,60,16)}<span class="mono" style="font-size:24px;color:#8E9890">CAMPAIGN SETTINGS · EXAMPLE</span></div>
+  <div style="margin-top:40px;display:flex;align-items:center;justify-content:space-between;gap:20px">
+   <div><div style="font:800 44px Inter">Advantage campaign budget</div><div style="margin-top:8px;font:600 30px Inter;color:#AEB7B0">One budget, Meta splits it</div></div>
+   <div class="s-tg" style="flex:none;width:150px;height:84px;border-radius:42px;background:rgba(255,255,255,.18);position:relative"><i class="s-k" style="position:absolute;top:8px;left:8px;width:68px;height:68px;border-radius:50%;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.4)"></i></div></div></div>
+  <div class="abs s-hand" style="left:780px;top:1010px;font-size:110px;opacity:0">👆</div></div>`);
+scenesEl.appendChild(vSw);
+function rSw(t,el){const T=t+C.sw-.08; const tap=C.swW;
+  const on=T>=tap; const p=eo(P(T,tap,.2)); $('.s-k',el).style.left=lerp(8,74,p)+'px'; $('.s-tg',el).style.background=on?'#22E06F':'rgba(255,255,255,.18)';
+  const h=$('.s-hand',el); h.style.opacity=clamp(P(T,tap-.35,.15))*(1-P(T,tap+.3,.2)); h.style.transform=`translateY(${(1-eo(P(T,tap-.35,.3)))*80-(T>tap-.05&&T<tap+.1?14:0)}px)`;}
+
+/* visual 3: ABO vs CBO side by side */
+const SIDE=(k,l1,l2,on)=>`<div class="a-s" data-k="${k}" style="flex:1;padding:34px 28px;border-radius:34px;background:${on?'rgba(34,224,111,.10)':'rgba(255,255,255,.06)'};border:2px solid ${on?'rgba(34,224,111,.6)':'rgba(255,255,255,.18)'};text-align:center">
+  <div style="font:900 96px Mont;color:${on?'var(--lime)':'#fff'}">${k}</div>
+  <div style="margin-top:14px;display:flex;justify-content:center;gap:12px">${[0,1,2].map(i=>`<i style="width:46px;height:${on?[90,40,20][i]:56}px;align-self:flex-end;border-radius:0 0 12px 12px;border:4px solid rgba(255,255,255,.55);border-top:none;background:linear-gradient(transparent 30%,${on?'#22E06F':'#8A938C'} 30%)"></i>`).join('')}</div>
+  <div style="margin-top:20px;font:800 34px/1.2 Inter">${l1}</div><div style="margin-top:6px;font:600 28px Inter;color:#AEB7B0">${l2}</div></div>`;
+const vAB=mk(`<div class="scene"><div class="abs" style="left:70px;right:70px;top:720px;display:flex;gap:30px">
+  ${SIDE('ABO','You split it','budget per ad set',false)}${SIDE('CBO','Meta splits it','one campaign budget',true)}</div></div>`);
+scenesEl.appendChild(vAB);
+function rAB(t,el){const T=t+C.abo-.1; const s=$$('.a-s',el);
+  pop(s[0],T,C.abo-.05,.35,.6); pop(s[1],T,C.cbo-.05,.35,.6);
+  const pk=T>=C.pick-.1; // poke: cards flip back and forth like a coin toss, then one gets the X
+  if(pk){const f=P(T,C.pick,0.9); s.forEach((e,i)=>{const lit=Math.floor(f*6)%2===i&&f<1; e.style.transform=`scale(${lit?1.05:.97})`; e.style.opacity=lit||f>=1?1:.55;});}
+}
+
+/* visual 4: your best ad, never tested */
+const vAd=mk(`<div class="scene"><div class="abs d-c" style="left:200px;right:200px;top:640px;border-radius:40px;overflow:hidden;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.18)">
+  <div style="height:380px;background:linear-gradient(135deg,#0E7A3C,#06331A);display:flex;align-items:center;justify-content:center;font:900 70px Mont;color:#fff">YOUR BEST AD</div>
+  <div style="padding:26px 30px;display:flex;justify-content:space-between"><div><div class="mono" style="font-size:22px;color:#8E9890">SPEND</div><div style="font:900 56px Mont">$0</div></div>
+   <div><div class="mono" style="font-size:22px;color:#8E9890">PEOPLE REACHED</div><div style="font:900 56px Mont">0</div></div></div></div>
+  <div class="abs d-st" style="left:0;right:0;top:920px;margin:0 auto;width:fit-content;padding:18px 40px;border:8px solid #F5F8F6;border-radius:20px;font:900 84px Mont;color:#F5F8F6;transform:rotate(-8deg);opacity:0;background:rgba(3,4,3,.55)">NEVER TESTED</div>
+  <div class="abs pill d-n" style="top:1290px;left:0;right:0;margin:0 auto;width:fit-content;background:var(--lime);color:#030403;font-size:36px;font-weight:900;white-space:nowrap;box-shadow:0 0 40px rgba(34,224,111,.6);opacity:0">WHICH ONE TO USE, WHEN ↓</div></div>`);
+scenesEl.appendChild(vAd);
+function rAd(t,el){const T=t+C.best-.1;
+  rise($('.d-c',el),T,C.best-.1,.3,40); const g=P(T,C.dies,.5); $('.d-c',el).style.filter=`grayscale(${g}) brightness(${lerp(1,.5,g)})`;
+  const s=P(T,C.tested-.05,.25); st($('.d-st',el),{opacity:clamp(s*3),transform:`rotate(-8deg) scale(${lerp(1.8,1,eo5(s))})`});
+  pop($('.d-n',el),T,C.tested+.55,.4,.6);}
+
+/* visual layers with their time windows */
+const VL=[
+  {el:vCups,a:0,b:C.bug-.08,r:rCups},
+  {el:vBug,a:C.bug-.08,b:C.sw-.08,r:rBug},
+  {el:vSw,a:C.sw-.08,b:C.abo-.1,r:rSw},
+  {el:vAB,a:C.abo-.1,b:C.best-.1,r:rAB},
+  {el:vAd,a:C.best-.1,b:END+1,r:rAd},
+];
+
+/* captions (house style, 3 words, current word lime) */
+const capWords=[];
+S.forEach(s=>s.words.forEach((w,k)=>{const nx=s.words[k+1];capWords.push({w:w.w.replace(/[.,]$/,''),s:w.s,e:nx?nx.s:s.start+s.dur,seg:s.key,brk:/[.,!?]$/.test(w.w)});}));
+const chunks=[];let cur=[];
+capWords.forEach((w,i)=>{cur.push(w);const nx=capWords[i+1];if(cur.length>=3||w.brk||!nx||nx.seg!==w.seg){chunks.push(cur);cur=[];}});
+
+function renderBg(t){
+  st($('#b1'),{left:`${300+Math.sin(t*.35)*180}px`,top:`${200+Math.cos(t*.28)*160}px`});
+  st($('#b2'),{left:`${500+Math.cos(t*.3)*200}px`,top:`${1300+Math.sin(t*.4)*180}px`});
+  st($('#b3'),{left:`${100+Math.sin(t*.5+1)*120}px`,top:`${900+Math.cos(t*.45)*200}px`});
+  st($('#grid'),{transform:`translateY(${(t*30)%90}px)`});
+}
+const cuts=[...new Set([...HL.map(h=>h.a),...VL.map(v=>v.a)])].filter(x=>x>0);
+window.seek=function(t){
+  renderBg(t);
+  const shock=t>=VL[1].a&&t<VL[1].b;
+  HL.forEach((h,i)=>{const b=i+1<HL.length?HL[i+1].a:END+1; const el=hlEls[i]; const vis=t>=h.a&&t<b&&!shock; el.style.display=vis?'block':'none'; if(!vis)return;
+    const lt=t-h.a; const p=eo5(P(lt,0,.22)); st($('.h-b',el),{transform:`scale(${lerp(1.18,1,p)})`,filter:`blur(${(1-p)*8}px)`,opacity:clamp(p*2)}); rise($('.h-l',el),lt,0,.2,16);
+    if(h.count){$('.h-b span',el).textContent=Math.round(90*eo(P(t,0,C.ninety+.35)))+'%';}
+    if(i===4){const T=t; pop($('.h-abo',el),T,C.abo-.05,.3,.6); pop($('.h-or',el),T,C.abo+.3,.25,.6); pop($('.h-cbo',el),T,C.cbo-.05,.3,.6); st($('.h-b',el),{opacity:1,filter:'none'});}
+  });
+  VL.forEach(v=>{const vis=t>=v.a&&t<v.b; v.el.style.display=vis?'block':'none'; if(!vis)return; const lt=t-v.a;
+    if(v.a>0){const p=eo5(P(lt,0,.2)); st(v.el,{transform:`scale(${lerp(1.06,1,p)})`});} v.r(lt,v.el);});
+  const cap=$('#cap'); const ch=chunks.find(c=>t>=c[0].s-.05&&t<c[c.length-1].e+.08);
+  if(!ch||shock){cap.innerHTML='';} else {
+    const pin=eo5(P(t,ch[0].s-.05,.18));
+    cap.innerHTML=ch.map(w=>{const on=t>=w.s&&t<w.e+.05; return `<span style="color:${on?'#22E06F':'#fff'};transform:scale(${on?1.08:1})">${w.w}</span>`}).join(' ');
+    st(cap,{transform:`translateY(${(1-pin)*30}px) scale(${lerp(.9,1,pin)})`,opacity:pin});
+  }
+  let fl=0; cuts.forEach(c=>{const d=Math.abs(t-c); if(d<.08) fl=Math.max(fl,(1-d/.08)*.35);});
+  $('#flash').style.opacity=fl;
+  return true;
+};
+window.__ready=document.fonts.ready.then(()=>true);
+</script></body></html>
