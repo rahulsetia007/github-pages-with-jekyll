@@ -1,0 +1,9 @@
+pain|Your ads say forty dollars a trial. Your billing says four hundred dollars a customer. Here's the number you should actually scale on!
+poke|Because Google and Meta count every free trial as a win. So they find more people who sign up, and never pay.
+fix0|Track cost per paying customer instead. Three steps.
+fix1|Step one. Download your ad spend, and your paid signups from billing, for the same month.
+fix2|Step two. Divide spend by paying customers, for each campaign. That's your real cost.
+fix3|Step three. Send the paid event back to your ads, so they bid on customers, not trials.
+payoff|Now you know which campaign makes money. And your ads find buyers, not freebie hunters!
+recap|Pull the numbers. Divide by paying customers. Send paid events back.
+cta|Send this to a SaaS founder who scales on trial numbers.
