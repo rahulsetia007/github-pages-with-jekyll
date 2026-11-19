@@ -85,19 +85,21 @@ const C={
 };
 const END=D.end;
 
-/* headline layer: small lead-in word + big punch line, swapped on every phrase */
+/* headline layer: the spoken words, revealed word by word (lead word, big words, then a smaller second line) */
+const g=(txt,at,lime)=>`<span class="h-w" data-at="${at}" style="display:inline-block;${lime?'color:var(--lime)':''}">${txt}</span>`;
 const HL=[
-  {a:0,            lead:'meta spent',      big:'<span style="color:var(--lime)">90%</span>', count:true},
-  {a:C.one-.12,    lead:'of your budget on',big:'ONE AD <span style="color:var(--lime)">SET.</span>'},
-  {a:C.other-.1,   lead:'the other two?',  big:'NEVER <span style="color:var(--lime)">TESTED.</span>'},
-  {a:C.sw-.08,     lead:"it's",            big:'ONE <span style="color:var(--lime)">SWITCH.</span>'},
-  {a:C.abo-.1,     lead:'',                big:'<span class="h-abo">ABO</span> <span class="h-or" style="font-size:.5em;color:#8A938C">or</span> <span class="h-cbo" style="color:var(--lime)">CBO?</span>'},
-  {a:C.pick-.1,    lead:'pick the',        big:'WRONG <span style="color:var(--lime)">ONE…</span>'},
-  {a:C.best-.1,    lead:'and your best ad',big:'<span style="color:var(--lime)">DIES.</span>'},
+  {a:0, lead:'meta spent', size:190, big:g('<b class="h-n" style="font-weight:900">0%</b>',0,1), sub:g('of your budget',W('pain',/^of/)), count:true},
+  {a:C.one-.12, lead:'on', big:[g('ONE',C.one),g('AD',W('pain',/^ad/)),g('SET.',W('pain',/^set/),1)].join(' '), sub:g('$450 of $500 went here',W('pain',/^set/)+.2)},
+  {a:C.other-.1, lead:'the other two?', big:[g('NEVER',C.never),g('GOT',W('pain',/^got/)),'<br>'+g('A CHANCE.',C.chance,1)].join(' ')},
+  {a:C.bug-.08, shock:true},
+  {a:C.sw-.08, lead:"it's", big:[g('ONE',W('pain2',/^one/)),g('SWITCH.',C.swW,1)].join(' ')},
+  {a:C.abo-.1, lead:'', big:[g('ABO',C.abo),g('<span style="font-size:.5em;color:#8A938C">or</span>',W('pain2',/^or/)),g('CBO?',C.cbo,1)].join(' ')},
+  {a:C.pick-.1, lead:'pick the', big:[g('WRONG',C.wrong),g('ONE…',W('poke',/^one/),1)].join(' '), sub:g('and…',W('poke',/^and/))},
+  {a:C.best-.1, lead:'your best ad', big:g('DIES',C.dies,1), sub:[g('before',W('poke',/^before/)),g("it's even",W('poke',/^it's/)),g('tested.',C.tested,1)].join(' ')},
 ];
-const hlEls=HL.map(h=>{const e=mk(`<div class="scene"><div class="abs h-l mono" style="top:250px;left:0;right:0;text-align:center;font-size:40px;color:#AEB7B0;text-transform:lowercase">${h.lead}</div>
-  <div class="abs h-b" style="top:310px;left:30px;right:30px;text-align:center;font:900 ${h.count?190:118}px/.95 Mont;letter-spacing:-.035em;text-transform:uppercase">${h.big}</div></div>`);scenesEl.appendChild(e);return e;});
-
+const hlEls=HL.map(h=>{const e=mk(`<div class="scene">${h.shock?'':`<div class="abs h-l mono" style="top:250px;left:0;right:0;text-align:center;font-size:40px;color:#AEB7B0;text-transform:lowercase">${h.lead}</div>
+  <div class="abs h-b" style="top:310px;left:30px;right:30px;text-align:center;font:900 ${h.size||118}px/.95 Mont;letter-spacing:-.035em;text-transform:uppercase">${h.big}</div>
+  ${h.sub?`<div class="abs h-s" style="top:${h.size?530:450}px;left:40px;right:40px;text-align:center;font:700 46px Inter;color:#C8D0CA">${h.sub}</div>`:''}`}</div>`);scenesEl.appendChild(e);return e;});
 /* visual 1: three ad-set glasses, budget pours into one */
 const CUPS=['Ad set A','Ad set B','Ad set C'];
 const vCups=mk(`<div class="scene">
@@ -151,7 +153,7 @@ const vAB=mk(`<div class="scene"><div class="abs" style="left:70px;right:70px;to
   ${SIDE('ABO','You split it','budget per ad set',false)}${SIDE('CBO','Meta splits it','one campaign budget',true)}</div></div>`);
 scenesEl.appendChild(vAB);
 function rAB(t,el){const T=t+C.abo-.1; const s=$$('.a-s',el);
-  pop(s[0],T,C.abo-.05,.35,.6); pop(s[1],T,C.cbo-.05,.35,.6);
+  pop(s[0],T,C.abo-.05,.35,.6); pop(s[1],T,C.cbo-.05,.35,.6); if(T>=C.cbo-.05&&T<C.pick-.1){s[0].style.opacity=lerp(1,.4,P(T,C.cbo,.25));}
   const pk=T>=C.pick-.1; // poke: cards flip back and forth like a coin toss, then one gets the X
   if(pk){const f=P(T,C.pick,0.9); s.forEach((e,i)=>{const lit=Math.floor(f*6)%2===i&&f<1; e.style.transform=`scale(${lit?1.05:.97})`; e.style.opacity=lit||f>=1?1:.55;});}
 }
@@ -193,11 +195,12 @@ function renderBg(t){
 const cuts=[...new Set([...HL.map(h=>h.a),...VL.map(v=>v.a)])].filter(x=>x>0);
 window.seek=function(t){
   renderBg(t);
+  { const gd=eo(P(t,C.dies,.6)); $('#bg').style.filter=`grayscale(${gd}) brightness(${lerp(1,.55,gd)})`; }
   const shock=t>=VL[1].a&&t<VL[1].b;
-  HL.forEach((h,i)=>{const b=i+1<HL.length?HL[i+1].a:END+1; const el=hlEls[i]; const vis=t>=h.a&&t<b&&!shock; el.style.display=vis?'block':'none'; if(!vis)return;
-    const lt=t-h.a; const p=eo5(P(lt,0,.22)); st($('.h-b',el),{transform:`scale(${lerp(1.18,1,p)})`,filter:`blur(${(1-p)*8}px)`,opacity:clamp(p*2)}); rise($('.h-l',el),lt,0,.2,16);
-    if(h.count){$('.h-b span',el).textContent=Math.round(90*eo(P(t,0,C.ninety+.35)))+'%';}
-    if(i===4){const T=t; pop($('.h-abo',el),T,C.abo-.05,.3,.6); pop($('.h-or',el),T,C.abo+.3,.25,.6); pop($('.h-cbo',el),T,C.cbo-.05,.3,.6); st($('.h-b',el),{opacity:1,filter:'none'});}
+  HL.forEach((h,i)=>{const b=i+1<HL.length?HL[i+1].a:END+1; const el=hlEls[i]; const vis=t>=h.a&&t<b&&!h.shock; el.style.display=vis?'block':'none'; if(!vis)return;
+    rise($('.h-l',el),t-h.a,0,.2,16);
+    $$('.h-w',el).forEach(x=>{const at=+x.dataset.at; const p=eo5(P(t,Math.max(h.a,at-.06),.2)); st(x,{opacity:p,transform:`scale(${lerp(1.25,1,p)})`,filter:`blur(${(1-p)*10}px)`});});
+    if(h.count) $('.h-n',el).textContent=Math.round(90*eo(P(t,0,C.ninety+.35)))+'%';
   });
   VL.forEach(v=>{const vis=t>=v.a&&t<v.b; v.el.style.display=vis?'block':'none'; if(!vis)return; const lt=t-v.a;
     if(v.a>0){const p=eo5(P(lt,0,.2)); st(v.el,{transform:`scale(${lerp(1.06,1,p)})`});} v.r(lt,v.el);});
