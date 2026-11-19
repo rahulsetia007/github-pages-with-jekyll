@@ -44,7 +44,7 @@ music = music + (pad * .5 + bl * .55 + arp) * side; music /= np.max(np.abs(music
 # sfx: whoosh + sub hit on each scene change, pops for list rows, tap for Follow
 sfx = np.zeros(N)
 _w=lambda k,p,n=0:[w['s'] for w in S[k]['words'] if w['w'].startswith(p)][n]
-starts = [_w('pain','one')-.12,_w('pain','The')-.1,_w('pain2','That')-.08,_w('pain2',"It's")-.08,_w('pain2','ABO')-.1,_w('poke','Pick')-.1,_w('poke','your')-.1]
+starts = [S['c1']['start'] - .12]
 for b in starts:
     l = int(.45 * sr); et = np.arange(l) / sr; x = rng.standard_normal(l); out = np.zeros(l); C = 9
     for j in range(C):
@@ -58,16 +58,27 @@ def tick(at, f=1500, g=.25):
 def wt(seg, pre):
     return next((w['s'] for w in S[seg]['words'] if w['w'].startswith(pre)), None)
 st0 = lambda k: S[k]['start'] - .18
-# PAIN: budget pours (fast ticks), 90% lands, dead glasses
-for k in range(10): tick(.15 + k * .1, 1800 + k * 90, .1)
-tick(wt('pain', 'ninety') + .3, 2800, .3)
-tick(wt('pain', 'Never'), 700, .3); tick(wt('pain', 'Never') + .12, 650, .25)
-tick(wt('pain2', 'switch'), 2600, .35)
-tick(wt('pain2', 'ABO'), 2200, .3); tick(wt('pain2', 'CBO'), 2600, .3)
-for k in range(6): tick(wt('poke', 'Pick') + k * .15, 1500 + (k % 2) * 600, .15)
+# PAIN: spend counts up on the table, $5 lands, "Why?" hit
+for k in range(10): tick(.3 + k * .15, 1800 + k * 90, .1)
+tick(wt('p1', 'ninety') + .55, 2800, .3)
+tick(wt('p2', 'five'), 1400, .25)
 hl2 = int(.5 * sr); ht2 = np.arange(hl2) / sr
-place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), wt('poke', 'tested'), .5)
-tick(wt('poke', 'tested') + .55, 2400, .3)
+place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), S['p3']['start'], .45)
+# CBO: node, boxes, money flows on "decides"
+tick(wt('c1', 'CBO'), 2400, .3)
+c = wt('c1', 'Campaign')
+for k in range(3): tick(c + .4 + k * .12, 2000, .15)
+d = wt('c2', 'decides')
+for k in range(9): tick(d + k * .14, 2200 + (k % 3) * 200, .1)
+# ABO: side by side, locked budgets
+tick(S['a1']['start'], 1800, .3)
+e = wt('a2', 'each')
+for k in range(3): tick(e - .1 + k * .15, 2600, .2)
+tick(wt('a2', 'yourself'), 3000, .3)
+# POKE: starved ad sets
+n = wt('k1', 'never')
+tick(n, 700, .3); tick(n + .12, 650, .25)
+tick(wt('k1', 'prove') + .9, 2400, .3)
 hl = int(.9 * sr); ht = np.arange(hl) / sr
 place(sfx, np.sin(2 * np.pi * (44 * ht + 80 * (1 - np.exp(-ht * 25)) / 25)) * np.exp(-ht * 6), 0, .3)  # opening hit
 # voice

@@ -4,7 +4,7 @@ from kokoro_onnx import Kokoro
 M = os.environ.get('VOICE_DIR', os.path.expanduser('~/.cache/kokoro')) + '/'
 k = Kokoro(M + 'kokoro-v1.0.onnx', M + 'voices-v1.0.bin')
 V = 'am_liam'; SP = 1.15
-lines = [l.split('|', 1) for l in open('vo.txt').read().strip().split('\n')]
+lines = [l.split('|') for l in open('vo.txt').read().strip().split('\n')]  # key|text|optional pause after (s)
 # speech-only respellings (captions keep the real word)
 PRON = {'Recap': 'Reecap', 'Duplicates': 'Dupli-kits', 'SaaS': 'Sass', 'ABO': 'A-B-O', 'CBO': 'C-B-O'}
 def say(text):
@@ -17,7 +17,7 @@ def trim(a, th=0.012, pre=200, post=600):
 sr = 24000; HOP = 120
 def mf(x): return librosa.feature.mfcc(y=x, sr=sr, n_mfcc=20, hop_length=HOP, n_fft=1024)
 out = []; segs = []; t = 0.0
-for key, text in lines:
+for key, text, *gap in lines:
     A, _ = say(text); A = trim(A)
     words = text.split(); parts = []; bounds = []; pos = 0
     for w in words:
@@ -34,6 +34,7 @@ for key, text in lines:
     d = len(A) / sr
     segs.append({"key": key, "text": text, "start": round(t, 3), "dur": round(d, 3), "words": wt})
     g = {'pain': .55, 'poke': .6, 'fix0': .6, 'fix1': .6, 'fix2': .6, 'fix3': .6, 'fix4': .7, 'payoff': .6, 'recap': .6}.get(key, 0)
+    if gap: g = float(gap[0])
     out.append(A); out.append(np.zeros(int(g * sr), np.float32)); t += d + g
 y = np.concatenate(out); y = y / np.max(np.abs(y)) * 0.89
 sf.write('voice.wav', y, sr)
