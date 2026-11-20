@@ -60,6 +60,10 @@ Do **not** use `#00FF66` or flat black.
 - Kokoro TTS, voice **`am_liam`** (male, chosen by the owner 14 Nov), speed **1.15**, `en-us`, with presence EQ +
   compression on the voice, a speech-only respelling table (e.g. Recap → "Reecap"), and the "AI" phoneme fix
   (`ˌeɪˈaɪ` → `ˈeɪ ˈaɪ`). See `tts.py` in any reel.
+- **House delivery (approved by the owner 20 Nov for all future videos; reference: `reels/google-deep-review-v2`):**
+  one short sentence per `vo.txt` line, with a pause after it set in a third field
+  (`key|text|pause`): ~0.25–0.3s inside a thought, ~0.5–0.6s after a key point or question.
+  Start every new video's voice from `reels/_brand/tts.py`.
 - Original synthesized music bed under the voice (ducked); loudness around -14 LUFS.
 
 ## Deliverables

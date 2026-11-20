@@ -44,7 +44,7 @@ music = music + (pad * .5 + bl * .55 + arp) * side; music /= np.max(np.abs(music
 # sfx: whoosh + sub hit on each scene change, pops for list rows, tap for Follow
 sfx = np.zeros(N)
 _w=lambda k,p,n=0:[w['s'] for w in S[k]['words'] if w['w'].startswith(p)][n]
-starts = [S['c1']['start'] - .12]
+starts = [S[k]['start'] - .12 for k in ['f0a', 'f1', 'y1', 'r1', 'c1']]
 for b in starts:
     l = int(.45 * sr); et = np.arange(l) / sr; x = rng.standard_normal(l); out = np.zeros(l); C = 9
     for j in range(C):
@@ -58,27 +58,41 @@ def tick(at, f=1500, g=.25):
 def wt(seg, pre):
     return next((w['s'] for w in S[seg]['words'] if w['w'].startswith(pre)), None)
 st0 = lambda k: S[k]['start'] - .18
-# PAIN: spend counts up on the table, $5 lands, "Why?" hit
-for k in range(10): tick(.3 + k * .15, 1800 + k * 90, .1)
-tick(wt('p1', 'ninety') + .55, 2800, .3)
-tick(wt('p2', 'five'), 1400, .25)
+# PAIN: 340 counts up, client message, question ring
+th = wt('p1', 'three')
+for k in range(10): tick(th + k * .12, 1800 + k * 100, .1)
+tick(th + 1.2, 2800, .3)
+tick(S['p2']['start'] + .4, 1500, .25); tick(S['p3']['start'], 2400, .3)
+# POKE: typing, numbers go grey, trust drains
+for k in range(4): tick(S['k1']['start'] + k * .25, 1200, .08)
+for pre in ['every', 'other', 'number']:
+    c = wt('k2', pre)
+    if c: tick(c, 700, .22)
 hl2 = int(.5 * sr); ht2 = np.arange(hl2) / sr
-place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), S['p3']['start'], .45)
-# CBO: node, boxes, money flows on "decides"
-tick(wt('c1', 'CBO'), 2400, .3)
-c = wt('c1', 'Campaign')
-for k in range(3): tick(c + .4 + k * .12, 2000, .15)
-d = wt('c2', 'decides')
-for k in range(9): tick(d + k * .14, 2200 + (k % 3) * 200, .1)
-# ABO: side by side, locked budgets
-tick(S['a1']['start'], 1800, .3)
-e = wt('a2', 'each')
-for k in range(3): tick(e - .1 + k * .15, 2600, .2)
-tick(wt('a2', 'yourself'), 3000, .3)
-# POKE: starved ad sets
-n = wt('k1', 'never')
-tick(n, 700, .3); tick(n + .12, 650, .25)
-tick(wt('k1', 'prove') + .9, 2400, .3)
+place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), wt('k2', 'report'), .4)
+# FIX intro: scan, flag, two tickets
+tick(wt('f0a', 'this') + .15, 900, .3)
+tw = wt('f0b', 'two'); tick(tw, 2400, .25); tick(tw + .18, 2700, .25)
+# steps
+tick(wt('f1', 'Sign'), 2000, .2)
+u = wt('f1', 'upload')
+for k in range(6): tick(u + k * .17, 1700 + k * 120, .1)
+tick(wt('f2a', 'strict'), 2200, .25)
+for pre in ['weak', 'missing', 'gaps']:
+    c = wt('f2b', pre)
+    if c: tick(c - .08, 900, .28)
+f = wt('f3', 'Fix')
+for k in range(3): tick(f + .1 + k * .3, 2400 + k * 150, .2)
+tick(wt('f3', 'double'), 2000, .22)
+# PAYOFF: sources tick in, approval
+s0 = wt('y1', 'source')
+for k in range(3): tick(s0 + k * .15, 2600, .18)
+tick(wt('y1', 'stops'), 3000, .3)
+# RECAP
+for pre in ['Upload', 'Review', 'Fix']:
+    c = wt('r1', pre)
+    if c: tick(c, 2600, .22); tick(c + .06, 3300, .16)
+tick(S['c1']['start'] - .12 + 2.2, 2200, .35)
 hl = int(.9 * sr); ht = np.arange(hl) / sr
 place(sfx, np.sin(2 * np.pi * (44 * ht + 80 * (1 - np.exp(-ht * 25)) / 25)) * np.exp(-ht * 6), 0, .3)  # opening hit
 # voice
