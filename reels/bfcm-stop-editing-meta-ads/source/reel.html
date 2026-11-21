@@ -1,0 +1,267 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- BFCM #1: stop touching your Meta ads before Black Friday (house teaching style). Pain, Poke, Fix, Payoff, Recap, CTA. -->
+<style>
+@font-face{font-family:Inter;src:url(fonts/Inter.ttf);font-weight:100 900}
+@font-face{font-family:Mont;src:url(fonts/Montserrat.ttf);font-weight:100 900}
+@font-face{font-family:Mono;src:url(fonts/SpaceMono-Bold.ttf)}
+@font-face{font-family:ISerif;src:url(fonts/InstrumentSerif-Italic.ttf);font-style:normal;font-weight:400}
+:root{
+  --ink:#030403; --ink2:#0A0D0B; --line:rgba(255,255,255,.08);
+  --text:#F5F8F6; --muted:#8A938C; --lime:#22E06F; --violet:#0E7A3C; --deep:#06331A;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ink)}
+body{font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+#stage{position:absolute;inset:0;overflow:hidden}
+.bg{position:absolute;inset:-200px}
+.blob{position:absolute;border-radius:50%;filter:blur(140px);opacity:.42}
+.grid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:90px 90px;-webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 45%,#000 30%,transparent 80%);opacity:.55}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse 85% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.65) 100%);pointer-events:none}
+.scene{position:absolute;inset:0;will-change:transform,filter,opacity}
+.abs{position:absolute}
+.mono{font-family:Mono,monospace;letter-spacing:.04em}
+#prog{position:absolute;top:118px;left:90px;right:90px;display:flex;gap:12px}
+#prog .seg{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
+#prog .seg i{display:block;height:100%;width:0;background:var(--lime);border-radius:8px;box-shadow:0 0 18px var(--lime)}
+.card{position:absolute;left:90px;width:900px;border-radius:44px;background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.14);box-shadow:0 40px 120px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.18);backdrop-filter:blur(30px);overflow:hidden}
+.pill{display:inline-flex;align-items:center;gap:12px;padding:14px 26px;border-radius:999px;font-weight:700;font-size:30px}
+.title{font-family:Mont;font-weight:900;font-size:128px;line-height:.92;letter-spacing:-.035em}
+.sub{font-size:44px;font-weight:500;color:#C8D0CA;line-height:1.25}
+.sub b{color:var(--lime);font-weight:800}
+.bar{height:22px;border-radius:12px;background:rgba(255,255,255,.14)}
+#cap{position:absolute;left:60px;right:60px;top:1500px;text-align:center;font-family:Mont;font-weight:900;font-size:66px;line-height:1.1;letter-spacing:-.01em;text-transform:uppercase}
+#cap span{display:inline-block;margin:0 10px;text-shadow:0 6px 30px rgba(0,0,0,.7)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;mix-blend-mode:overlay}
+#wipe{position:absolute;left:0;right:0;height:2400px;top:-2400px;background:var(--lime)}
+.ghost{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.16)}
+.tile{display:inline-flex;align-items:center;justify-content:center;flex:none;background:#fff;color:#030403;font-family:Mont;font-weight:900;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+</style></head>
+<body><div id="stage">
+  <div class="bg" id="bg">
+    <div class="blob" id="b1" style="width:900px;height:900px;background:var(--violet)"></div>
+    <div class="blob" id="b2" style="width:800px;height:800px;background:var(--deep)"></div>
+    <div class="blob" id="b3" style="width:600px;height:600px;background:var(--lime);opacity:.18"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div id="scenes"></div>
+  <div id="prog"></div>
+  <div id="cap"></div>
+  <div id="wipe"></div>
+  <div id="flash"></div>
+  <div class="vig"></div>
+</div>
+<script>
+const D = window.__DATA__;
+const $ = (s,el=document)=>el.querySelector(s);
+const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-clamp(t),3);
+const eo5=t=>1-Math.pow(1-clamp(t),5);
+const eio=t=>{t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+const back=t=>{t=clamp(t);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
+const P=(t,a,d)=>clamp((t-a)/d);
+function st(el,o){for(const k in o) el.style[k]=o[k];}
+function pop(el,t,a,d=.45,from=.6){const p=P(t,a,d);st(el,{opacity:clamp(p*3),transform:`scale(${lerp(from,1,back(p))})`});}
+function rise(el,t,a,d=.5,dy=60){const p=eo(P(t,a,d));st(el,{opacity:p,transform:`translateY(${(1-p)*dy}px)`,filter:`blur(${(1-p)*10}px)`});}
+function typed(el,txt,t,a,cps=26){const n=Math.floor(clamp((t-a)*cps,0,txt.length));el.textContent=txt.slice(0,n);return n<txt.length;}
+function mk(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
+const scenesEl=$('#scenes');
+
+/* ---------- content: teaching shots (house delivery). Each visual stays up and changes state on the spoken words. ---------- */
+const S=D.segs, segBy=Object.fromEntries(S.map(s=>[s.key,s]));
+const W=(seg,re,n=0)=>{const ws=segBy[seg].words.filter(x=>re.test(x.w));return ws[n]?ws[n].s:null;};
+const ST=k=>segBy[k].start;
+const END=D.end;
+let _gid=0;
+const LT=(svg,size,r)=>{const id='g'+(++_gid);return `<span class="tile" style="width:${size}px;height:${size}px;border-radius:${r}px;padding:${Math.round(size*.17)}px;background:#fff">${svg.replace(/igg/g,id)}</span>`;};
+const LOGO_G=`<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0081FB" d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303zm10.16 2.053c1.147 0 2.188.758 2.992 1.999 1.132 1.748 1.647 4.195 1.647 6.4 0 1.548-.368 2.9-1.839 2.9-.58 0-1.027-.23-1.664-1.004-.496-.601-1.343-1.878-2.832-4.358l-.617-1.028a44.908 44.908 0 0 0-1.255-1.98c.07-.109.141-.224.211-.327 1.12-1.667 2.118-2.602 3.358-2.602zm-10.201.553c1.265 0 2.058.791 2.675 1.446.307.327.737.871 1.234 1.579l-1.02 1.566c-.757 1.163-1.882 3.017-2.837 4.338-1.191 1.649-1.81 1.817-2.486 1.817-.524 0-1.038-.237-1.383-.794-.263-.426-.464-1.13-.464-2.046 0-2.221.63-4.535 1.66-6.088.454-.687.964-1.226 1.533-1.533a2.264 2.264 0 0 1 1.088-.285z"/></svg>`;
+const DOC=`<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M6 2h8l5 5v15H6z" fill="none" stroke="#030403" stroke-width="2.2" stroke-linejoin="round"/><path d="M14 2v5h5M9 12h7M9 16h7" stroke="#030403" stroke-width="2.2"/></svg>`;
+const TICK=(s=34,c='#030403')=>`<svg width="${s}" height="${s}" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const CARD='background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.16);border-radius:40px';
+
+/* ---------- headline: the spoken words, each blurs in when it is said ---------- */
+const g=(txt,at,lime)=>`<span class="h-w" data-at="${at}" style="display:inline-block;${lime?'color:var(--lime)':''}">${txt}</span>`;
+const L=t=>`<b style="color:var(--lime)">${t}</b>`;
+const HL=[
+  {a:0, lead:"you're running", size:150, big:g('5',W('p1',/^five/),1)+' '+g('AD SETS.',W('p1',/^ad/))},
+  {a:ST('p2')-.12, lead:'each one gets about', size:120, big:g('12 SALES',W('p2',/^twelve/),1)+'<br>'+g('A WEEK.',W('p2',/^week/))},
+  {a:ST('p3')-.12, lead:'meta says', size:116, big:g("THAT'S",W('p3',/^that's/))+'<br>'+g('COSTING YOU.',W('p3',/^costing/),1)},
+  {a:ST('k1')-.12, lead:'under 50 conversions a week', size:190, big:g('+28%',W('k1',/^twenty/),1), sub:g('more per purchase.',W('k1',/^more/))},
+  {a:ST('k2')-.12, lead:'every edit this week can push them back into', size:130, big:g('LEARNING.',W('k2',/^learning/),1), sub:g('right before '+L('Black Friday.'),W('k2',/^right/))},
+  {a:ST('f0')-.12, lead:"here's the fix", size:150, big:g('3 STEPS',W('f0',/^Three/),1), sub:g('before Friday.',W('f0',/^before/))},
+  {a:ST('f1a')-.12, lead:'step one', size:130, big:g('DO THE',W('f1a',/^Do/))+' '+g('MATH.',W('f1a',/^math/),1)},
+  {a:ST('f1c')-.12, lead:"that's how many", size:100, big:g('AD SETS',W('f1c',/^ad/))+'<br>'+g('YOU CAN AFFORD.',W('f1c',/^afford/),1)},
+  {a:ST('f2')-.12, lead:'step two', size:130, big:g('MERGE',W('f2',/^Merge/),1)+' '+g('DOWN.',W('f2',/^down/)), sub:g('so they finish '+L('learning')+' before the sale.',W('f2',/^so/))},
+  {a:ST('f3a')-.12, lead:'step three', size:110, big:g('SCHEDULE',W('f3a',/^Schedule/),1)+'<br>'+g('THE BUDGET.',W('f3a',/^budget/))},
+  {a:ST('f3b')-.12, lead:"then don't touch anything until", size:140, big:g('TUESDAY.',W('f3b',/^Tuesday/),1)},
+  {a:ST('y1')-.12, lead:'now every ad set gets', size:110, big:g('ENOUGH',W('y1',/^enough/))+' '+g('SALES.',W('y1',/^sales/),1), sub:g('and your budget goes up on Friday, '+L('all by itself.'),W('y1',/^And/))},
+  {a:ST('r1')-.12, lead:'recap · save this', size:100, big:g('MATH.',W('r1',/^Do/))+' '+g('MERGE.',W('r1',/^Merge/))+'<br>'+g('SCHEDULE.',W('r1',/^Schedule/),1)},
+  {a:ST('c1')-.12, cta:true},
+];
+const hlEls=HL.map(h=>{const e=mk(`<div class="scene">${h.cta?'':`<div class="abs" style="top:220px;left:30px;right:30px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+  ${h.lead?`<div class="h-l mono" style="font-size:38px;color:#AEB7B0;text-transform:lowercase">${h.lead}</div>`:''}
+  <div class="h-b" style="font:900 ${h.size||118}px/.95 Mont;letter-spacing:-.035em;text-transform:uppercase">${h.big}</div>
+  ${h.sub?`<div class="h-s" style="font:700 46px Inter;color:#C8D0CA">${h.sub}</div>`:''}</div>`}</div>`);scenesEl.appendChild(e);return e;});
+
+/* ---------- V1: five small ad sets, all under the 50/week line (pain + poke) ---------- */
+const PILL=(txt,on)=>`<span class="pill" style="padding:6px 14px;font-size:20px;font-weight:800;white-space:nowrap;${on?'background:#22E06F;color:#030403':'background:rgba(255,255,255,.14);color:#fff'}">${txt}</span>`;
+const vAds=mk(`<div class="scene">
+  <div class="abs ac" style="left:60px;right:60px;top:700px;padding:30px;${CARD}">
+    <div style="display:flex;align-items:center;gap:16px">${LT(LOGO_G,56,15)}<span class="mono" style="font-size:22px;color:#8E9890">AD SETS · THIS WEEK · EXAMPLE</span></div>
+    <div style="position:relative;margin-top:22px">
+      ${[1,2,3,4,5].map(i=>`<div class="ar" style="display:grid;grid-template-columns:150px 1fr 70px 190px;align-items:center;gap:14px;height:84px">
+        <span style="font:800 28px Inter">Ad set ${i}</span>
+        <div style="height:24px;border-radius:12px;background:rgba(255,255,255,.08);overflow:hidden"><i class="ab" style="display:block;height:100%;width:0;background:#8A938C"></i></div>
+        <span class="an" style="font:900 34px Mont;text-align:right">0</span><span class="as" style="text-align:right"></span></div>`).join('')}
+      <div class="al" style="position:absolute;top:-8px;bottom:-8px;left:calc(164px + (100% - 164px - 288px));width:0;border-left:4px dashed rgba(255,255,255,.35)"></div>
+      <span class="all mono" style="position:absolute;top:-40px;left:calc(164px + (100% - 164px - 288px) - 60px);font-size:22px;color:#AEB7B0">50/WEEK</span>
+    </div></div>
+  <div class="abs ast" style="left:0;right:0;top:930px;margin:0 auto;width:fit-content;padding:16px 36px;border:8px solid #F5F8F6;border-radius:20px;font:900 72px Mont;color:#F5F8F6;background:rgba(3,4,3,.75);transform:rotate(-6deg);opacity:0">+28% PER PURCHASE</div>
+  <svg class="abs acu" width="70" height="70" viewBox="0 0 24 24" style="left:640px;top:820px;opacity:0"><path d="M4 2l16 9-7 2-3 7z" fill="#fff" stroke="#030403" stroke-width="1.5"/></svg>
+  <div class="abs pill acal" style="top:1290px;left:0;right:0;margin:0 auto;width:fit-content;background:#F5F8F6;color:#030403;font-size:32px;font-weight:900;opacity:0">📅 Black Friday · Fri</div></div>`);
+scenesEl.appendChild(vAds);
+function rAds(t,el){const T=t;
+  rise($('.ac',el),T,0,.35,40);
+  const rows=$$('.ar',el); const tw=W('p2',/^twelve/), ms=ST('p3'), fi=W('k1',/^fifty/), tf=W('k1',/^twenty/), ed=W('k2',/^edit/), le=W('k2',/^learning/), bf=W('k2',/^Black/);
+  rows.forEach((r,i)=>{rise(r,T,W('p1',/^five/)-.1+i*.1,.3,20);
+    const n=12*eo(P(T,tw-.1,.8)); $('.an',r).textContent=Math.round(n); $('.ab',r).style.width=(n/50*100)+'%';
+    let s=''; if(T>=le-.05) s=PILL('⟳ Learning',false); else if(T>=ms) s=PILL('Learning limited',false); $('.as',r).innerHTML=s;
+    if(i===0&&T>=ed+.3&&T<le) r.style.background='rgba(255,255,255,.08)'; else r.style.background='transparent';});
+  const al=$('.al',el), hot=T>=fi-.05; al.style.borderLeftColor=hot?'#22E06F':'rgba(255,255,255,.35)'; $('.all',el).style.color=hot?'#22E06F':'#AEB7B0';
+  al.style.boxShadow=hot?'0 0 24px rgba(34,224,111,.6)':'none';
+  const sp=P(T,tf-.05,.25); st($('.ast',el),{opacity:clamp(sp*3)*(1-clamp(P(T,ST('k2')-.2,.3))),transform:`rotate(-6deg) scale(${lerp(1.8,1,eo5(sp))})`});
+  const cu=$('.acu',el); cu.style.opacity=clamp(P(T,ed-.4,.2))*(1-clamp(P(T,le+.4,.3))); const mv=eo(P(T,ed-.4,.6));
+  cu.style.transform=`translate(${(1-mv)*200}px,${(1-mv)*220}px) scale(${T>ed+.25&&T<ed+.4?.85:1})`;
+  pop($('.acal',el),T,bf-.05,.4,.6);
+}
+
+/* ---------- V2: the 3 steps ---------- */
+const STEPS=['Do the math','Merge down','Schedule + hands off'];
+const vFix=mk(`<div class="scene"><div class="abs" style="left:90px;right:90px;top:720px;display:flex;flex-direction:column;gap:22px">${STEPS.map((x,i)=>`<div class="fs" style="display:flex;align-items:center;gap:24px;padding:30px 32px;border-radius:28px;${CARD}"><span class="tile" style="width:80px;height:80px;border-radius:22px;font:900 40px Mont">${i+1}</span><span style="font:800 46px Inter">${x}</span></div>`).join('')}</div></div>`);
+scenesEl.appendChild(vFix);
+function rFix(t,el){const T=t+ST('f0')-.12; $$('.fs',el).forEach((c,i)=>pop(c,T,W('f0',/^Three/)-.05+i*.15,.4,.6));}
+
+/* ---------- V3: steps card (formula, merge, schedule) ---------- */
+const vStep=mk(`<div class="scene"><div class="abs sc3" style="left:60px;right:60px;top:690px;height:660px;padding:32px;${CARD}">
+  <div style="display:flex;align-items:center;gap:16px">${LT(LOGO_G,56,15)}<span class="mono st-h" style="font-size:22px;color:#8E9890"></span></div>
+  <div class="s1" style="position:absolute;left:32px;right:32px;top:120px;text-align:center">
+    <div class="m1" style="font:700 30px Inter;color:#AEB7B0">Weekly budget</div><div class="m1" style="font:900 96px Mont">$3,500</div>
+    <div class="m2" style="font:900 60px Mont;color:#8A938C;margin:2px 0">÷</div>
+    <div class="m3" style="display:flex;justify-content:center;align-items:baseline;gap:16px;font:900 64px Mont">(<span><span style="display:block;font:700 26px Inter;color:#AEB7B0">cost per purchase</span>$35</span><span class="m4">× 50</span>)</div>
+    <div class="m5" style="margin-top:20px;display:inline-flex;align-items:center;gap:18px;padding:16px 34px;border-radius:26px;background:#22E06F;color:#030403;font:900 70px Mont">= 2 ad sets</div></div>
+  <div class="s2" style="position:absolute;left:32px;right:32px;top:130px">
+    <div class="mono" style="font-size:22px;color:#AEB7B0;margin-bottom:14px">PURCHASES / WEEK</div>
+    ${[0,1,2,3,4].map(i=>`<div class="mr" style="position:absolute;left:0;right:0;display:grid;grid-template-columns:170px 1fr 80px;align-items:center;gap:14px;height:80px;padding:0 18px;border-radius:20px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16)">
+      <span class="mn" style="font:800 28px Inter">Ad set ${i+1}</span><div style="height:24px;border-radius:12px;background:rgba(255,255,255,.08);overflow:hidden"><i class="mb" style="display:block;height:100%;width:24%;background:#8A938C"></i></div><span class="mv" style="font:900 34px Mont;text-align:right">12</span></div>`).join('')}
+    <div class="mok pill" style="position:absolute;left:0;top:420px;background:#22E06F;color:#030403;font-size:30px;font-weight:900;opacity:0">✓ Exits learning before the sale</div></div>
+  <div class="s3" style="position:absolute;left:32px;right:32px;top:120px">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:22px 26px;border-radius:22px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16)"><span style="font:800 32px Inter">Daily budget</span><span style="font:900 48px Mont">$500</span></div>
+    <div class="b2" style="margin-top:16px;padding:22px 26px;border-radius:22px;background:rgba(34,224,111,.10);border:2px solid rgba(34,224,111,.6)">
+      <div class="mono" style="font-size:22px;color:var(--lime)">BUDGET SCHEDULING</div>
+      <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><span style="font:800 34px Inter">Fri Nov 27 → Mon Nov 30</span><span style="font:900 48px Mont;color:var(--lime)">$1,000</span></div>
+      <div class="b2ok" style="margin-top:10px;font:800 28px Inter;color:var(--lime);opacity:0">✓ Scheduled · goes back by itself</div></div>
+    <div class="b3" style="margin-top:22px;display:flex;align-items:center;justify-content:center;gap:16px;padding:22px;border-radius:22px;border:4px solid #F5F8F6;font:900 46px Mont;opacity:0">🔒 HANDS OFF UNTIL TUE</div></div>
+</div></div>`);
+scenesEl.appendChild(vStep);
+for(let i=0;i<3;i++) $('#prog').appendChild(mk('<div class="seg"><i></i></div>'));
+function rStep(t,el){const T=t+ST('f1a')-.12;
+  const step=T<ST('f2')-.12?0:T<ST('f3a')-.12?1:2;
+  $('.st-h',el).textContent=['STEP 1 · THE MATH · EXAMPLE','STEP 2 · MERGE · EXAMPLE','STEP 3 · SCHEDULE · EXAMPLE'][step];
+  ['.s1','.s2','.s3'].forEach((c,i)=>$(c,el).style.display=step===i?'block':'none');
+  if(step===0){const m=$$('.m1',el); m.forEach(x=>rise(x,T,W('f1b',/^Weekly/)-.1,.35,20)); rise($('.m2',el),T,W('f1b',/^divided/)-.05,.3,16);
+    rise($('.m3',el),T,W('f1b',/^cost/)-.1,.35,20); const m4=$('.m4',el); const p4=P(T,W('f1b',/^fifty/)-.1,.3); m4.style.opacity=clamp(p4*3); m4.style.color=p4>0?'#22E06F':'#fff';
+    pop($('.m5',el),T,W('f1c',/^That's/)-.05,.45,.5);}
+  if(step===1){const mg=eio(P(T,W('f2',/^Merge/),.8)); const fl=eo(P(T,W('f2',/^learning/)-.4,.8));
+    $$('.mr',el).forEach((r,i)=>{const y0=50+i*92, keep=i<2, y1=50+(i<2?i:(i%2))*110; r.style.top=lerp(y0,y1,mg)+'px'; r.style.opacity=keep?1:1-mg; r.style.height=lerp(80,96,keep?mg:0)+'px';
+      const v=keep?lerp(12,50,Math.max(mg*0.6,fl)):12; $('.mv',r).textContent=Math.round(v); const b=$('.mb',r); b.style.width=Math.min(100,v/50*100)+'%'; b.style.background=v>=49?'#22E06F':'#8A938C';
+      r.style.borderColor=keep&&v>=49?'rgba(34,224,111,.7)':'rgba(255,255,255,.16)'; if(keep) $('.mn',r).textContent=mg>.5?(i===0?'Ad set A':'Ad set B'):'Ad set '+(i+1);});
+    pop($('.mok',el),T,W('f2',/^finish/)-.05,.4,.6); $('.mok',el).style.top='300px';}
+  if(step===2){rise($('.b2',el),T,W('f3a',/^Schedule/)-.1,.4,30); rise($('.b2ok',el),T,W('f3a',/^scheduling/)-.05,.3,16);
+    const p=P(T,W('f3b',/^touch/)-.05,.3); st($('.b3',el),{opacity:clamp(p*3),transform:`scale(${lerp(1.4,1,eo5(p))})`});}
+}
+
+/* ---------- V4: payoff, the week plays out ---------- */
+const DAYS=[['Mon',500],['Tue',500],['Wed',500],['Thu',500],['Fri',1000],['Sat',1000],['Sun',1000],['Mon',1000],['Tue',500]];
+const vPay=mk(`<div class="scene"><div class="abs pc" style="left:60px;right:60px;top:690px;padding:32px;${CARD}">
+  <div style="display:flex;gap:16px">${['Ad set A','Ad set B'].map(n=>`<div class="pa" style="flex:1;display:flex;align-items:center;justify-content:space-between;padding:20px 22px;border-radius:22px;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.16)"><span style="font:800 30px Inter">${n}</span><span class="pst">${PILL('Learning',false)}</span></div>`).join('')}</div>
+  <div class="mono" style="margin-top:26px;font-size:22px;color:#8E9890">DAILY BUDGET · BLACK FRIDAY WEEK</div>
+  <div style="margin-top:14px;height:300px;display:flex;align-items:flex-end;gap:12px">${DAYS.map(([d,v],i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end"><span class="pv" style="font:900 22px Mont;opacity:0">$${v>=1000?'1k':v}</span><i class="pb" data-v="${v}" style="display:block;width:100%;height:0;border-radius:12px 12px 4px 4px;background:${v>500?'linear-gradient(#22E06F,#0E7A3C)':'#5A625C'}"></i><span style="font:700 22px Inter;color:${i>=4&&i<=7?'#22E06F':'#AEB7B0'}">${d}</span></div>`).join('')}</div>
+  <div class="pn" style="margin-top:20px;font:800 30px Inter;color:#C8D0CA;opacity:0">You didn't touch a thing. 🔒</div></div></div>`);
+scenesEl.appendChild(vPay);
+function rPay(t,el){const T=t+ST('y1')-.12; rise($('.pc',el),t,0,.35,30);
+  const ok=T>=W('y1',/^learn/)-.05; $$('.pa',el).forEach(p=>{$('.pst',p).innerHTML=PILL(ok?'✓ Active':'Learning',ok); p.style.borderColor=ok?'rgba(34,224,111,.7)':'rgba(255,255,255,.16)';});
+  const up=W('y1',/^goes/); $$('.pb',el).forEach((b,i)=>{const v=+b.dataset.v; const h=(v>500?eo(P(T,up-.2+(i-4)*.12,.4)):eo(P(t,.3+i*.06,.4)))*(v/1000)*240; b.style.height=h+'px'; b.previousElementSibling.style.opacity=h>10?1:0;});
+  rise($('.pn',el),T,W('y1',/^itself/)+.2,.35,16);
+}
+
+/* ---------- V5: recap checklist ---------- */
+const RC=[['Do the math: budget ÷ (cost × 50)',/^Do/],['Merge to that many ad sets',/^Merge/],['Schedule the budget, then hands off',/^Schedule/]];
+const vRec=mk(`<div class="scene"><div class="abs" style="left:70px;right:70px;top:720px;display:flex;flex-direction:column;gap:22px">${RC.map(([x])=>`<div class="rr" style="display:flex;align-items:center;gap:22px;padding:30px;border-radius:26px;border:2px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06)"><span class="rb" style="flex:none;width:60px;height:60px;border-radius:16px;border:4px solid #8A938C;display:flex;align-items:center;justify-content:center"></span><span style="font:800 38px Inter">${x}</span></div>`).join('')}</div></div>`);
+scenesEl.appendChild(vRec);
+function rRec(t,el){const T=t+ST('r1')-.12; $$('.rr',el).forEach((r,i)=>{rise(r,t,.1+i*.1,.35,30); const on=T>=W('r1',RC[i][1])-.05; const b=$('.rb',r);
+  b.style.borderColor=on?'#22E06F':'#8A938C'; b.style.background=on?'#22E06F':'transparent'; b.innerHTML=on?TICK(36):''; r.style.borderColor=on?'rgba(34,224,111,.6)':'rgba(255,255,255,.16)';});}
+
+/* ---------- V6: CTA ---------- */
+const ANG=['Do the math','Merge down','Schedule budget','Hands off'];
+const vCta=mk(`<div class="scene">
+  <div class="abs mono c-t" style="top:300px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">COMMENT BFCM FOR THE CHECKLIST</div>
+  <div class="abs" style="left:110px;right:110px;top:380px;display:grid;grid-template-columns:1fr 1fr;gap:18px">${ANG.map((a,i)=>`<div class="c-g ghost" style="border-radius:28px;padding:18px 24px;display:flex;align-items:center;gap:18px"><span class="tile" style="width:60px;height:60px;border-radius:16px;font:700 24px Mono">${String(i+1).padStart(2,'0')}</span><span style="font:800 34px Inter">${a}</span></div>`).join('')}</div>
+  <div class="abs c-f" style="top:900px;left:0;right:0;text-align:center;font:900 100px Mont;letter-spacing:-.03em">Follow for more</div>
+  <div class="abs c-s" style="top:1030px;left:0;right:0;text-align:center;font-family:ISerif;font-size:76px;color:#D8E0DA">send this to a Meta advertiser</div>
+  <div class="abs c-b pill" style="top:1180px;left:0;right:0;margin:0 auto;width:fit-content;padding:24px 70px;font-size:44px;font-weight:900;background:var(--lime);color:#030403">Follow</div>
+  <svg class="abs c-m" width="70" height="70" viewBox="0 0 24 24" style="left:640px;top:1300px;opacity:0"><path d="M4 2l16 9-7 2-3 7z" fill="#fff" stroke="#030403" stroke-width="1.5"/></svg></div>`);
+scenesEl.appendChild(vCta);
+function rCta(t,el){rise($('.c-t',el),t,0,.3,20); $$('.c-g',el).forEach((g2,i)=>pop(g2,t,.1+i*.08,.35,.6));
+  rise($('.c-f',el),t,.5,.4,30); rise($('.c-s',el),t,.7,.4,30); pop($('.c-b',el),t,.9,.4,.6);
+  const tap=2.2; const m=$('.c-m',el); m.style.opacity=clamp(P(t,1.3,.2)); m.style.transform=`translate(${(1-eo(P(t,1.3,.8)))*200}px,${(1-eo(P(t,1.3,.8)))*160}px) scale(${t>tap&&t<tap+.15?.85:1})`;
+  const b=$('.c-b',el); if(t>=tap){b.innerHTML='Following ✓'; b.style.background='rgba(255,255,255,.12)'; b.style.color='#fff'; b.style.border='2px solid rgba(255,255,255,.3)';}}
+
+const VL=[
+  {el:vAds,a:0,b:ST('f0')-.12,r:rAds},
+  {el:vFix,a:ST('f0')-.12,b:ST('f1a')-.12,r:rFix},
+  {el:vStep,a:ST('f1a')-.12,b:ST('y1')-.12,r:rStep},
+  {el:vPay,a:ST('y1')-.12,b:ST('r1')-.12,r:rPay},
+  {el:vRec,a:ST('r1')-.12,b:ST('c1')-.12,r:rRec},
+  {el:vCta,a:ST('c1')-.12,b:END+1,r:rCta},
+];
+const PS=[ST('f1a')-.12,ST('f2')-.12,ST('f3a')-.12,ST('y1')-.12];
+const NOCAP=['r1','c1'];
+
+/* captions */
+const capWords=[];
+S.forEach(s=>s.words.forEach((w,k)=>{const nx=s.words[k+1];capWords.push({w:w.w.replace(/[.,]$/,''),s:w.s,e:nx?nx.s:s.start+s.dur,seg:s.key,brk:/[.,!?]$/.test(w.w)});}));
+const chunks=[];let cur=[];
+capWords.forEach((w,i)=>{cur.push(w);const nx=capWords[i+1];if(cur.length>=3||w.brk||!nx||nx.seg!==w.seg){chunks.push(cur);cur=[];}});
+function renderBg(t){
+  st($('#b1'),{left:`${300+Math.sin(t*.35)*180}px`,top:`${200+Math.cos(t*.28)*160}px`});
+  st($('#b2'),{left:`${500+Math.cos(t*.3)*200}px`,top:`${1300+Math.sin(t*.4)*180}px`});
+  st($('#b3'),{left:`${100+Math.sin(t*.5+1)*120}px`,top:`${900+Math.cos(t*.45)*200}px`});
+  st($('#grid'),{transform:`translateY(${(t*30)%90}px)`});
+}
+const cuts=VL.map(v=>v.a).filter(x=>x>0);
+window.seek=function(t){
+  renderBg(t);
+  HL.forEach((h,i)=>{const b=i+1<HL.length?HL[i+1].a:END+1; const el=hlEls[i]; const vis=t>=h.a&&t<b; el.style.display=vis?'block':'none'; if(!vis)return;
+    if($('.h-l',el)) rise($('.h-l',el),t-h.a,0,.25,16);
+    $$('.h-w',el).forEach(x=>{const at=+x.dataset.at; const p=eo5(P(t,Math.max(h.a,at-.06),.25)); st(x,{opacity:p,transform:`scale(${lerp(1.2,1,p)})`,filter:`blur(${(1-p)*10}px)`});});
+    if($('.h-n',el)) $('.h-n',el).textContent='+'+Math.round(340*eo(P(t,W('p1',/^three/)-.05,1.2)))+'%';
+  });
+  VL.forEach(v=>{const vis=t>=v.a&&t<v.b; v.el.style.display=vis?'block':'none'; if(!vis)return; const lt=t-v.a;
+    if(v.a>0){const p=eo5(P(lt,0,.3)); st(v.el,{transform:`scale(${lerp(1.05,1,p)})`,opacity:p});} v.r(lt,v.el);});
+  [...$('#prog').children].forEach((s,i)=>{s.firstChild.style.width=`${clamp((t-PS[i])/(PS[i+1]-PS[i]))*100}%`;});
+  st($('#prog'),{opacity:t<PS[0]-.2?0:t<PS[0]+.2?eo(P(t,PS[0]-.2,.4)):(t>PS[3]?1-eo(P(t,PS[3],.3)):1)});
+  const cap=$('#cap'); const ch=chunks.find(c=>t>=c[0].s-.05&&t<c[c.length-1].e+.08);
+  if(!ch||NOCAP.includes(ch[0].seg)){cap.innerHTML='';} else {
+    const pin=eo5(P(t,ch[0].s-.05,.18));
+    cap.innerHTML=ch.map(w=>{const on=t>=w.s&&t<w.e+.05; return `<span style="color:${on?'#22E06F':'#fff'};transform:scale(${on?1.08:1})">${w.w}</span>`}).join(' ');
+    st(cap,{transform:`translateY(${(1-pin)*30}px) scale(${lerp(.9,1,pin)})`,opacity:pin});
+  }
+  let fl=0, wy=-2400; cuts.forEach(c=>{const d=Math.abs(t-c); if(d<.08) fl=Math.max(fl,(1-d/.08)*.3);});
+  const pw=VL[3].a; if(Math.abs(t-pw)<.21){wy=lerp(1920,-2400,eio((t-pw+.21)/.42));}
+  $('#flash').style.opacity=fl; $('#wipe').style.top=`${wy}px`;
+  return true;
+};
+window.__ready=document.fonts.ready.then(()=>true);
+</script></body></html>
