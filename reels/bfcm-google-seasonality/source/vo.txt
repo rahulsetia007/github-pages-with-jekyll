@@ -1,0 +1,15 @@
+p1|Over five thousand Google Ads accounts tried one Black Friday trick.|0.3
+p2|And it made their clicks cost more.|0.4
+p3|Don't press this button.|0.6
+k1|It's called a seasonality adjustment. It tells Google to bid higher, because you expect more sales.|0.3
+k2|But accounts that used it saw click costs rise about twice as much as accounts that didn't.|0.6
+f0|Here's what to do instead. Three steps, before Friday.|0.5
+f1a|Step one. Type seasonality adjustments in the Google Ads search bar.|0.25
+f1b|If there's one set for Black Friday, remove it.|0.6
+f2a|Step two. Let Smart Bidding do its job.|0.25
+f2b|Google says it already accounts for seasonal events like holidays.|0.6
+f3a|Step three. Put that energy into your offer.|0.25
+f3b|Add a Black Friday promotion asset, so your discount shows right in the ad.|0.6
+y1|Now Google bids on real demand. And shoppers see your deal before they even click.|0.6
+r1|Remove the adjustment. Trust the bidding. Promote the offer.|0.6
+c1|Send this to someone running Google Ads this Black Friday.|0.3
