@@ -1,8 +1,8 @@
-p1|You're spending ten dollars a day on Meta ads.|0.25
-p2|And nothing happens.|0.4
-p3|Meta isn't broken. Your budget is just too small to learn.|0.6
+p1|Running Meta ads, but getting clicks and no sales?|0.3
+p2|It might not be your ad.|0.25
+p3|It might be your budget.|0.6
 k1|Meta needs about fifty conversions a week, per ad set, to learn who buys.|0.3
-k2|Below that, it gets stuck in learning limited. And Meta says those ad sets pay about twenty eight percent more per sale.|0.6
+k2|Below that, your ad set gets stuck in learning limited. And Meta says those ad sets pay about twenty eight percent more per sale.|0.6
 f0|Here's the formula. Three steps.|0.5
 f1|Step one. Find your cost per result. Say it's twenty dollars a sale.|0.5
 f2a|Step two. Multiply by fifty, then divide by seven.|0.3
