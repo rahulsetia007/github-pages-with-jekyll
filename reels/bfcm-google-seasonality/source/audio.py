@@ -44,7 +44,7 @@ music = music + (pad * .5 + bl * .55 + arp) * side; music /= np.max(np.abs(music
 # sfx: whoosh + sub hit on each scene change, pops for list rows, tap for Follow
 sfx = np.zeros(N)
 _w=lambda k,p,n=0:[w['s'] for w in S[k]['words'] if w['w'].startswith(p)][n]
-starts = [S[k]['start'] - .12 for k in ['f0', 'f1a', 'y1', 'r1', 'c1']]
+starts = [S[k]['start'] - .12 for k in ['p3', 'k1', 'k2', 'f0', 'f1a', 'y1', 'r1', 'c1']]
 for b in starts:
     l = int(.45 * sr); et = np.arange(l) / sr; x = rng.standard_normal(l); out = np.zeros(l); C = 9
     for j in range(C):
@@ -58,37 +58,29 @@ def tick(at, f=1500, g=.25):
 def wt(seg, pre):
     return next((w['s'] for w in S[seg]['words'] if w['w'].startswith(pre)), None)
 st0 = lambda k: S[k]['start'] - .18
-# PAIN: rows pop, counters to 12, "learning limited" tags
-f = wt('p1', 'five')
-for k in range(5): tick(f - .1 + k * .1, 1800 + k * 120, .12)
-tw = wt('p2', 'twelve')
-for k in range(8): tick(tw + k * .1, 2000, .07)
-tick(S['p3']['start'], 1200, .25)
-# POKE: 50 line, +28% stamp, edit click, back to learning
-tick(wt('k1', 'fifty'), 2600, .25)
+# PAIN: dots fill, cost rises, stamp on "button"
+for k in range(12): tick(.15 + k * .13, 1800 + k * 80, .07)
+c = wt('p2', 'clicks')
+for k in range(5): tick(c + k * .18, 1400 + k * 150, .12)
 hl2 = int(.5 * sr); ht2 = np.arange(hl2) / sr
-place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), wt('k1', 'twenty'), .45)
-tick(wt('k2', 'edit') + .3, 3200, .3)
-tick(wt('k2', 'learning'), 700, .3); tick(wt('k2', 'learning') + .12, 650, .25)
-tick(wt('k2', 'Black'), 2400, .25)
+place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), wt('p3', 'button'), .5)
+# POKE
+tick(wt('k1', 'bid'), 2400, .25)
+tick(wt('k2', 'rise'), 1600, .2); tick(wt('k2', 'twice'), 2600, .3)
 # FIX
 th = wt('f0', 'Three')
 for k in range(3): tick(th + k * .15, 2200 + k * 200, .2)
-for pre in ['Weekly', 'divided', 'cost', 'fifty']:
-    c = wt('f1b', pre)
-    if c: tick(c, 1900, .15)
-tick(wt('f1c', "That's"), 3000, .3)
-m = wt('f2', 'Merge')
-for k in range(5): tick(m + k * .15, 1500 + k * 150, .12)
-tick(wt('f2', 'finish'), 2800, .25)
-tick(wt('f3a', 'Schedule'), 2200, .25); tick(wt('f3a', 'scheduling'), 2800, .25)
-place(sfx, np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8), wt('f3b', 'touch'), .35)
-# PAYOFF: active, budget steps up
-tick(wt('y1', 'learn'), 2600, .25)
-g = wt('y1', 'goes')
-for k in range(4): tick(g - .2 + k * .12, 2000 + k * 200, .18)
+s0 = wt('f1a', 'seasonality') - .1
+for k in range(14): tick(s0 + k * .05, 3000 + (k % 3) * 300, .05)
+tick(wt('f1b', 'If'), 1800, .2); tick(wt('f1b', 'remove'), 3200, .3)
+tick(wt('f2b', 'already'), 2600, .25)
+tick(wt('f3b', 'promotion'), 2200, .25); tick(wt('f3b', 'discount'), 2800, .22)
+# PAYOFF
+r = wt('y1', 'real')
+for k in range(6): tick(r + k * .2, 1800 + k * 150, .12)
+tick(wt('y1', 'deal'), 2800, .25)
 # RECAP
-for pre in ['Do', 'Merge', 'Schedule']:
+for pre in ['Remove', 'Trust', 'Promote']:
     c = wt('r1', pre)
     if c: tick(c, 2600, .22); tick(c + .06, 3300, .16)
 tick(S['c1']['start'] - .12 + 2.2, 2200, .35)
