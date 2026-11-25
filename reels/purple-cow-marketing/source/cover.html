@@ -1,0 +1,68 @@
+<!doctype html><html><head><meta charset="utf-8">
+<!-- Purple Cow cover (hook layout from the style guide). Text kept inside the 4:5 grid crop (y 285-1635). -->
+<style>
+@font-face{font-family:Inter;src:url(fonts/Inter.ttf);font-weight:100 900}
+@font-face{font-family:Mont;src:url(fonts/Montserrat.ttf);font-weight:100 900}
+@font-face{font-family:Mono;src:url(fonts/SpaceMono-Bold.ttf)}
+@font-face{font-family:ISerif;src:url(fonts/InstrumentSerif-Italic.ttf);font-style:normal;font-weight:400}
+:root{
+  --ink:#030403; --ink2:#0A0D0B; --line:rgba(255,255,255,.08);
+  --text:#F5F8F6; --muted:#8A938C; --lime:#22E06F; --violet:#0E7A3C; --deep:#06331A;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ink)}
+body{font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+#stage{position:absolute;inset:0;overflow:hidden}
+.bg{position:absolute;inset:-200px}
+.blob{position:absolute;border-radius:50%;filter:blur(140px);opacity:.42}
+.grid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:90px 90px;-webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 45%,#000 30%,transparent 80%);opacity:.55}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse 85% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.65) 100%);pointer-events:none}
+.scene{position:absolute;inset:0;will-change:transform,filter,opacity}
+.abs{position:absolute}
+.mono{font-family:Mono,monospace;letter-spacing:.04em}
+#prog{position:absolute;top:118px;left:90px;right:90px;display:flex;gap:12px}
+#prog .seg{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
+#prog .seg i{display:block;height:100%;width:0;background:var(--lime);border-radius:8px;box-shadow:0 0 18px var(--lime)}
+.card{position:absolute;left:90px;width:900px;border-radius:44px;background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.14);box-shadow:0 40px 120px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.18);backdrop-filter:blur(30px);overflow:hidden}
+.pill{display:inline-flex;align-items:center;gap:12px;padding:14px 26px;border-radius:999px;font-weight:700;font-size:30px}
+.title{font-family:Mont;font-weight:900;font-size:128px;line-height:.92;letter-spacing:-.035em}
+.sub{font-size:44px;font-weight:500;color:#C8D0CA;line-height:1.25}
+.sub b{color:var(--lime);font-weight:800}
+.bar{height:22px;border-radius:12px;background:rgba(255,255,255,.14)}
+#cap{position:absolute;left:60px;right:60px;top:1500px;text-align:center;font-family:Mont;font-weight:900;font-size:66px;line-height:1.1;letter-spacing:-.01em;text-transform:uppercase}
+#cap span{display:inline-block;margin:0 10px;text-shadow:0 6px 30px rgba(0,0,0,.7)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;mix-blend-mode:overlay}
+#wipe{position:absolute;left:0;right:0;height:2400px;top:-2400px;background:var(--lime)}
+.ghost{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.16)}
+.tile{display:inline-flex;align-items:center;justify-content:center;flex:none;background:#fff;color:#030403;font-family:Mont;font-weight:900;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+</style><style>
+.tile{display:inline-flex}
+.giant{font:900 470px/.82 Mont;letter-spacing:-.05em;background:linear-gradient(180deg,#F5F8F6 15%,#22E06F 85%);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 0 60px rgba(34,224,111,.45))}
+</style></head><body><div id="stage">
+<div class="bg"><div class="blob" style="width:900px;height:900px;background:var(--violet);left:250px;top:150px"></div>
+<div class="blob" style="width:800px;height:800px;background:var(--deep);left:400px;top:1300px"></div>
+<div class="blob" style="width:600px;height:600px;background:var(--lime);opacity:.18;left:200px;top:800px"></div></div>
+<div class="grid"></div>
+<div class="abs" style="left:0;right:0;top:510px;display:flex;flex-direction:column;align-items:center;text-align:center">
+  <div class="mono" style="font-size:36px;color:var(--lime)">MARKETING · THE PURPLE COW</div>
+  <div class="giant" style="margin-top:30px;font-size:128px;line-height:.92;letter-spacing:-.04em;white-space:nowrap">WHY NOBODY<br>STOPS ON<br>YOUR AD</div>
+  <div id="herd" style="margin-top:50px;display:flex;align-items:flex-end;gap:6px"></div>
+  <div style="margin-top:30px;font-family:ISerif;font-size:80px;color:#D8E0DA">be the <span style="color:#B07CFF">purple cow</span></div>
+  <div class="pill" style="margin-top:40px;background:var(--lime);color:#030403;font-size:32px;font-weight:900;padding:14px 30px"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z" fill="#030403"/></svg>SAVE THIS</div>
+</div>
+<script>const COWC={brown:{b:'#9A6A47',s:'#5C3A25',sn:'#E2B39A',l:'#7A5136',h:'#3B2A1E'},purple:{b:'#9D5CF5',s:'#6A35D8',sn:'#F2C2F5',l:'#7E45E6',h:'#3E1E7A'}};
+function COW(kind,w){const c=COWC[kind];return `<svg width="${w}" viewBox="0 0 240 170" style="overflow:visible;display:block">
+ <path d="M38 70 C18 78 20 112 14 122" stroke="${c.l}" stroke-width="6" fill="none" stroke-linecap="round"/><ellipse cx="13" cy="126" rx="7" ry="10" fill="${c.s}"/>
+ ${[[58,0],[82,1],[136,0],[160,1]].map(([x,b])=>`<rect x="${x}" y="98" width="17" height="56" rx="8" fill="${b?c.l:c.b}"/><rect x="${x-1}" y="146" width="19" height="12" rx="4" fill="${c.h}"/>`).join('')}
+ <path d="M40 66 C40 36 70 30 110 32 C150 30 182 36 186 62 C190 92 176 112 146 114 L80 114 C52 114 40 96 40 66Z" fill="${c.b}"/>
+ <path d="M70 40 C86 34 100 46 94 60 C88 74 66 70 62 58 C59 50 62 44 70 40Z" fill="${c.s}"/>
+ <path d="M128 70 C142 62 160 70 156 86 C152 100 130 102 124 90 C120 82 120 75 128 70Z" fill="${c.s}"/>
+ <path d="M150 36 C160 34 172 40 170 50 C166 58 152 56 148 48Z" fill="${c.s}"/>
+ <path d="M176 44 C178 30 196 22 210 30 C224 38 226 60 218 72 C210 84 190 84 182 74 C176 66 174 56 176 44Z" fill="${c.b}"/>
+ <path d="M186 28 C182 16 186 10 192 8" stroke="#F3E9D8" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M208 26 C212 14 210 8 204 6" stroke="#F3E9D8" stroke-width="5" fill="none" stroke-linecap="round"/>
+ <ellipse cx="176" cy="38" rx="11" ry="6" fill="${c.l}" transform="rotate(-25 176 38)"/>
+ <ellipse cx="212" cy="76" rx="20" ry="14" fill="${c.sn}"/><ellipse cx="205" cy="76" rx="3" ry="4" fill="${c.h}"/><ellipse cx="219" cy="76" rx="3" ry="4" fill="${c.h}"/>
+ <circle cx="200" cy="50" r="5" fill="#111"/><circle cx="201.5" cy="48.5" r="1.6" fill="#fff"/></svg>`;}
+
+document.getElementById('herd').innerHTML=['brown','brown','purple','brown','brown'].map(k=>k==='purple'?`<div style="filter:drop-shadow(0 0 40px rgba(157,92,245,.9));transform:translateY(-10px)">${COW('purple',270)}</div>`:`<div style="filter:grayscale(.6) brightness(.55)">${COW('brown',170)}</div>`).join('');
+</script><div class="vig"></div></div></body></html>

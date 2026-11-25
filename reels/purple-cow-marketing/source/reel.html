@@ -1,0 +1,292 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- Purple Cow marketing (Seth Godin's idea) explained with the cow metaphor, house teaching style. Pain, Poke, Fix, Payoff, Recap, CTA. -->
+<style>
+@font-face{font-family:Inter;src:url(fonts/Inter.ttf);font-weight:100 900}
+@font-face{font-family:Mont;src:url(fonts/Montserrat.ttf);font-weight:100 900}
+@font-face{font-family:Mono;src:url(fonts/SpaceMono-Bold.ttf)}
+@font-face{font-family:ISerif;src:url(fonts/InstrumentSerif-Italic.ttf);font-style:normal;font-weight:400}
+:root{
+  --ink:#030403; --ink2:#0A0D0B; --line:rgba(255,255,255,.08);
+  --text:#F5F8F6; --muted:#8A938C; --lime:#22E06F; --violet:#0E7A3C; --deep:#06331A;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ink)}
+body{font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+#stage{position:absolute;inset:0;overflow:hidden}
+.bg{position:absolute;inset:-200px}
+.blob{position:absolute;border-radius:50%;filter:blur(140px);opacity:.42}
+.grid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:90px 90px;-webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 45%,#000 30%,transparent 80%);opacity:.55}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse 85% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.65) 100%);pointer-events:none}
+.scene{position:absolute;inset:0;will-change:transform,filter,opacity}
+.abs{position:absolute}
+.mono{font-family:Mono,monospace;letter-spacing:.04em}
+#prog{position:absolute;top:118px;left:90px;right:90px;display:flex;gap:12px}
+#prog .seg{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
+#prog .seg i{display:block;height:100%;width:0;background:var(--lime);border-radius:8px;box-shadow:0 0 18px var(--lime)}
+.card{position:absolute;left:90px;width:900px;border-radius:44px;background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.14);box-shadow:0 40px 120px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.18);backdrop-filter:blur(30px);overflow:hidden}
+.pill{display:inline-flex;align-items:center;gap:12px;padding:14px 26px;border-radius:999px;font-weight:700;font-size:30px}
+.title{font-family:Mont;font-weight:900;font-size:128px;line-height:.92;letter-spacing:-.035em}
+.sub{font-size:44px;font-weight:500;color:#C8D0CA;line-height:1.25}
+.sub b{color:var(--lime);font-weight:800}
+.bar{height:22px;border-radius:12px;background:rgba(255,255,255,.14)}
+#cap{position:absolute;left:60px;right:60px;top:1500px;text-align:center;font-family:Mont;font-weight:900;font-size:66px;line-height:1.1;letter-spacing:-.01em;text-transform:uppercase}
+#cap span{display:inline-block;margin:0 10px;text-shadow:0 6px 30px rgba(0,0,0,.7)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;mix-blend-mode:overlay}
+#wipe{position:absolute;left:0;right:0;height:2400px;top:-2400px;background:var(--lime)}
+.ghost{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.16)}
+.tile{display:inline-flex;align-items:center;justify-content:center;flex:none;background:#fff;color:#030403;font-family:Mont;font-weight:900;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+</style></head>
+<body><div id="stage">
+  <div class="bg" id="bg">
+    <div class="blob" id="b1" style="width:900px;height:900px;background:var(--violet)"></div>
+    <div class="blob" id="b2" style="width:800px;height:800px;background:var(--deep)"></div>
+    <div class="blob" id="b3" style="width:600px;height:600px;background:var(--lime);opacity:.18"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div id="scenes"></div>
+  <div id="prog"></div>
+  <div id="cap"></div>
+  <div id="wipe"></div>
+  <div id="flash"></div>
+  <div class="vig"></div>
+</div>
+<script>
+const D = window.__DATA__;
+const $ = (s,el=document)=>el.querySelector(s);
+const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-clamp(t),3);
+const eo5=t=>1-Math.pow(1-clamp(t),5);
+const eio=t=>{t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+const back=t=>{t=clamp(t);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
+const P=(t,a,d)=>clamp((t-a)/d);
+function st(el,o){for(const k in o) el.style[k]=o[k];}
+function pop(el,t,a,d=.45,from=.6){const p=P(t,a,d);st(el,{opacity:clamp(p*3),transform:`scale(${lerp(from,1,back(p))})`});}
+function rise(el,t,a,d=.5,dy=60){const p=eo(P(t,a,d));st(el,{opacity:p,transform:`translateY(${(1-p)*dy}px)`,filter:`blur(${(1-p)*10}px)`});}
+function typed(el,txt,t,a,cps=26){const n=Math.floor(clamp((t-a)*cps,0,txt.length));el.textContent=txt.slice(0,n);return n<txt.length;}
+function mk(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
+const scenesEl=$('#scenes');
+
+/* ---------- content: teaching shots (house delivery). Each visual stays up and changes state on the spoken words. ---------- */
+const S=D.segs, segBy=Object.fromEntries(S.map(s=>[s.key,s]));
+const W=(seg,re,n=0)=>{const ws=segBy[seg].words.filter(x=>re.test(x.w));return ws[n]?ws[n].s:null;};
+const ST=k=>segBy[k].start;
+const END=D.end;
+let _gid=0;
+const LT=(svg,size,r)=>{const id='g'+(++_gid);return `<span class="tile" style="width:${size}px;height:${size}px;border-radius:${r}px;padding:${Math.round(size*.17)}px;background:#fff">${svg.replace(/igg/g,id)}</span>`;};
+const LOGO_G=`<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0081FB" d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303zm10.16 2.053c1.147 0 2.188.758 2.992 1.999 1.132 1.748 1.647 4.195 1.647 6.4 0 1.548-.368 2.9-1.839 2.9-.58 0-1.027-.23-1.664-1.004-.496-.601-1.343-1.878-2.832-4.358l-.617-1.028a44.908 44.908 0 0 0-1.255-1.98c.07-.109.141-.224.211-.327 1.12-1.667 2.118-2.602 3.358-2.602zm-10.201.553c1.265 0 2.058.791 2.675 1.446.307.327.737.871 1.234 1.579l-1.02 1.566c-.757 1.163-1.882 3.017-2.837 4.338-1.191 1.649-1.81 1.817-2.486 1.817-.524 0-1.038-.237-1.383-.794-.263-.426-.464-1.13-.464-2.046 0-2.221.63-4.535 1.66-6.088.454-.687.964-1.226 1.533-1.533a2.264 2.264 0 0 1 1.088-.285z"/></svg>`;
+const DOC=`<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M6 2h8l5 5v15H6z" fill="none" stroke="#030403" stroke-width="2.2" stroke-linejoin="round"/><path d="M14 2v5h5M9 12h7M9 16h7" stroke="#030403" stroke-width="2.2"/></svg>`;
+const TICK=(s=34,c='#030403')=>`<svg width="${s}" height="${s}" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const CARD='background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.16);border-radius:40px';
+
+/* ---------- the cow (original illustration, faces right) ---------- */
+const COWC={brown:{b:'#9A6A47',s:'#5C3A25',sn:'#E2B39A',l:'#7A5136',h:'#3B2A1E'},purple:{b:'#9D5CF5',s:'#6A35D8',sn:'#F2C2F5',l:'#7E45E6',h:'#3E1E7A'}};
+function COW(kind,w){const c=COWC[kind];return `<svg width="${w}" viewBox="0 0 240 170" style="overflow:visible;display:block">
+ <path d="M38 70 C18 78 20 112 14 122" stroke="${c.l}" stroke-width="6" fill="none" stroke-linecap="round"/><ellipse cx="13" cy="126" rx="7" ry="10" fill="${c.s}"/>
+ ${[[58,0],[82,1],[136,0],[160,1]].map(([x,b])=>`<rect x="${x}" y="98" width="17" height="56" rx="8" fill="${b?c.l:c.b}"/><rect x="${x-1}" y="146" width="19" height="12" rx="4" fill="${c.h}"/>`).join('')}
+ <path d="M40 66 C40 36 70 30 110 32 C150 30 182 36 186 62 C190 92 176 112 146 114 L80 114 C52 114 40 96 40 66Z" fill="${c.b}"/>
+ <path d="M70 40 C86 34 100 46 94 60 C88 74 66 70 62 58 C59 50 62 44 70 40Z" fill="${c.s}"/>
+ <path d="M128 70 C142 62 160 70 156 86 C152 100 130 102 124 90 C120 82 120 75 128 70Z" fill="${c.s}"/>
+ <path d="M150 36 C160 34 172 40 170 50 C166 58 152 56 148 48Z" fill="${c.s}"/>
+ <path d="M176 44 C178 30 196 22 210 30 C224 38 226 60 218 72 C210 84 190 84 182 74 C176 66 174 56 176 44Z" fill="${c.b}"/>
+ <path d="M186 28 C182 16 186 10 192 8" stroke="#F3E9D8" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M208 26 C212 14 210 8 204 6" stroke="#F3E9D8" stroke-width="5" fill="none" stroke-linecap="round"/>
+ <ellipse cx="176" cy="38" rx="11" ry="6" fill="${c.l}" transform="rotate(-25 176 38)"/>
+ <ellipse cx="212" cy="76" rx="20" ry="14" fill="${c.sn}"/><ellipse cx="205" cy="76" rx="3" ry="4" fill="${c.h}"/><ellipse cx="219" cy="76" rx="3" ry="4" fill="${c.h}"/>
+ <circle cx="200" cy="50" r="5" fill="#111"/><circle cx="201.5" cy="48.5" r="1.6" fill="#fff"/></svg>`;}
+const PURP='#B07CFF';
+
+/* ---------- headline: the spoken words, each blurs in when it is said ---------- */
+const g=(txt,at,col)=>`<span class="h-w" data-at="${at}" style="display:inline-block;${col==='p'?`color:${PURP};text-shadow:0 0 30px rgba(157,92,245,.6)`:col?'color:var(--lime)':''}">${txt}</span>`;
+const L=t=>`<b style="color:var(--lime)">${t}</b>`;
+const HL=[
+  {a:0, lead:'your ad looks like', size:116, big:g('EVERY',W('p1',/^every/))+' '+g('OTHER AD.',W('p1',/^other/),1), sub:g('in the feed.',W('p1',/^in/))},
+  {a:ST('p2')-.12, lead:"that's why", size:140, big:g('NOBODY',W('p2',/^nobody/))+'<br>'+g('STOPS.',W('p2',/^stops/),1)},
+  {a:ST('k1')-.12, lead:'picture driving past a', size:120, big:g('FIELD',W('k1',/^field/))+' '+g('OF COWS.',W('k1',/^cows/),1)},
+  {a:W('k1',/^After/)-.12, lead:'after a few minutes of brown cows', size:120, big:g('YOU STOP',W('k1',/^stop/))+'<br>'+g('LOOKING.',W('k1',/^looking/),1)},
+  {a:ST('k2')-.12, lead:"that's your customer, scrolling past", size:84, big:g('QUALITY.',W('k2',/^quality/))+'<br>'+g('FAST SHIPPING.',W('k2',/^fast/))+'<br>'+g('BEST PRICE.',W('k2',/^best/),1)},
+  {a:W('k2',/^And/)-.12, lead:'and you pay for', size:124, big:g('EVERY',W('k2',/^every/))+' '+g('SCROLL.',W('k2',/^scroll/),1)},
+  {a:ST('f0a')-.12, lead:'but if you saw a', size:130, big:g('PURPLE COW',W('f0a',/^purple/),'p'), sub:g("you'd stop.",W('f0a',/^you'd/))+' '+g("you'd "+L('tell a friend.'),W('f0a',/^You'd/))},
+  {a:ST('f0b')-.12, lead:"that's seth godin's", size:130, big:g('PURPLE COW.',W('f0b',/^Purple/),'p'), sub:g("here's how to "+L('find yours.'),W('f0b',/^Here's/))},
+  {a:ST('f1a')-.12, lead:'step one · write down what', size:96, big:g('EVERY',W('f1a',/^every/))+' '+g('COMPETITOR',W('f1a',/^competitor/))+'<br>'+g('SAYS.',W('f1a',/^says/),1)},
+  {a:ST('f1b')-.12, lead:'those are your brown cows', size:130, big:g('CROSS THEM',W('f1b',/^Cross/))+'<br>'+g('OUT.',W('f1b',/^out/),1)},
+  {a:ST('f2a')-.12, lead:'step two · ask', size:84, big:g('WHAT WOULD',W('f2a',/^what/))+' '+g('A CUSTOMER',W('f2a',/^customer/))+'<br>'+g('TELL A FRIEND?',W('f2a',/^tell/),1)},
+  {a:ST('f2b')-.12, lead:'pick one thing, push it to the', size:140, big:g('EXTREME.',W('f2b',/^extreme/),1), sub:g('not fast replies.',W('f2b',/^Not/))+' '+g(L('replies in 5 min, guaranteed.'),W('f2b',/^Replies/))},
+  {a:ST('f3a')-.12, lead:'step three · put it in the', size:116, big:g('FIRST LINE',W('f3a',/^first/),1)+'<br>'+g('OF YOUR AD.',W('f3a',/^line/))},
+  {a:ST('f3b')-.12, lead:'show it to the people who', size:130, big:g('CARE MOST.',W('f3b',/^care/),1), sub:g("they'll "+L('spread it for you.'),W('f3b',/^They'll/))},
+  {a:ST('y1')-.12, lead:'now your ad is the', size:110, big:g('PURPLE COW',W('y1',/^purple/),'p')+'<br>'+g('IN THE FEED.',W('y1',/^feed/)), sub:g('people stop, remember it, and '+L('tell a friend.'),W('y1',/^People/))},
+  {a:ST('r1')-.12, lead:'recap · save this', size:96, big:g('CROSS OUT.',W('r1',/^Cross/))+' '+g('FIND.',W('r1',/^Find/))+'<br>'+g('LEAD WITH IT.',W('r1',/^Lead/),1)},
+  {a:ST('c1')-.12, cta:true},
+];
+const hlEls=HL.map(h=>{const e=mk(`<div class="scene">${h.cta||h.shock?'':`<div class="abs" style="top:210px;left:30px;right:30px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+  ${h.lead?`<div class="h-l mono" style="font-size:38px;color:#AEB7B0;text-transform:lowercase">${h.lead}</div>`:''}
+  <div class="h-b" style="font:900 ${h.size||118}px/.95 Mont;letter-spacing:-.035em;text-transform:uppercase">${h.big}</div>
+  ${h.sub?`<div class="h-s" style="font:700 44px Inter;color:#C8D0CA">${h.sub}</div>`:''}</div>`}</div>`);scenesEl.appendChild(e);return e;});
+
+const CUR=`<svg width="70" height="70" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#fff" stroke="#030403" stroke-width="1.5"/></svg>`;
+const PERSON=(c,s)=>`<svg width="${s}" height="${s}" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="${c}"/><circle cx="20" cy="15" r="7" fill="#030403" opacity=".55"/><path d="M8 34 C10 24 30 24 32 34" fill="#030403" opacity=".55"/></svg>`;
+
+/* ---------- phone feed (pain + payoff) ---------- */
+const CLAIMS=['Quality you can trust','Fast, free shipping','Best prices, guaranteed','Top quality products','Fast delivery','Best value'];
+const feedCard=(i,mine)=>`<div class="fcard" data-i="${i}" style="position:absolute;left:18px;right:18px;height:340px;border-radius:24px;background:${mine?'#120C1E':'#141815'};border:${mine?'3px solid '+PURP:'1.5px solid rgba(255,255,255,.12)'};padding:16px;overflow:hidden">
+  <div style="display:flex;align-items:center;gap:10px"><i style="display:block;width:34px;height:34px;border-radius:50%;background:${mine?PURP:'#3A403C'}"></i><div><div style="font:800 20px Inter">${mine?'Your brand':'Brand '+String.fromCharCode(65+i%6)}</div><div style="font:600 15px Inter;color:#8E9890">Sponsored</div></div></div>
+  <div style="margin-top:12px;height:170px;border-radius:16px;background:${mine?'linear-gradient(135deg,#2A1650,#120C1E)':'linear-gradient(135deg,#2A302C,#1B201D)'};display:flex;align-items:center;justify-content:center">${mine?`<div class="mycow" style="filter:drop-shadow(0 0 24px rgba(157,92,245,.8))">${COW('purple',190)}</div>`:`<i style="display:block;width:90px;height:90px;border-radius:18px;background:#3A403C"></i>`}</div>
+  <div style="margin-top:12px;font:800 24px Inter;color:${mine?'#fff':'#C8D0CA'}">${mine?'⚡ Replies in 5 minutes. Guaranteed.':CLAIMS[i%6]}</div>
+  ${mine?`<div class="mst" style="margin-top:6px;display:flex;gap:18px;font:800 20px Inter;color:#C8D0CA"><span>🔖 <b class="sv">0</b> saves</span><span>↗ <b class="sh">0</b> shares</span></div>`:''}</div>`;
+const PHONE=(id,mine)=>`<div class="abs ${id}" style="left:250px;top:650px;width:580px;height:780px;border-radius:64px;background:#060806;border:10px solid #2A302C;box-shadow:0 40px 100px rgba(0,0,0,.6);overflow:hidden">
+  <i style="position:absolute;left:50%;top:14px;width:120px;height:26px;margin-left:-60px;border-radius:13px;background:#000;z-index:3"></i>
+  <div class="fd" style="position:absolute;left:0;right:0;top:0;bottom:0">${[0,1,2,3].map(i=>feedCard(i,false)).join('')}${mine?feedCard(9,true):''}</div></div>`;
+function scrollFeed(el,y,mineY){$$('.fcard',el).forEach(c=>{const i=+c.dataset.i; if(i===9){c.style.top=mineY+'px';return;} const yy=((i*360-y)%1440+1440)%1440-200; c.style.top=yy+'px';});}
+const vFeed=mk(`<div class="scene">${PHONE('ph',false)}<div class="abs thumb" style="left:640px;top:1180px;font-size:110px">👆</div></div>`);
+scenesEl.appendChild(vFeed);
+function rFeed(t,el){const T=t; pop($('.ph',el),T,0,.35,.9);
+  const sp=T<W('p2',/^nobody/)?520:900; const y=T*520+Math.max(0,T-W('p2',/^nobody/))*380; scrollFeed(el,y);
+  const fd=$('.fd',el); fd.style.filter=T>W('p2',/^nobody/)?`blur(${2*clamp(P(T,W('p2',/^nobody/),.3))}px)`:'none';
+  const ph=(T*1.4)%1; $('.thumb',el).style.transform=`translateY(${-eio(clamp(ph/.6))*260}px)`; $('.thumb',el).style.opacity=ph<.7?1:1-(ph-.7)/.3;}
+
+/* ---------- the drive: field of brown cows, then the purple cow ---------- */
+const NC=6, GAP=450, SPD=380;
+const vField=mk(`<div class="scene"><div class="abs fl" style="left:40px;right:40px;top:640px;height:780px;border-radius:44px;overflow:hidden;background:linear-gradient(#0A140E,#06331A 70%);border:1.5px solid rgba(255,255,255,.12)">
+  <svg class="abs" width="1000" height="780" viewBox="0 0 1000 780" style="left:0;top:0"><path d="M0 430 C200 380 420 420 600 390 C780 360 900 400 1000 380 L1000 780 L0 780Z" fill="#0E3B21"/><path d="M0 500 C250 470 500 510 1000 480 L1000 780 L0 780Z" fill="#0E7A3C" opacity=".55"/></svg>
+  <div class="fence abs" style="left:0;top:470px;width:3000px;height:120px">${Array.from({length:30},(_,i)=>`<i style="position:absolute;left:${i*100}px;top:0;width:16px;height:120px;border-radius:6px;background:#3B2A1E"></i>`).join('')}<i style="position:absolute;left:0;right:0;top:30px;height:10px;background:#4A3626"></i><i style="position:absolute;left:0;right:0;top:75px;height:10px;background:#4A3626"></i></div>
+  <div class="herd">${Array.from({length:NC},(_,i)=>`<div class="bc abs" data-i="${i}" style="top:370px;width:370px"><span class="tag pill" style="position:absolute;left:40px;top:-70px;background:#F5F8F6;color:#030403;font-size:26px;font-weight:900;white-space:nowrap;opacity:0">${['Quality','Fast shipping','Best price'][i%3]}</span>${COW('brown',370)}</div>`).join('')}</div>
+  <div class="pcw abs" style="top:300px;width:460px;opacity:0"><div style="filter:drop-shadow(0 0 40px rgba(157,92,245,.85))">${COW('purple',460)}</div></div>
+  <div class="bub abs" style="left:80px;top:150px;padding:20px 30px;border-radius:30px 30px 30px 8px;background:#F5F8F6;color:#030403;font:800 38px Inter;opacity:0">💬 “You HAVE to see this cow”</div>
+  <div class="eye abs mono" style="right:30px;top:24px;font-size:24px;color:#AEB7B0;opacity:0">👀 ATTENTION <b class="ev">100%</b></div>
+  <div class="spent abs" style="left:30px;top:24px;padding:12px 22px;border-radius:999px;background:rgba(3,4,3,.7);border:1.5px solid rgba(255,255,255,.2);font:900 34px Mont;opacity:0">$ spent: <span class="sv2">$0</span></div>
+  <div class="book abs" style="left:0;right:0;top:110px;margin:0 auto;width:fit-content;display:flex;align-items:center;gap:22px;padding:22px 30px;border-radius:26px;background:rgba(3,4,3,.82);border:2px solid ${PURP};opacity:0">
+    <div style="width:90px;height:120px;border-radius:8px;background:linear-gradient(150deg,${PURP},#5B2BC0);display:flex;align-items:center;justify-content:center;font-size:44px">🐄</div>
+    <div><div class="mono" style="font-size:20px;color:#AEB7B0">THE IDEA COMES FROM</div><div style="font:900 44px Mont;color:${PURP}">Purple Cow</div><div style="font:700 28px Inter">by Seth Godin</div></div></div></div></div>`);
+scenesEl.appendChild(vField);
+function rField(t,el){const T=t+ST('k1')-.12; rise($('.fl',el),t,0,.4,40);
+  const tp=W('f0a',/^purple/); const u=clamp((T-tp)/.9); const dist=T<tp?SPD*T:SPD*tp+SPD*.9*(u-u*u/2);
+  $('.fence',el).style.transform=`translateX(${-((dist*.8)%100)}px)`;
+  const purpleOn=T>=tp-.6; const dim=clamp(P(T,W('k1',/^stop/),.6))*(T<tp?1:1);
+  $$('.bc',el).forEach(c=>{const i=+c.dataset.i; let x=((i*GAP-dist)%(NC*GAP)+NC*GAP)%(NC*GAP)-370; c.style.left=x+'px';
+    const bob=Math.sin(T*6+i)*4; c.style.transform=`translateY(${bob}px)`;
+    let f=`grayscale(${dim*.7}) brightness(${lerp(1,.6,dim)})`; if(purpleOn) f=`grayscale(1) brightness(.35)`; c.style.filter=f;
+    const tag=$('.tag',c); const tw=[W('k2',/^quality/),W('k2',/^fast/),W('k2',/^best/)][i%3]; tag.style.opacity=T>=tw-.05&&T<tp?1:0;});
+  const ev=$('.eye',el); ev.style.opacity=clamp(P(T,W('k1',/^After/),.3))*(T<tp?1:0); $('.ev',el).textContent=Math.round(lerp(100,8,eio(P(T,W('k1',/^After/),1.9))))+'%';
+  const pay=W('k2',/^pay/); const sp=$('.spent',el); sp.style.opacity=T>=pay-.1&&T<tp?1:0; $('.sv2',el).textContent='$'+(Math.max(0,(T-pay))*3.7).toFixed(2);
+  const D_end=SPD*(tp+.45); const px=460-230+(D_end-dist); const pc=$('.pcw',el); pc.style.left=px+'px'; pc.style.opacity=purpleOn?1:0; pc.style.transform=`translateY(${Math.sin(T*5)*5}px) scale(${1+.04*Math.sin(T*3)})`;
+  pop($('.bub',el),T,W('f0a',/^tell/)-.1,.4,.6); if(T>=ST('f0b')-.12) $('.bub',el).style.opacity=0;
+  pop($('.book',el),T,W('f0b',/^Seth/)-.1,.45,.6);
+}
+
+/* ---------- steps card ---------- */
+const COMP=['Quality you can trust','Fast, free shipping','Best prices','Great customer service'];
+const vStep=mk(`<div class="scene"><div class="abs sc3" style="left:60px;right:60px;top:690px;height:680px;padding:32px;${CARD}">
+  <div style="display:flex;align-items:center;gap:16px"><span class="tile" style="width:56px;height:56px;border-radius:15px;font-size:32px">🐄</span><span class="mono st-h" style="font-size:22px;color:#8E9890"></span></div>
+  <div class="s1" style="position:absolute;left:32px;right:32px;top:118px;display:flex;flex-direction:column;gap:14px">${COMP.map(x=>`<div class="cr" style="position:relative;display:flex;align-items:center;gap:18px;padding:16px 22px;border-radius:22px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16)"><div style="width:110px">${COW('brown',110)}</div><span style="font:800 34px Inter">${x}</span><i class="x" style="position:absolute;left:150px;top:50%;height:6px;width:0;border-radius:3px;background:#F5F8F6"></i></div>`).join('')}</div>
+  <div class="s2" style="position:absolute;left:32px;right:32px;top:118px">
+    <div class="q2" style="display:flex;align-items:center;gap:18px">${PERSON('#F5F8F6',90)}<div style="padding:20px 28px;border-radius:30px 30px 30px 8px;background:#F5F8F6;color:#030403;font:800 36px Inter">“What would I tell a friend?”</div></div>
+    <div class="nf" style="position:relative;margin-top:34px;width:fit-content;padding:16px 30px;border-radius:999px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.3);font:800 36px Inter;color:#AEB7B0">Fast replies<i class="x2" style="position:absolute;left:20px;top:50%;height:6px;width:0;border-radius:3px;background:#F5F8F6"></i></div>
+    <div class="ex" style="margin-top:26px;display:flex;align-items:center;gap:20px;padding:26px 28px;border-radius:28px;background:#22E06F;color:#030403">
+      <div style="flex:none;width:150px;filter:drop-shadow(0 0 18px rgba(157,92,245,.8))">${COW('purple',150)}</div><div style="font:900 50px/1.05 Mont">Replies in 5 minutes. Guaranteed.</div></div></div>
+  <div class="s3" style="position:absolute;left:32px;right:32px;top:118px">
+    <div class="ad3" style="padding:22px;border-radius:24px;background:#F5F8F6;color:#030403">
+      <div style="display:flex;align-items:center;gap:12px">${LT(LOGO_G,44,12)}<div><div style="font:800 24px Inter">Your brand</div><div style="font:600 18px Inter;color:#5A625C">Sponsored · Example</div></div></div>
+      <div style="margin-top:14px;font:900 40px Mont;min-height:48px"><span class="l1"></span></div>
+      <div style="margin-top:6px;font:500 26px Inter;color:#3A403C">Ask us anything. A real person answers.</div></div>
+    <div class="rip" style="position:relative;margin-top:24px;height:250px">
+      ${[0,1,2].map(i=>`<i class="ring" style="position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:4px solid ${PURP};opacity:0"></i>`).join('')}
+      <div class="core" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;gap:10px">${PERSON('#22E06F',70)}${PERSON('#22E06F',70)}${PERSON('#22E06F',70)}</div>
+      ${[[-330,-70],[-250,70],[250,-80],[330,60],[-150,-105],[160,100]].map(([x,y])=>`<div class="pp" style="position:absolute;left:calc(50% + ${x}px - 28px);top:calc(50% + ${y}px - 28px);opacity:0">${PERSON(PURP,56)}</div>`).join('')}</div></div>
+</div></div>`);
+scenesEl.appendChild(vStep);
+for(let i=0;i<3;i++) $('#prog').appendChild(mk('<div class="seg"><i></i></div>'));
+function rStep(t,el){const T=t+ST('f1a')-.12;
+  const step=T<ST('f2a')-.12?0:T<ST('f3a')-.12?1:2;
+  $('.st-h',el).textContent=['STEP 1 · YOUR BROWN COWS','STEP 2 · YOUR PURPLE COW','STEP 3 · LEAD WITH IT · EXAMPLE'][step];
+  ['.s1','.s2','.s3'].forEach((c,i)=>$(c,el).style.display=step===i?'flex':'none'); $('.s2',el).style.display=step===1?'block':'none'; $('.s3',el).style.display=step===2?'block':'none';
+  if(step===0){$$('.cr',el).forEach((r,i)=>{rise(r,T,W('f1a',/^Write/)-.1+i*.25,.35,24); const x=eo(P(T,W('f1b',/^Cross/)+i*.12,.3)); $('.x',r).style.width=(x*(r.offsetWidth-180))+'px'; r.style.opacity=x>0?lerp(1,.45,x):r.style.opacity;
+    r.style.borderColor=T>=W('f1b',/^brown/)-.05&&T<W('f1b',/^Cross/)?'rgba(245,248,246,.6)':'rgba(255,255,255,.16)';});}
+  if(step===1){pop($('.q2',el),T,W('f2a',/^Ask/)-.1,.4,.7); rise($('.nf',el),T,W('f2b',/^Not/)-.15,.3,20); $('.x2',el).style.width=(eo(P(T,W('f2b',/^replies/)-.05,.3))*230)+'px';
+    pop($('.ex',el),T,W('f2b',/^Replies/)-.05,.45,.6); $('.q2',el).style.opacity=T>W('f2b',/^Pick/)?Math.min(+$('.q2',el).style.opacity||1,.5):$('.q2',el).style.opacity;}
+  if(step===2){rise($('.ad3',el),T,ST('f3a')-.1,.35,30); typed($('.l1',el),'⚡ Replies in 5 minutes. Guaranteed.',T,W('f3a',/^first/)-.1,30);
+    rise($('.core',el),T,W('f3b',/^people/)-.1,.35,20); const sp=W('f3b',/^spread/);
+    $$('.ring',el).forEach((r,i)=>{const p=((T-sp+i*.35)%1.05)/1.05; const on=T>=sp-.35*i; r.style.opacity=on&&T>=sp?(1-p)*.8:0; r.style.transform=`scale(${1+p*4})`;});
+    $$('.pp',el).forEach((p,i)=>pop(p,T,sp+.1+i*.12,.35,.4));}
+}
+
+/* ---------- payoff: the feed stops on your purple cow ---------- */
+const vPay=mk(`<div class="scene">${PHONE('ph2',true)}</div>`);
+scenesEl.appendChild(vPay);
+function rPay(t,el){const T=t+ST('y1')-.12; rise($('.ph2',el),t,0,.35,30);
+  const ts=W('y1',/^purple/); const u=clamp((T-(ST('y1')-.12))/(ts-ST('y1')+.4)); const y=t*0+eo(u)*1440;
+  scrollFeed(el,y,lerp(1600,220,eo(u)));
+  $$('.fcard',el).forEach(c=>{if(+c.dataset.i!==9){c.style.opacity=u>=1?.35:1;}});
+  const mine=$$('.fcard',el).find(c=>+c.dataset.i===9); mine.style.boxShadow=u>=1?`0 0 0 ${4+3*Math.sin(T*6)}px rgba(157,92,245,.5)`:'none';
+  $('.sv',el).textContent=Math.round(240*eo(P(T,W('y1',/^remember/)-.1,1.2))); $('.sh',el).textContent=Math.round(96*eo(P(T,W('y1',/^tell/)-.1,1.0)));
+  const mc=$('.mycow',el); if(mc) mc.style.transform=`translateY(${Math.sin(T*5)*4}px)`;}
+
+/* ---------- recap ---------- */
+const RC=[['Cross out the brown cows (what everyone says)',/^Cross/],['Find your remarkable thing, pushed to the extreme',/^Find/],['Lead with it in the first line',/^Lead/]];
+const vRec=mk(`<div class="scene"><div class="abs" style="left:70px;right:70px;top:720px;display:flex;flex-direction:column;gap:22px">${RC.map(([x])=>`<div class="rr" style="display:flex;align-items:center;gap:22px;padding:28px;border-radius:26px;border:2px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06)"><span class="rb" style="flex:none;width:60px;height:60px;border-radius:16px;border:4px solid #8A938C;display:flex;align-items:center;justify-content:center"></span><span style="font:800 34px Inter">${x}</span></div>`).join('')}</div></div>`);
+scenesEl.appendChild(vRec);
+function rRec(t,el){const T=t+ST('r1')-.12; $$('.rr',el).forEach((r,i)=>{rise(r,t,.1+i*.1,.35,30); const on=T>=W('r1',RC[i][1])-.05; const b=$('.rb',r);
+  b.style.borderColor=on?'#22E06F':'#8A938C'; b.style.background=on?'#22E06F':'transparent'; b.innerHTML=on?TICK(36):''; r.style.borderColor=on?'rgba(34,224,111,.6)':'rgba(255,255,255,.16)';});}
+
+/* ---------- CTA ---------- */
+const vCta=mk(`<div class="scene">
+  <div class="abs mono c-t" style="top:300px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">COMMENT COW FOR THE PROMPT</div>
+  <div class="abs c-cow" style="left:0;right:0;top:400px;display:flex;justify-content:center;filter:drop-shadow(0 0 40px rgba(157,92,245,.85))">${COW('purple',360)}</div>
+  <div class="abs c-f" style="top:900px;left:0;right:0;text-align:center;font:900 100px Mont;letter-spacing:-.03em">Follow for more</div>
+  <div class="abs c-s" style="top:1030px;left:0;right:0;text-align:center;font-family:ISerif;font-size:76px;color:#D8E0DA">go find your purple cow</div>
+  <div class="abs c-b pill" style="top:1180px;left:0;right:0;margin:0 auto;width:fit-content;padding:24px 70px;font-size:44px;font-weight:900;background:var(--lime);color:#030403">Follow</div>
+  <div class="abs c-m" style="left:640px;top:1300px;opacity:0">${CUR}</div></div>`);
+scenesEl.appendChild(vCta);
+function rCta(t,el){rise($('.c-t',el),t,0,.3,20); pop($('.c-cow',el),t,.1,.5,.5); $('.c-cow',el).style.transform+=` translateY(${Math.sin(t*5)*6}px)`;
+  rise($('.c-f',el),t,.5,.4,30); rise($('.c-s',el),t,.7,.4,30); pop($('.c-b',el),t,.9,.4,.6);
+  const tap=2.2; const m=$('.c-m',el); m.style.opacity=clamp(P(t,1.3,.2)); m.style.transform=`translate(${(1-eo(P(t,1.3,.8)))*200}px,${(1-eo(P(t,1.3,.8)))*160}px) scale(${t>tap&&t<tap+.15?.85:1})`;
+  const b=$('.c-b',el); if(t>=tap){b.innerHTML='Following ✓'; b.style.background='rgba(255,255,255,.12)'; b.style.color='#fff'; b.style.border='2px solid rgba(255,255,255,.3)';}}
+
+const VL=[
+  {el:vFeed,a:0,b:ST('k1')-.12,r:rFeed},
+  {el:vField,a:ST('k1')-.12,b:ST('f1a')-.12,r:rField},
+  {el:vStep,a:ST('f1a')-.12,b:ST('y1')-.12,r:rStep},
+  {el:vPay,a:ST('y1')-.12,b:ST('r1')-.12,r:rPay},
+  {el:vRec,a:ST('r1')-.12,b:ST('c1')-.12,r:rRec},
+  {el:vCta,a:ST('c1')-.12,b:END+1,r:rCta},
+];
+const PAYA=ST('y1')-.12;
+const PS=[ST('f1a')-.12,ST('f2a')-.12,ST('f3a')-.12,ST('y1')-.12];
+const NOCAP=['r1','c1'];
+
+/* captions */
+const capWords=[];
+S.forEach(s=>s.words.forEach((w,k)=>{const nx=s.words[k+1];capWords.push({w:w.w.replace(/[.,]$/,''),s:w.s,e:nx?nx.s:s.start+s.dur,seg:s.key,brk:/[.,!?]$/.test(w.w)});}));
+const chunks=[];let cur=[];
+capWords.forEach((w,i)=>{cur.push(w);const nx=capWords[i+1];if(cur.length>=3||w.brk||!nx||nx.seg!==w.seg){chunks.push(cur);cur=[];}});
+function renderBg(t){
+  st($('#b1'),{left:`${300+Math.sin(t*.35)*180}px`,top:`${200+Math.cos(t*.28)*160}px`});
+  st($('#b2'),{left:`${500+Math.cos(t*.3)*200}px`,top:`${1300+Math.sin(t*.4)*180}px`});
+  st($('#b3'),{left:`${100+Math.sin(t*.5+1)*120}px`,top:`${900+Math.cos(t*.45)*200}px`});
+  st($('#grid'),{transform:`translateY(${(t*30)%90}px)`});
+}
+const cuts=VL.map(v=>v.a).filter(x=>x>0);
+window.seek=function(t){
+  renderBg(t);
+  HL.forEach((h,i)=>{const b=i+1<HL.length?HL[i+1].a:END+1; const el=hlEls[i]; const vis=t>=h.a&&t<b; el.style.display=vis?'block':'none'; if(!vis)return;
+    if($('.h-l',el)) rise($('.h-l',el),t-h.a,0,.25,16);
+    $$('.h-w',el).forEach(x=>{const at=+x.dataset.at; const p=eo5(P(t,Math.max(h.a,at-.06),.25)); st(x,{opacity:p,transform:`scale(${lerp(1.2,1,p)})`,filter:`blur(${(1-p)*10}px)`});});
+    if($('.h-n',el)) $('.h-n',el).textContent='+'+Math.round(340*eo(P(t,W('p1',/^three/)-.05,1.2)))+'%';
+  });
+  VL.forEach(v=>{const vis=t>=v.a&&t<v.b; v.el.style.display=vis?'block':'none'; if(!vis)return; const lt=t-v.a;
+    if(v.a>0){const p=eo5(P(lt,0,.3)); st(v.el,{transform:`scale(${lerp(1.05,1,p)})`,opacity:p});} v.r(lt,v.el);});
+  [...$('#prog').children].forEach((s,i)=>{s.firstChild.style.width=`${clamp((t-PS[i])/(PS[i+1]-PS[i]))*100}%`;});
+  st($('#prog'),{opacity:t<PS[0]-.2?0:t<PS[0]+.2?eo(P(t,PS[0]-.2,.4)):(t>PS[3]?1-eo(P(t,PS[3],.3)):1)});
+  const cap=$('#cap'); const ch=chunks.find(c=>t>=c[0].s-.05&&t<c[c.length-1].e+.08);
+  if(!ch||NOCAP.includes(ch[0].seg)){cap.innerHTML='';} else {
+    const pin=eo5(P(t,ch[0].s-.05,.18));
+    cap.innerHTML=ch.map(w=>{const on=t>=w.s&&t<w.e+.05; return `<span style="color:${on?'#22E06F':'#fff'};transform:scale(${on?1.08:1})">${w.w}</span>`}).join(' ');
+    st(cap,{transform:`translateY(${(1-pin)*30}px) scale(${lerp(.9,1,pin)})`,opacity:pin});
+  }
+  let fl=0, wy=-2400; cuts.forEach(c=>{const d=Math.abs(t-c); if(d<.08) fl=Math.max(fl,(1-d/.08)*.3);});
+  const pw=PAYA; if(Math.abs(t-pw)<.21){wy=lerp(1920,-2400,eio((t-pw+.21)/.42));}
+  $('#flash').style.opacity=fl; $('#wipe').style.top=`${wy}px`;
+  return true;
+};
+window.__ready=document.fonts.ready.then(()=>true);
+</script></body></html>
