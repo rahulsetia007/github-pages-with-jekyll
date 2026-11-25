@@ -1,0 +1,15 @@
+p1|Your ad looks like every other ad in the feed.|0.25
+p2|That's why nobody stops.|0.6
+k1|Picture driving past a field of cows. After a few minutes of brown cows, you stop looking.|0.3
+k2|That's your customer, scrolling past ads that all say quality, fast shipping, best price. And you pay for every scroll.|0.6
+f0a|But if you saw a purple cow, you'd stop. You'd tell a friend.|0.3
+f0b|That's Seth Godin's Purple Cow. Here's how to find yours.|0.5
+f1a|Step one. Write down what every competitor says.|0.25
+f1b|Those are your brown cows. Cross them out.|0.6
+f2a|Step two. Ask, what would a customer tell a friend about us?|0.3
+f2b|Pick one thing, and push it to the extreme. Not fast replies. Replies in five minutes, guaranteed.|0.6
+f3a|Step three. Put it in the first line of your ad.|0.25
+f3b|And show it to the people who'll care most. They'll spread it for you.|0.6
+y1|Now your ad is the purple cow in the feed. People stop, remember it, and tell a friend.|0.6
+r1|Cross out the brown cows. Find your remarkable thing. Lead with it.|0.6
+c1|Comment COW, and I'll send you the prompt to find yours.|0.3

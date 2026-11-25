@@ -6,7 +6,7 @@ k = Kokoro(M + 'kokoro-v1.0.onnx', M + 'voices-v1.0.bin')
 V = 'am_liam'; SP = 1.15
 lines = [l.split('|') for l in open('vo.txt').read().strip().split('\n')]  # key|text|optional pause after (s)
 # speech-only respellings (captions keep the real word)
-PRON = {'Recap': 'Reecap', 'Duplicates': 'Dupli-kits', 'SaaS': 'Sass', 'ABO': 'A-B-O', 'CBO': 'C-B-O'}
+PRON = {'Recap': 'Reecap', 'Duplicates': 'Dupli-kits', 'SaaS': 'Sass', 'ABO': 'A-B-O', 'CBO': 'C-B-O', 'BFCM': 'B-F-C-M', 'button': 'buttin', 'CPM': 'C-P-M', 'Godin': 'Godeen', 'COW': 'cow'}
 def say(text):
     for a, b in PRON.items(): text = re.sub(r'\b%s\b' % a, b, text)
     ph = k.tokenizer.phonemize(text, 'en-us').replace('ˌeɪˈaɪ', 'ˈeɪ ˈaɪ')
