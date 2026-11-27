@@ -1,0 +1,275 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- Form friction: your form is a front door, each field is a lock (house teaching style). Pain, Poke, Fix, Payoff, Recap, CTA. -->
+<style>
+@font-face{font-family:Inter;src:url(fonts/Inter.ttf);font-weight:100 900}
+@font-face{font-family:Mont;src:url(fonts/Montserrat.ttf);font-weight:100 900}
+@font-face{font-family:Mono;src:url(fonts/SpaceMono-Bold.ttf)}
+@font-face{font-family:ISerif;src:url(fonts/InstrumentSerif-Italic.ttf);font-style:normal;font-weight:400}
+:root{
+  --ink:#030403; --ink2:#0A0D0B; --line:rgba(255,255,255,.08);
+  --text:#F5F8F6; --muted:#8A938C; --lime:#22E06F; --violet:#0E7A3C; --deep:#06331A;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ink)}
+body{font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+#stage{position:absolute;inset:0;overflow:hidden}
+.bg{position:absolute;inset:-200px}
+.blob{position:absolute;border-radius:50%;filter:blur(140px);opacity:.42}
+.grid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:90px 90px;-webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 45%,#000 30%,transparent 80%);opacity:.55}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse 85% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.65) 100%);pointer-events:none}
+.scene{position:absolute;inset:0;will-change:transform,filter,opacity}
+.abs{position:absolute}
+.mono{font-family:Mono,monospace;letter-spacing:.04em}
+#prog{position:absolute;top:118px;left:90px;right:90px;display:flex;gap:12px}
+#prog .seg{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
+#prog .seg i{display:block;height:100%;width:0;background:var(--lime);border-radius:8px;box-shadow:0 0 18px var(--lime)}
+.card{position:absolute;left:90px;width:900px;border-radius:44px;background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.14);box-shadow:0 40px 120px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.18);backdrop-filter:blur(30px);overflow:hidden}
+.pill{display:inline-flex;align-items:center;gap:12px;padding:14px 26px;border-radius:999px;font-weight:700;font-size:30px}
+.title{font-family:Mont;font-weight:900;font-size:128px;line-height:.92;letter-spacing:-.035em}
+.sub{font-size:44px;font-weight:500;color:#C8D0CA;line-height:1.25}
+.sub b{color:var(--lime);font-weight:800}
+.bar{height:22px;border-radius:12px;background:rgba(255,255,255,.14)}
+#cap{position:absolute;left:60px;right:60px;top:1500px;text-align:center;font-family:Mont;font-weight:900;font-size:66px;line-height:1.1;letter-spacing:-.01em;text-transform:uppercase}
+#cap span{display:inline-block;margin:0 10px;text-shadow:0 6px 30px rgba(0,0,0,.7)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;mix-blend-mode:overlay}
+#wipe{position:absolute;left:0;right:0;height:2400px;top:-2400px;background:var(--lime)}
+.ghost{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.16)}
+.tile{display:inline-flex;align-items:center;justify-content:center;flex:none;background:#fff;color:#030403;font-family:Mont;font-weight:900;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+</style></head>
+<body><div id="stage">
+  <div class="bg" id="bg">
+    <div class="blob" id="b1" style="width:900px;height:900px;background:var(--violet)"></div>
+    <div class="blob" id="b2" style="width:800px;height:800px;background:var(--deep)"></div>
+    <div class="blob" id="b3" style="width:600px;height:600px;background:var(--lime);opacity:.18"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div id="scenes"></div>
+  <div id="prog"></div>
+  <div id="cap"></div>
+  <div id="wipe"></div>
+  <div id="flash"></div>
+  <div class="vig"></div>
+</div>
+<script>
+const D = window.__DATA__;
+const $ = (s,el=document)=>el.querySelector(s);
+const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-clamp(t),3);
+const eo5=t=>1-Math.pow(1-clamp(t),5);
+const eio=t=>{t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+const back=t=>{t=clamp(t);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
+const P=(t,a,d)=>clamp((t-a)/d);
+function st(el,o){for(const k in o) el.style[k]=o[k];}
+function pop(el,t,a,d=.45,from=.6){const p=P(t,a,d);st(el,{opacity:clamp(p*3),transform:`scale(${lerp(from,1,back(p))})`});}
+function rise(el,t,a,d=.5,dy=60){const p=eo(P(t,a,d));st(el,{opacity:p,transform:`translateY(${(1-p)*dy}px)`,filter:`blur(${(1-p)*10}px)`});}
+function typed(el,txt,t,a,cps=26){const n=Math.floor(clamp((t-a)*cps,0,txt.length));el.textContent=txt.slice(0,n);return n<txt.length;}
+function mk(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
+const scenesEl=$('#scenes');
+
+/* ---------- content: teaching shots (house delivery). Each visual stays up and changes state on the spoken words. ---------- */
+const S=D.segs, segBy=Object.fromEntries(S.map(s=>[s.key,s]));
+const W=(seg,re,n=0)=>{const ws=segBy[seg].words.filter(x=>re.test(x.w));return ws[n]?ws[n].s:null;};
+const ST=k=>segBy[k].start;
+const END=D.end;
+let _gid=0;
+const LT=(svg,size,r)=>{const id='g'+(++_gid);return `<span class="tile" style="width:${size}px;height:${size}px;border-radius:${r}px;padding:${Math.round(size*.17)}px;background:#fff">${svg.replace(/igg/g,id)}</span>`;};
+const LOGO_G=`<svg width="100%" height="100%" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="12" rx="3" fill="#030403"/></svg>`;
+const DOC=`<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M6 2h8l5 5v15H6z" fill="none" stroke="#030403" stroke-width="2.2" stroke-linejoin="round"/><path d="M14 2v5h5M9 12h7M9 16h7" stroke="#030403" stroke-width="2.2"/></svg>`;
+const TICK=(s=34,c='#030403')=>`<svg width="${s}" height="${s}" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const CARD='background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.16);border-radius:40px';
+
+/* ---------- objects: door, padlock, person ---------- */
+const LOCK=(s)=>`<svg width="${s}" height="${s*1.25}" viewBox="0 0 40 50" style="display:block;overflow:visible"><path class="sh" d="M10 22 V14 a10 10 0 0 1 20 0 V22" stroke="#C8D0CA" stroke-width="5" fill="none" stroke-linecap="round"/><rect x="4" y="20" width="32" height="26" rx="6" fill="#E8B931"/><circle cx="20" cy="30" r="4" fill="#5A4510"/><rect x="18.5" y="31" width="3" height="8" rx="1.5" fill="#5A4510"/></svg>`;
+const PERSON=(c,s)=>`<svg width="${s}" height="${s*1.6}" viewBox="0 0 40 64" style="display:block"><circle cx="20" cy="11" r="9" fill="${c}"/><path d="M6 60 V34 C6 24 34 24 34 34 V60Z" fill="${c}"/></svg>`;
+const LOCKPOS=[[.28,.16],[.72,.16],[.28,.32],[.72,.32],[.28,.62],[.72,.62],[.28,.78],[.72,.78]];
+const DOOR=(w,h,cls,ls)=>`<div class="door ${cls}" style="position:relative;width:${w}px;height:${h}px;border-radius:18px 18px 0 0;border:14px solid #3B2A1E;border-bottom:none;background:#F5F8F6">
+  <div class="dl" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,#22E06F,#0E7A3C 70%);opacity:0"></div>
+  <div class="dp" style="position:absolute;inset:0;transform-origin:0 50%;background:linear-gradient(160deg,#9A6A47,#6B4630);border-radius:6px 6px 0 0">
+   <div style="position:absolute;left:12%;right:12%;top:6%;height:36%;border:5px solid rgba(0,0,0,.18);border-radius:10px"></div>
+   <div style="position:absolute;left:12%;right:12%;top:52%;height:40%;border:5px solid rgba(0,0,0,.18);border-radius:10px"></div>
+   <i style="position:absolute;right:7%;top:47%;width:${w*.07}px;height:${w*.07}px;border-radius:50%;background:#E8B931"></i>
+   ${LOCKPOS.map(([x,y],i)=>`<div class="lk" data-i="${i}" style="position:absolute;left:${x*100}%;top:${y*100}%;transform:translate(-50%,-50%);opacity:${ls?1:0}">${LOCK(w*.16)}</div>`).join('')}</div></div>`;
+
+/* ---------- headline: the spoken words, each blurs in when it is said ---------- */
+const g=(txt,at,lime)=>`<span class="h-w" data-at="${at}" style="display:inline-block;${lime?'color:var(--lime)':''}">${txt}</span>`;
+const L=t=>`<b style="color:var(--lime)">${t}</b>`;
+const HL=[
+  {a:0, lead:'people start filling in your form', size:140, big:g('THEN THEY',W('p1',/^then/))+'<br>'+g('QUIT.',W('p1',/^quit/),1)},
+  {a:ST('p2')-.12, lead:'every extra box is a', size:124, big:g('REASON',W('p2',/^reason/))+'<br>'+g('TO LEAVE.',W('p2',/^leave/),1)},
+  {a:ST('k1')-.12, lead:'your form is a front door', size:120, big:g('EACH FIELD',W('k1',/^field/))+'<br>'+g('= A LOCK.',W('k1',/^lock/),1)},
+  {a:ST('k2')-.12, lead:'add enough locks, and', size:130, big:g('PEOPLE',W('k2',/^people/))+'<br>'+g('GIVE UP.',W('k2',/^give/),1)},
+  {a:W('k2',/^And/)-.12, lead:'and you', size:96, big:g('PAID',W('k2',/^paid/),1)+' '+g('TO BRING THEM',W('k2',/^bring/))+'<br>'+g('TO THAT DOOR.',W('k2',/^door/))},
+  {a:ST('f0')-.12, lead:"here's how to", size:130, big:g('CUT THE',W('f0',/^cut/))+' '+g('LOCKS.',W('f0',/^locks/),1), sub:g('3 steps.',W('f0',/^Three/))},
+  {a:ST('f1a')-.12, lead:'step one', size:130, big:g('LIST EVERY',W('f1a',/^List/))+'<br>'+g('FIELD.',W('f1a',/^field/),1)},
+  {a:ST('f1b')-.12, lead:'for each one, ask', size:92, big:g('DO I NEED THIS',W('f1b',/^do/))+'<br>'+g('BEFORE MY REPLY?',W('f1b',/^before/),1)},
+  {a:ST('f2a')-.12, lead:'step two', size:140, big:g('CUT',W('f2a',/^Cut/),1)+' '+g('EVERY NO.',W('f2a',/^no/))},
+  {a:ST('f2b')-.12, lead:'company size · budget · how did you hear', size:124, big:g('ASK THOSE',W('f2b',/^Ask/))+'<br>'+g('LATER.',W('f2b',/^later/),1)},
+  {a:ST('f3a')-.12, lead:'step three · keep only what you need to', size:150, big:g('REPLY.',W('f3a',/^reply/),1), sub:g('name · email or phone · '+L('one question'),W('f3a',/^Usually/))},
+  {a:ST('f3b')-.12, lead:'then send yourself a test lead and', size:150, big:g('TIME IT.',W('f3b',/^time/),1)},
+  {a:ST('y1')-.12, lead:'now your door has', size:140, big:g('ONE LOCK.',W('y1',/^one/),1), sub:g('more people walk in, '+L('same ad spend.'),W('y1',/^More/))},
+  {a:ST('r1')-.12, lead:'recap · save this', size:92, big:g('LIST.',W('r1',/^List/))+' '+g('CUT.',W('r1',/^Cut/))+'<br>'+g('KEEP WHAT MATTERS.',W('r1',/^Keep/),1)},
+  {a:ST('c1')-.12, cta:true},
+];
+const hlEls=HL.map(h=>{const e=mk(`<div class="scene">${h.cta?'':`<div class="abs" style="top:210px;left:30px;right:30px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+  ${h.lead?`<div class="h-l mono" style="font-size:38px;color:#AEB7B0;text-transform:lowercase">${h.lead}</div>`:''}
+  <div class="h-b" style="font:900 ${h.size||118}px/.95 Mont;letter-spacing:-.035em;text-transform:uppercase">${h.big}</div>
+  ${h.sub?`<div class="h-s" style="font:700 44px Inter;color:#C8D0CA">${h.sub}</div>`:''}</div>`}</div>`);scenesEl.appendChild(e);return e;});
+
+const CUR=`<svg width="70" height="70" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#fff" stroke="#030403" stroke-width="1.5"/></svg>`;
+const FIELDS=[['Name',1],['Email',1],['Phone',0],['Company',0],['Company size',0],['Budget',0],['How did you hear about us?',0],['What do you need help with?',1]];
+
+/* ---------- V1: the long form (pain) ---------- */
+const vForm=mk(`<div class="scene"><div class="abs fc" style="left:150px;right:150px;top:630px;padding:28px;${CARD}">
+  <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:900 36px Mont">Get a free quote</span><span class="mono" style="font-size:20px;color:#8E9890">EXAMPLE</span></div>
+  ${FIELDS.map(([f],i)=>`<div class="ff" style="margin-top:9px;padding:8px 18px;border-radius:14px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.14)"><div style="font:700 18px Inter;color:#8E9890">${f}</div><div class="fv" style="font:700 24px Inter;height:28px"></div></div>`).join('')}
+  <div style="margin-top:16px;padding:14px;border-radius:14px;background:#22E06F;color:#030403;text-align:center;font:900 28px Mont">Submit</div></div>
+  <div class="abs fcur" style="left:600px;top:760px;opacity:0">${CUR}</div>
+  <div class="abs pill fx" style="top:1150px;left:0;right:0;margin:0 auto;width:fit-content;background:#F5F8F6;color:#030403;font-size:34px;font-weight:900;opacity:0">✕ Left the page</div>
+  <div class="abs pill fn" style="top:540px;left:0;right:0;margin:0 auto;width:fit-content;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.3);font-size:32px;font-weight:900;opacity:0">8 boxes to fill</div></div>`);
+scenesEl.appendChild(vForm);
+function rForm(t,el){const T=t; rise($('.fc',el),T,0,.35,40);
+  const v=$$('.fv',el); typed(v[0],'Sam',T,.25,12); typed(v[1],'sam@mail.com',T,.6,18);
+  const cu=$('.fcur',el); cu.style.opacity=T<W('p1',/^quit/)?1:0; cu.style.transform=`translateY(${T<.6?0:Math.min(1,(T-.6)/.3)*78}px)`;
+  const q=W('p1',/^quit/); const fc=$('.fc',el); if(T>=q){const p=eo(P(T,q,.4)); fc.style.opacity=lerp(1,.35,p); fc.style.filter=`grayscale(${p})`;}
+  pop($('.fx',el),T,q,.35,.6); if(T>=ST('p2')-.1) $('.fx',el).style.opacity=0;
+  const ff=$$('.ff',el); const a=W('p2',/^Every/), b=W('p2',/^leave/); ff.forEach((f,i)=>{const on=T>=a+i*(b-a)/8; f.style.borderColor=on?'#F5F8F6':'rgba(255,255,255,.14)';});
+  if(T>=a) {fc.style.opacity=1; fc.style.filter='none';} pop($('.fn',el),T,W('p2',/^box/),.35,.6);}
+
+/* ---------- V2: the door (poke) ---------- */
+const vDoor=mk(`<div class="scene"><div class="abs dw" style="left:0;right:0;top:640px;display:flex;justify-content:center">${DOOR(440,660,'big',false)}</div>
+  <i class="abs" style="left:120px;right:120px;top:1300px;height:8px;border-radius:4px;background:#3B2A1E"></i>
+  <div class="abs pv" style="left:-120px;top:1160px">${PERSON('#F5F8F6',90)}</div>
+  <div class="abs pill pq" style="top:1080px;left:120px;background:#F5F8F6;color:#030403;font-size:30px;font-weight:900;opacity:0">“Nope.” 😩</div>
+  <div class="abs pill pc" style="top:1340px;left:0;right:0;margin:0 auto;width:fit-content;background:#E8B931;color:#030403;font-size:32px;font-weight:900;opacity:0">🪙 You paid for this visit</div></div>`);
+scenesEl.appendChild(vDoor);
+function rDoor(t,el){const T=t+ST('k1')-.12; rise($('.dw',el),t,0,.4,40);
+  const a=W('k1',/^Each/), b=W('k1',/^lock/); $$('.lk',el).forEach((l,i)=>pop(l,T,a+i*(b-a)/7,.3,.3));
+  const pv=$('.pv',el); const w0=W('k2',/^Add/), gu=W('k2',/^give/); let x=-120;
+  if(T>=w0) x=lerp(-120,260,eo(P(T,w0,1.0))); if(T>=gu+.1){x=lerp(260,-160,eio(P(T,gu+.1,1.0)));}
+  const shake=T>W('k2',/^people/)-.1&&T<gu+.1?Math.sin(T*50)*8:0; pv.style.left=(x+shake)+'px'; pv.style.transform=`scaleX(${T>=gu+.1?-1:1})`;
+  pop($('.pq',el),T,gu-.05,.3,.6); if(T>gu+.9) $('.pq',el).style.opacity=0;
+  pop($('.pc',el),T,W('k2',/^paid/)-.05,.4,.5);}
+
+/* ---------- V3: 3 steps ---------- */
+const STEPS=['List every field','Cut every “no”','Keep what you need to reply'];
+const vFix=mk(`<div class="scene"><div class="abs" style="left:90px;right:90px;top:720px;display:flex;flex-direction:column;gap:22px">${STEPS.map((x,i)=>`<div class="fs" style="display:flex;align-items:center;gap:24px;padding:30px 32px;border-radius:28px;${CARD}"><span class="tile" style="width:80px;height:80px;border-radius:22px;font:900 40px Mont">${i+1}</span><span style="font:800 44px Inter">${x}</span></div>`).join('')}</div></div>`);
+scenesEl.appendChild(vFix);
+function rFix(t,el){const T=t+ST('f0')-.12; $$('.fs',el).forEach((c,i)=>pop(c,T,W('f0',/^Three/)-.05+i*.15,.4,.6));}
+
+/* ---------- V4: steps card: field list + mini door ---------- */
+const vStep=mk(`<div class="scene"><div class="abs sc3" style="left:50px;right:50px;top:680px;height:700px;padding:30px;${CARD}">
+  <div class="mono st-h" style="font-size:22px;color:#8E9890"></div>
+  <div class="fl" style="position:absolute;left:30px;top:80px;width:600px">${FIELDS.map(([f,k],i)=>`<div class="fr" data-k="${k}" style="position:absolute;left:0;width:600px;height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-radius:16px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.14)"><span class="fl1" style="position:relative;font:800 26px Inter">${f}<i class="st" style="position:absolute;left:0;top:50%;height:4px;width:0;background:#F5F8F6"></i></span><span class="tg" style="font:900 26px Mont;opacity:0">${k?'✓':'✕'}</span></div>`).join('')}</div>
+  <div class="md" style="position:absolute;right:40px;top:110px">${DOOR(250,380,'mini',true)}</div>
+  <div class="sw" style="position:absolute;right:30px;top:120px;width:290px;padding:24px;border-radius:26px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.2);text-align:center;opacity:0">
+    <div class="mono" style="font-size:20px;color:#AEB7B0">TEST LEAD · EXAMPLE</div><div style="font-size:70px">⏱</div>
+    <div style="font:700 26px Inter;color:#8E9890;text-decoration:line-through">before 0:58</div><div class="swv" style="font:900 80px Mont;color:var(--lime)">0:00</div></div>
+</div></div>`);
+scenesEl.appendChild(vStep);
+for(let i=0;i<3;i++) $('#prog').appendChild(mk('<div class="seg"><i></i></div>'));
+function rStep(t,el){const T=t+ST('f1a')-.12;
+  const step=T<ST('f2a')-.12?0:T<ST('f3a')-.12?1:2;
+  $('.st-h',el).textContent=['STEP 1 · LIST EVERY FIELD · EXAMPLE','STEP 2 · CUT EVERY NO','STEP 3 · KEEP WHAT YOU NEED'][step];
+  const cuts=[W('f2a',/^Cut/)+.2,W('f2b',/^Company/),W('f2b',/^Company/)+.3,W('f2b',/^budget/),W('f2b',/^how/)];
+  let ci=0; const fr=$$('.fr',el);
+  const collapse=eio(P(T,ST('f3a')-.12,.6)); let y=0;
+  fr.forEach((r,i)=>{const keep=+r.dataset.k; const tg=$('.tg',r);
+    rise(r,T,W('f1a',/^List/)-.1+i*.12,.3,16);
+    const tq=W('f1b',/^do/)+i*.18; tg.style.opacity=T>=tq?1:0; tg.style.color=keep?'#22E06F':'#F5F8F6';
+    if(!keep){const c=cuts[ci++]; const p=eo(P(T,c,.35)); $('.st',r).style.width=(p*100)+'%'; r.style.opacity=T>=c?lerp(1,.3,p)*(1-collapse):r.style.opacity;
+      r.style.top=(i*72)+'px';} else {r.style.top=lerp(i*72,y*96,collapse)+'px'; r.style.height=lerp(62,82,collapse)+'px'; r.style.borderColor=collapse>.5?'rgba(34,224,111,.7)':'rgba(255,255,255,.14)'; y++;}
+    r.dataset.cut=0;});
+  // mini door locks: 5 cut fields = locks 3..7 pop off in cut order
+  const order=[2,3,4,5,6]; $$('.mini .lk',el).forEach((l,i)=>{const j=order.indexOf(i); if(j<0){l.style.opacity=1;return;} const c=cuts[j]; const p=P(T,c,.45);
+    l.style.opacity=T<c?1:1-p; l.style.transform=`translate(-50%,-50%) translateY(${eio(p)*300}px) rotate(${p*80}deg)`;});
+  const md=$('.md',el); md.style.opacity=step===2?1-collapse:1; md.style.display=step===2&&collapse>=1?'none':'block';
+  const sw=$('.sw',el); sw.style.opacity=step===2?clamp(P(T,W('f3b',/^test/)-.2,.3)):0;
+  const sv=Math.round(15*eo(P(T,W('f3b',/^time/),1.2))); $('.swv',el).textContent='0:'+String(sv).padStart(2,'0');}
+
+/* ---------- V5: payoff: one lock, door opens, people walk in ---------- */
+const vPay=mk(`<div class="scene"><div class="abs pw2" style="left:0;right:0;top:640px;display:flex;justify-content:center">${DOOR(440,660,'pay',false)}</div>
+  <i class="abs" style="left:120px;right:120px;top:1300px;height:8px;border-radius:4px;background:#3B2A1E"></i>
+  ${[0,1,2,3,4].map(i=>`<div class="abs wk" data-i="${i}" style="left:-120px;top:1160px">${PERSON(i%2?'#22E06F':'#F5F8F6',80)}</div>`).join('')}
+  <div class="abs" style="left:60px;top:680px;padding:18px 24px;border-radius:24px;background:rgba(3,4,3,.75);border:1.5px solid rgba(255,255,255,.2)"><div class="mono" style="font-size:20px;color:#8E9890">LEADS · EXAMPLE</div><div class="ld" style="font:900 64px Mont;color:var(--lime)">12</div><div class="mono" style="font-size:18px;color:#AEB7B0">SAME AD SPEND</div></div></div>`);
+scenesEl.appendChild(vPay);
+function rPay(t,el){const T=t+ST('y1')-.12; rise($('.pw2',el),t,0,.35,30);
+  const lk=$$('.pay .lk',el); lk.forEach((l,i)=>{l.style.opacity=i===2?1:0;});
+  const ol=W('y1',/^lock/); const sh=$('.pay .lk[data-i="2"] .sh',el); sh.style.transform=`translateY(${-eo(P(T,ol,.3))*8}px)`;
+  const op=eio(P(T,ol+.3,.7)); $('.pay .dp',el).style.transform=`scaleX(${lerp(1,.16,op)}) skewY(${-op*8}deg)`; $('.pay .dl',el).style.opacity=op;
+  const m=W('y1',/^More/); $$('.wk',el).forEach(w=>{const i=+w.dataset.i; const p=eio(P(T,m+i*.35,1.2)); w.style.left=lerp(-120,470,p)+'px'; w.style.opacity=p>.92?1-(p-.92)/.08:1; w.style.transform=`translateY(${Math.abs(Math.sin(T*9+i))*-8}px)`;});
+  $('.ld',el).textContent=Math.round(lerp(12,29,eo(P(T,m,2.0))));}
+
+/* ---------- recap ---------- */
+const RC=[['List every field',/^List/],['Cut the nice-to-haves (ask later)',/^Cut/],['Keep what you need to reply',/^Keep/]];
+const vRec=mk(`<div class="scene"><div class="abs" style="left:70px;right:70px;top:720px;display:flex;flex-direction:column;gap:22px">${RC.map(([x])=>`<div class="rr" style="display:flex;align-items:center;gap:22px;padding:28px;border-radius:26px;border:2px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06)"><span class="rb" style="flex:none;width:60px;height:60px;border-radius:16px;border:4px solid #8A938C;display:flex;align-items:center;justify-content:center"></span><span style="font:800 38px Inter">${x}</span></div>`).join('')}</div></div>`);
+scenesEl.appendChild(vRec);
+function rRec(t,el){const T=t+ST('r1')-.12; $$('.rr',el).forEach((r,i)=>{rise(r,t,.1+i*.1,.35,30); const on=T>=W('r1',RC[i][1])-.05; const b=$('.rb',r);
+  b.style.borderColor=on?'#22E06F':'#8A938C'; b.style.background=on?'#22E06F':'transparent'; b.innerHTML=on?TICK(36):''; r.style.borderColor=on?'rgba(34,224,111,.6)':'rgba(255,255,255,.16)';});}
+
+/* ---------- CTA ---------- */
+const ANG=['List every field','Cut the no’s','Ask later','Time a test lead'];
+const vCta=mk(`<div class="scene">
+  <div class="abs mono c-t" style="top:300px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">SEND THIS TO A MARKETER</div>
+  <div class="abs" style="left:110px;right:110px;top:380px;display:grid;grid-template-columns:1fr 1fr;gap:18px">${ANG.map((a,i)=>`<div class="c-g ghost" style="border-radius:28px;padding:18px 24px;display:flex;align-items:center;gap:18px"><span class="tile" style="width:60px;height:60px;border-radius:16px;font:700 24px Mono">${String(i+1).padStart(2,'0')}</span><span style="font:800 32px Inter">${a}</span></div>`).join('')}</div>
+  <div class="abs c-f" style="top:900px;left:0;right:0;text-align:center;font:900 100px Mont;letter-spacing:-.03em">Follow for more</div>
+  <div class="abs c-s" style="top:1030px;left:0;right:0;text-align:center;font-family:ISerif;font-size:70px;color:#D8E0DA">send it to someone with a long form</div>
+  <div class="abs c-b pill" style="top:1180px;left:0;right:0;margin:0 auto;width:fit-content;padding:24px 70px;font-size:44px;font-weight:900;background:var(--lime);color:#030403">Follow</div>
+  <div class="abs c-m" style="left:640px;top:1300px;opacity:0">${CUR}</div></div>`);
+scenesEl.appendChild(vCta);
+function rCta(t,el){rise($('.c-t',el),t,0,.3,20); $$('.c-g',el).forEach((g2,i)=>pop(g2,t,.1+i*.08,.35,.6));
+  rise($('.c-f',el),t,.5,.4,30); rise($('.c-s',el),t,.7,.4,30); pop($('.c-b',el),t,.9,.4,.6);
+  const tap=2.2; const m=$('.c-m',el); m.style.opacity=clamp(P(t,1.3,.2)); m.style.transform=`translate(${(1-eo(P(t,1.3,.8)))*200}px,${(1-eo(P(t,1.3,.8)))*160}px) scale(${t>tap&&t<tap+.15?.85:1})`;
+  const b=$('.c-b',el); if(t>=tap){b.innerHTML='Following ✓'; b.style.background='rgba(255,255,255,.12)'; b.style.color='#fff'; b.style.border='2px solid rgba(255,255,255,.3)';}}
+
+const VL=[
+  {el:vForm,a:0,b:ST('k1')-.12,r:rForm},
+  {el:vDoor,a:ST('k1')-.12,b:ST('f0')-.12,r:rDoor},
+  {el:vFix,a:ST('f0')-.12,b:ST('f1a')-.12,r:rFix},
+  {el:vStep,a:ST('f1a')-.12,b:ST('y1')-.12,r:rStep},
+  {el:vPay,a:ST('y1')-.12,b:ST('r1')-.12,r:rPay},
+  {el:vRec,a:ST('r1')-.12,b:ST('c1')-.12,r:rRec},
+  {el:vCta,a:ST('c1')-.12,b:END+1,r:rCta},
+];
+const PAYA=ST('y1')-.12;
+const PS=[ST('f1a')-.12,ST('f2a')-.12,ST('f3a')-.12,ST('y1')-.12];
+const NOCAP=['r1','c1'];
+
+/* captions */
+const capWords=[];
+S.forEach(s=>s.words.forEach((w,k)=>{const nx=s.words[k+1];capWords.push({w:w.w.replace(/[.,]$/,''),s:w.s,e:nx?nx.s:s.start+s.dur,seg:s.key,brk:/[.,!?]$/.test(w.w)});}));
+const chunks=[];let cur=[];
+capWords.forEach((w,i)=>{cur.push(w);const nx=capWords[i+1];if(cur.length>=3||w.brk||!nx||nx.seg!==w.seg){chunks.push(cur);cur=[];}});
+function renderBg(t){
+  st($('#b1'),{left:`${300+Math.sin(t*.35)*180}px`,top:`${200+Math.cos(t*.28)*160}px`});
+  st($('#b2'),{left:`${500+Math.cos(t*.3)*200}px`,top:`${1300+Math.sin(t*.4)*180}px`});
+  st($('#b3'),{left:`${100+Math.sin(t*.5+1)*120}px`,top:`${900+Math.cos(t*.45)*200}px`});
+  st($('#grid'),{transform:`translateY(${(t*30)%90}px)`});
+}
+const cuts=VL.map(v=>v.a).filter(x=>x>0);
+window.seek=function(t){
+  renderBg(t);
+  HL.forEach((h,i)=>{const b=i+1<HL.length?HL[i+1].a:END+1; const el=hlEls[i]; const vis=t>=h.a&&t<b; el.style.display=vis?'block':'none'; if(!vis)return;
+    if($('.h-l',el)) rise($('.h-l',el),t-h.a,0,.25,16);
+    $$('.h-w',el).forEach(x=>{const at=+x.dataset.at; const p=eo5(P(t,Math.max(h.a,at-.06),.25)); st(x,{opacity:p,transform:`scale(${lerp(1.2,1,p)})`,filter:`blur(${(1-p)*10}px)`});});
+    if($('.h-n',el)) $('.h-n',el).textContent='+'+Math.round(340*eo(P(t,W('p1',/^three/)-.05,1.2)))+'%';
+  });
+  VL.forEach(v=>{const vis=t>=v.a&&t<v.b; v.el.style.display=vis?'block':'none'; if(!vis)return; const lt=t-v.a;
+    if(v.a>0){const p=eo5(P(lt,0,.3)); st(v.el,{transform:`scale(${lerp(1.05,1,p)})`,opacity:p});} v.r(lt,v.el);});
+  [...$('#prog').children].forEach((s,i)=>{s.firstChild.style.width=`${clamp((t-PS[i])/(PS[i+1]-PS[i]))*100}%`;});
+  st($('#prog'),{opacity:t<PS[0]-.2?0:t<PS[0]+.2?eo(P(t,PS[0]-.2,.4)):(t>PS[3]?1-eo(P(t,PS[3],.3)):1)});
+  const cap=$('#cap'); const ch=chunks.find(c=>t>=c[0].s-.05&&t<c[c.length-1].e+.08);
+  if(!ch||NOCAP.includes(ch[0].seg)){cap.innerHTML='';} else {
+    const pin=eo5(P(t,ch[0].s-.05,.18));
+    cap.innerHTML=ch.map(w=>{const on=t>=w.s&&t<w.e+.05; return `<span style="color:${on?'#22E06F':'#fff'};transform:scale(${on?1.08:1})">${w.w}</span>`}).join(' ');
+    st(cap,{transform:`translateY(${(1-pin)*30}px) scale(${lerp(.9,1,pin)})`,opacity:pin});
+  }
+  let fl=0, wy=-2400; cuts.forEach(c=>{const d=Math.abs(t-c); if(d<.08) fl=Math.max(fl,(1-d/.08)*.3);});
+  const pw=PAYA; if(Math.abs(t-pw)<.21){wy=lerp(1920,-2400,eio((t-pw+.21)/.42));}
+  $('#flash').style.opacity=fl; $('#wipe').style.top=`${wy}px`;
+  return true;
+};
+window.__ready=document.fonts.ready.then(()=>true);
+</script></body></html>

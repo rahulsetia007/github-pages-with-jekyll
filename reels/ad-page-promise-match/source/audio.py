@@ -44,7 +44,7 @@ music = music + (pad * .5 + bl * .55 + arp) * side; music /= np.max(np.abs(music
 # sfx: whoosh + sub hit on each scene change, pops for list rows, tap for Follow
 sfx = np.zeros(N)
 _w=lambda k,p,n=0:[w['s'] for w in S[k]['words'] if w['w'].startswith(p)][n]
-starts = [S[k]['start'] - .12 for k in ['k1', 'f1a', 'y1', 'r1', 'c1']]
+starts = [S[k]['start'] - .12 for k in ['k1', 'f0', 'f1a', 'y1', 'r1', 'c1']]
 for b in starts:
     l = int(.45 * sr); et = np.arange(l) / sr; x = rng.standard_normal(l); out = np.zeros(l); C = 9
     for j in range(C):
@@ -58,42 +58,39 @@ def tick(at, f=1500, g=.25):
 def wt(seg, pre):
     return next((w['s'] for w in S[seg]['words'] if w['w'].startswith(pre)), None)
 st0 = lambda k: S[k]['start'] - .18
-# PAIN: swipe ticks while the feed scrolls
-for k in range(6): tick(.2 + k * .7, 1400, .12)
+# PAIN: clicks count, thud on "buys", underline on "promise"
+for k in range(9): tick(.1 + k * .14, 1800 + k * 90, .08)
 hl2 = int(.5 * sr); ht2 = np.arange(hl2) / sr
 thud = np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8)
-place(sfx, thud, wt('p2', 'stops'), .35)
-# POKE: claim tags pop, cash ticks
-for pre in ['quality', 'fast', 'best']:
-    c = wt('k2', pre)
-    if c: tick(c, 2200, .2)
-pay = wt('k2', 'pay')
-for k in range(6): tick(pay + k * .2, 3200, .12)
-# the purple cow: brake whoosh + a soft synthesized moo
-tp = wt('f0a', 'purple')
-ml = int(1.1 * sr); mt = np.arange(ml) / sr
-f = 150 - 40 * np.clip(mt / 1.1, 0, 1)
-ph = 2 * np.pi * np.cumsum(f) / sr
-moo = (np.sin(ph) + .5 * np.sin(2 * ph) + .25 * np.sin(3 * ph)) * np.sin(np.pi * np.clip(mt / 1.1, 0, 1)) ** 1.5
-moo = sosfilt(butter(2, [200, 1200], 'bandpass', fs=sr, output='sos'), moo)
-place(sfx, moo / np.max(np.abs(moo)), tp + .3, .5)
-tick(wt('f0a', 'tell'), 2600, .25); tick(wt('f0b', 'Seth'), 2200, .22)
-# steps
-w0 = wt('f1a', 'Write')
-for k in range(4): tick(w0 + k * .25, 1800 + k * 150, .15)
-c0 = wt('f1b', 'Cross')
-for k in range(4): tick(c0 + k * .12, 900, .18)
-tick(wt('f2a', 'Ask'), 2400, .2); tick(wt('f2b', 'replies'), 900, .22); tick(wt('f2b', 'Replies'), 3000, .3)
-f1 = wt('f3a', 'first')
-for k in range(12): tick(f1 + k * .05, 3000 + (k % 3) * 300, .05)
-s0 = wt('f3b', 'spread')
-for k in range(6): tick(s0 + .1 + k * .12, 2000 + k * 150, .15)
-# PAYOFF: feed brakes on your ad, saves and shares count
-place(sfx, thud, wt('y1', 'purple') + .3, .3)
-r0 = wt('y1', 'remember')
-for k in range(8): tick(r0 + k * .15, 2400 + (k % 2) * 400, .1)
+place(sfx, thud, wt('p1', 'buys'), .45)
+tick(wt('p2', 'promise'), 2400, .22); tick(wt('p2', "doesn't"), 900, .25)
+# POKE: sign pop, shoes pop, steps, door bell, coins
+tick(wt('k1', 'pizza') - .1, 2600, .3)
+place(sfx, thud, wt('k1', 'shoes'), .35)
+for k in range(4): tick(wt('k1', 'walk') + k * .18, 700, .1)
+o = wt('k2', 'walk')
+for k in range(5): tick(o + k * .16, 700, .1)
+pd = wt('k2', 'paid')
+for k in range(6): tick(pd + k * .2, 3300, .12)
+# FIX
+th = wt('f0', 'Three')
+for k in range(3): tick(th + k * .15, 2200 + k * 200, .2)
+for seg, pre in [('f1a', 'promise'), ('f1a', 'offer'), ('f1a', 'price'), ('f1a', 'words')]:
+    c = wt(seg, pre)
+    if c: tick(c, 2000, .18)
+tick(wt('f1b', 'promise'), 900, .25)
+c = wt('f2a', 'copy')
+for k in range(5): tick(c + k * .15, 1600 + k * 250, .12)
+for pre in ['Same']:
+    tick(wt('f2b', pre), 2600, .2)
+for w in [w for w in S['f2b']['words'] if w['w'].startswith('same')]: tick(w['s'], 2800, .2)
+tick(wt('f3a', 'page'), 2600, .25); tick(wt('f3b', 'home'), 900, .25)
+# PAYOFF
+tick(wt('y1', 'inside'), 2400, .22)
+pe = wt('y1', 'People')
+for k in range(5): tick(pe + .4 + k * .35, 2600 + k * 120, .15)
 # RECAP
-for pre in ['Cross', 'Find', 'Lead']:
+for pre in ['Find', 'Put', 'One']:
     c = wt('r1', pre)
     if c: tick(c, 2600, .22); tick(c + .06, 3300, .16)
 tick(S['c1']['start'] - .12 + 2.2, 2200, .35)

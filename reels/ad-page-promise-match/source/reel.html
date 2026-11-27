@@ -1,0 +1,280 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- Ad to page promise match (pizza sign / shoe shop metaphor), house teaching style. Pain, Poke, Fix, Payoff, Recap, CTA. -->
+<style>
+@font-face{font-family:Inter;src:url(fonts/Inter.ttf);font-weight:100 900}
+@font-face{font-family:Mont;src:url(fonts/Montserrat.ttf);font-weight:100 900}
+@font-face{font-family:Mono;src:url(fonts/SpaceMono-Bold.ttf)}
+@font-face{font-family:ISerif;src:url(fonts/InstrumentSerif-Italic.ttf);font-style:normal;font-weight:400}
+:root{
+  --ink:#030403; --ink2:#0A0D0B; --line:rgba(255,255,255,.08);
+  --text:#F5F8F6; --muted:#8A938C; --lime:#22E06F; --violet:#0E7A3C; --deep:#06331A;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ink)}
+body{font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+#stage{position:absolute;inset:0;overflow:hidden}
+.bg{position:absolute;inset:-200px}
+.blob{position:absolute;border-radius:50%;filter:blur(140px);opacity:.42}
+.grid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:90px 90px;-webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 45%,#000 30%,transparent 80%);opacity:.55}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse 85% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.65) 100%);pointer-events:none}
+.scene{position:absolute;inset:0;will-change:transform,filter,opacity}
+.abs{position:absolute}
+.mono{font-family:Mono,monospace;letter-spacing:.04em}
+#prog{position:absolute;top:118px;left:90px;right:90px;display:flex;gap:12px}
+#prog .seg{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
+#prog .seg i{display:block;height:100%;width:0;background:var(--lime);border-radius:8px;box-shadow:0 0 18px var(--lime)}
+.card{position:absolute;left:90px;width:900px;border-radius:44px;background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.14);box-shadow:0 40px 120px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.18);backdrop-filter:blur(30px);overflow:hidden}
+.pill{display:inline-flex;align-items:center;gap:12px;padding:14px 26px;border-radius:999px;font-weight:700;font-size:30px}
+.title{font-family:Mont;font-weight:900;font-size:128px;line-height:.92;letter-spacing:-.035em}
+.sub{font-size:44px;font-weight:500;color:#C8D0CA;line-height:1.25}
+.sub b{color:var(--lime);font-weight:800}
+.bar{height:22px;border-radius:12px;background:rgba(255,255,255,.14)}
+#cap{position:absolute;left:60px;right:60px;top:1500px;text-align:center;font-family:Mont;font-weight:900;font-size:66px;line-height:1.1;letter-spacing:-.01em;text-transform:uppercase}
+#cap span{display:inline-block;margin:0 10px;text-shadow:0 6px 30px rgba(0,0,0,.7)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;mix-blend-mode:overlay}
+#wipe{position:absolute;left:0;right:0;height:2400px;top:-2400px;background:var(--lime)}
+.ghost{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.16)}
+.tile{display:inline-flex;align-items:center;justify-content:center;flex:none;background:#fff;color:#030403;font-family:Mont;font-weight:900;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+</style></head>
+<body><div id="stage">
+  <div class="bg" id="bg">
+    <div class="blob" id="b1" style="width:900px;height:900px;background:var(--violet)"></div>
+    <div class="blob" id="b2" style="width:800px;height:800px;background:var(--deep)"></div>
+    <div class="blob" id="b3" style="width:600px;height:600px;background:var(--lime);opacity:.18"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div id="scenes"></div>
+  <div id="prog"></div>
+  <div id="cap"></div>
+  <div id="wipe"></div>
+  <div id="flash"></div>
+  <div class="vig"></div>
+</div>
+<script>
+const D = window.__DATA__;
+const $ = (s,el=document)=>el.querySelector(s);
+const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-clamp(t),3);
+const eo5=t=>1-Math.pow(1-clamp(t),5);
+const eio=t=>{t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+const back=t=>{t=clamp(t);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
+const P=(t,a,d)=>clamp((t-a)/d);
+function st(el,o){for(const k in o) el.style[k]=o[k];}
+function pop(el,t,a,d=.45,from=.6){const p=P(t,a,d);st(el,{opacity:clamp(p*3),transform:`scale(${lerp(from,1,back(p))})`});}
+function rise(el,t,a,d=.5,dy=60){const p=eo(P(t,a,d));st(el,{opacity:p,transform:`translateY(${(1-p)*dy}px)`,filter:`blur(${(1-p)*10}px)`});}
+function typed(el,txt,t,a,cps=26){const n=Math.floor(clamp((t-a)*cps,0,txt.length));el.textContent=txt.slice(0,n);return n<txt.length;}
+function mk(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
+const scenesEl=$('#scenes');
+
+/* ---------- content: teaching shots (house delivery). Each visual stays up and changes state on the spoken words. ---------- */
+const S=D.segs, segBy=Object.fromEntries(S.map(s=>[s.key,s]));
+const W=(seg,re,n=0)=>{const ws=segBy[seg].words.filter(x=>re.test(x.w));return ws[n]?ws[n].s:null;};
+const ST=k=>segBy[k].start;
+const END=D.end;
+let _gid=0;
+const LT=(svg,size,r)=>{const id='g'+(++_gid);return `<span class="tile" style="width:${size}px;height:${size}px;border-radius:${r}px;padding:${Math.round(size*.17)}px;background:#fff">${svg.replace(/igg/g,id)}</span>`;};
+const LOGO_G=`<svg width="100%" height="100%" viewBox="0 0 24 24"><text x="2" y="19" font-size="18">🍕</text></svg>`;
+const DOC=`<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M6 2h8l5 5v15H6z" fill="none" stroke="#030403" stroke-width="2.2" stroke-linejoin="round"/><path d="M14 2v5h5M9 12h7M9 16h7" stroke="#030403" stroke-width="2.2"/></svg>`;
+const TICK=(s=34,c='#030403')=>`<svg width="${s}" height="${s}" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const CARD='background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.16);border-radius:40px';
+
+/* ---------- headline: the spoken words, each blurs in when it is said ---------- */
+const g=(txt,at,lime)=>`<span class="h-w" data-at="${at}" style="display:inline-block;${lime?'color:var(--lime)':''}">${txt}</span>`;
+const L=t=>`<b style="color:var(--lime)">${t}</b>`;
+const HL=[
+  {a:0, lead:'getting clicks, but', size:150, big:g('NOBODY',W('p1',/^nobody/))+'<br>'+g('BUYS?',W('p1',/^buys/),1)},
+  {a:ST('p2')-.12, lead:'your ad might be making a', size:140, big:g('PROMISE',W('p2',/^promise/),1), sub:g("your page doesn't keep.",W('p2',/^your/))},
+  {a:ST('k1')-.12, lead:'picture a shop sign that says', size:140, big:g('🍕 PIZZA.',W('k1',/^pizza/),1), sub:g('you walk in, and they sell '+L('shoes.'),W('k1',/^You/))},
+  {a:ST('k2')-.12, lead:'you walk straight out, and', size:110, big:g('YOU PAID',W('k2',/^paid/))+'<br>'+g('FOR THE CLICK.',W('k2',/^click/),1)},
+  {a:ST('f0')-.12, lead:"here's the", size:170, big:g('FIX.',W('f0',/^fix/),1), sub:g('3 steps.',W('f0',/^Three/))},
+  {a:ST('f1a')-.12, lead:'step one · write down the one', size:116, big:g('PROMISE',W('f1a',/^promise/),1)+'<br>'+g('IN YOUR AD.',W('f1a',/^ad/))},
+  {a:ST('f1b')-.12, lead:'open your page. at the top, can you see', size:116, big:g('THE SAME',W('f1b',/^same/))+'<br>'+g('PROMISE?',W('f1b',/^promise/),1)},
+  {a:ST('f2a')-.12, lead:'step two · if not, copy your', size:116, big:g('HEADLINE',W('f2a',/^headline/),1)+'<br>'+g('TO THE TOP.',W('f2a',/^top/))},
+  {a:ST('f2b')-.12, size:100, big:g('SAME WORDS.',ST('f2b'))+'<br>'+g('SAME OFFER.',W('f2b',/^same/))+'<br>'+g('SAME PICTURE.',W('f2b',/^same/,1),1)},
+  {a:ST('f3a')-.12, lead:'step three', size:140, big:g('ONE AD.',W('f3a',/^One/))+'<br>'+g('ONE PAGE.',W('f3a',/^one/),1)},
+  {a:ST('f3b')-.12, lead:"one product? don't send people to your", size:130, big:g('HOME PAGE.',W('f3b',/^home/),1)},
+  {a:ST('y1')-.12, lead:'now the sign says pizza, and inside', size:116, big:g("THERE'S PIZZA.",W('y1',/^there's/),1), sub:g('people stay, and '+L('they buy.'),W('y1',/^People/))},
+  {a:ST('r1')-.12, lead:'recap · save this', size:90, big:g('FIND IT.',W('r1',/^Find/))+' '+g('TOP IT.',W('r1',/^Put/))+'<br>'+g('ONE AD, ONE PAGE.',W('r1',/^One/),1)},
+  {a:ST('c1')-.12, cta:true},
+];
+const hlEls=HL.map(h=>{const e=mk(`<div class="scene">${h.cta?'':`<div class="abs" style="top:210px;left:30px;right:30px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+  ${h.lead?`<div class="h-l mono" style="font-size:38px;color:#AEB7B0;text-transform:lowercase">${h.lead}</div>`:''}
+  <div class="h-b" style="font:900 ${h.size||118}px/.95 Mont;letter-spacing:-.035em;text-transform:uppercase">${h.big}</div>
+  ${h.sub?`<div class="h-s" style="font:700 44px Inter;color:#C8D0CA">${h.sub}</div>`:''}</div>`}</div>`);scenesEl.appendChild(e);return e;});
+
+const CUR=`<svg width="70" height="70" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#fff" stroke="#030403" stroke-width="1.5"/></svg>`;
+const PERSON=(c,s)=>`<svg width="${s}" height="${s*1.6}" viewBox="0 0 40 64"><circle cx="20" cy="12" r="10" fill="${c}"/><path d="M4 62 L6 34 C6 26 34 26 34 34 L36 62Z" fill="${c}"/></svg>`;
+const PILL=(txt,on)=>`<span class="pill" style="padding:8px 16px;font-size:24px;font-weight:800;white-space:nowrap;${on?'background:#22E06F;color:#030403':'background:rgba(255,255,255,.16);color:#fff'}">${txt}</span>`;
+const AD=(cls)=>`<div class="${cls}" style="padding:20px;border-radius:24px;background:#F5F8F6;color:#030403">
+  <div style="display:flex;align-items:center;gap:12px"><span class="tile" style="width:44px;height:44px;border-radius:12px;font-size:26px;background:#FFE3D6">🍕</span><div><div style="font:800 24px Inter">Tony's Pizza</div><div style="font:600 18px Inter;color:#5A625C">Sponsored · Example</div></div></div>
+  <div style="margin-top:12px;position:relative;font:900 44px Mont;line-height:1.05;width:fit-content">50% off pizza tonight<i class="ul" style="position:absolute;left:0;bottom:-6px;height:7px;width:0;border-radius:4px;background:#22E06F"></i></div></div>`;
+
+/* ---------- shop facade (poke + payoff) ---------- */
+const SHOP=(inside)=>`<div class="abs shop" style="left:90px;right:90px;top:660px;height:720px">
+  <div class="sign" style="position:absolute;left:60px;right:60px;top:0;height:120px;border-radius:24px;background:#F5F8F6;color:#030403;display:flex;align-items:center;justify-content:center;font:900 76px Mont;letter-spacing:-.02em">🍕 PIZZA</div>
+  <div style="position:absolute;left:30px;right:30px;top:140px;height:44px;border-radius:12px;background:repeating-linear-gradient(90deg,#22E06F 0 60px,#F5F8F6 60px 120px)"></div>
+  <div style="position:absolute;left:30px;right:30px;top:184px;bottom:40px;border-radius:0 0 24px 24px;background:#141815;border:2px solid rgba(255,255,255,.14)">
+    <div class="win" style="position:absolute;left:36px;top:40px;width:470px;height:340px;border-radius:20px;background:#0A0D0B;border:4px solid #3A403C;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:16px;font-size:82px">${inside}</div>
+    <div class="door" style="position:absolute;right:46px;bottom:0;width:240px;height:400px;border-radius:120px 120px 0 0;background:#2A302C;border:4px solid #3A403C"></div></div>
+  <div class="ppl" style="position:absolute;left:0;right:0;bottom:30px;height:200px"></div></div>`;
+function walkers(el,T,spec){ // spec: [{t0,inT,outT,stay}] person walks from left to the door; stays or walks back out to the right
+  const box=$('.ppl',el); if(box.children.length!==spec.length) box.innerHTML=spec.map(()=>`<div class="pw" style="position:absolute;bottom:0;opacity:0">${PERSON('#F5F8F6',100)}</div>`).join('');
+  [...box.children].forEach((p,i)=>{const s=spec[i]; const door=660; let x=-120,o=0;
+    if(T>=s.t0){o=1; x=lerp(-120,door,eio(P(T,s.t0,s.inT)));
+      if(s.stay){ if(T>s.t0+s.inT) {o=1-clamp(P(T,s.t0+s.inT,.3)); x=door;} }
+      else if(T>s.outAt){ x=lerp(door,1000,eio(P(T,s.outAt,.8))); }}
+    p.style.left=x+'px'; p.style.opacity=o; p.style.transform=`translateY(${Math.abs(Math.sin(T*9+i))*-6}px)`;});}
+
+/* ---------- V1: the ad (pain) ---------- */
+const vAd=mk(`<div class="scene"><div class="abs a1" style="left:100px;right:100px;top:690px">${AD('adc')}
+  <div style="margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:18px">
+    <div style="padding:20px 24px;border-radius:22px;${CARD}"><div class="mono" style="font-size:20px;color:#8E9890">CLICKS</div><div class="ck" style="font:900 80px Mont;color:var(--lime)">0</div></div>
+    <div class="sl" style="padding:20px 24px;border-radius:22px;${CARD}"><div class="mono" style="font-size:20px;color:#8E9890">SALES</div><div style="font:900 80px Mont">0</div></div></div>
+  <div class="nk" style="margin-top:22px;text-align:center;opacity:0">${PILL("Landing page: 👟 shoes?",false)}</div></div></div>`);
+scenesEl.appendChild(vAd);
+function rAd(t,el){const T=t; rise($('.a1',el),T,0,.35,40);
+  $('.ck',el).textContent=Math.round(327*eo(P(T,.1,W('p1',/^buys/)+.2)));
+  const b=W('p1',/^buys/); const sl=$('.sl',el); sl.style.borderColor=T>=b?'#F5F8F6':''; sl.style.transform=`scale(${1+Math.sin(clamp((T-b)/.3)*Math.PI)*.08})`;
+  $('.ul',el).style.width=(eo(P(T,W('p2',/^promise/)-.05,.4))*100)+'%';
+  pop($('.nk',el),T,W('p2',/^doesn't/)-.05,.4,.6);}
+
+/* ---------- V2: the shoe shop (poke) ---------- */
+const vShop=mk(`<div class="scene">${SHOP('👟 👞<br>👠 🥾')}<div class="abs coin" style="left:0;right:0;top:1395px;margin:0 auto;width:fit-content;padding:12px 26px;border-radius:999px;background:rgba(3,4,3,.8);border:2px solid rgba(255,255,255,.25);font:900 36px Mont;opacity:0">💰 paid for clicks: <span class="cv">$0.00</span></div></div>`);
+scenesEl.appendChild(vShop);
+function rShop(t,el){const T=t+ST('k1')-.12;
+  rise($('.shop',el),t,0,.4,40); pop($('.sign',el),T,W('k1',/^pizza/)-.1,.45,.6);
+  const sh=W('k1',/^shoes/); const win=$('.win',el); win.style.opacity=T>=sh-.1?1:0; win.style.transform=`scale(${T>=sh-.1?1+Math.sin(clamp((T-sh)/.35)*Math.PI)*.06:1})`;
+  const wk=W('k1',/^walk/), out=W('k2',/^walk/);
+  walkers(el,T,[{t0:wk-.4,inT:.8,outAt:out},{t0:out+.6,inT:.7,outAt:out+1.5},{t0:out+1.4,inT:.7,outAt:out+2.3},{t0:out+2.2,inT:.7,outAt:out+3.1}]);
+  const pd=W('k2',/^paid/); const c=$('.coin',el); c.style.opacity=T>=pd-.2?1:0; $('.cv',el).textContent='$'+(Math.max(0,T-pd+.2)*1.8).toFixed(2);}
+
+/* ---------- V3: 3 steps ---------- */
+const STEPS=['Find the promise in your ad','Put it at the top of the page','One ad, one page'];
+const vFix=mk(`<div class="scene"><div class="abs" style="left:90px;right:90px;top:720px;display:flex;flex-direction:column;gap:22px">${STEPS.map((x,i)=>`<div class="fs" style="display:flex;align-items:center;gap:24px;padding:30px 32px;border-radius:28px;${CARD}"><span class="tile" style="width:80px;height:80px;border-radius:22px;font:900 40px Mont">${i+1}</span><span style="font:800 42px Inter">${x}</span></div>`).join('')}</div></div>`);
+scenesEl.appendChild(vFix);
+function rFix(t,el){const T=t+ST('f0')-.12; $$('.fs',el).forEach((c,i)=>pop(c,T,W('f0',/^Three/)-.05+i*.15,.4,.6));}
+
+/* ---------- V4: steps card ---------- */
+const PAGE=(cls,hero)=>`<div class="${cls}" style="border-radius:24px;overflow:hidden;background:#F5F8F6;color:#030403">
+  <div style="height:40px;background:#DDE3DF;display:flex;align-items:center;gap:8px;padding:0 16px">${['#8A938C','#8A938C','#8A938C'].map(c=>`<i style="display:block;width:12px;height:12px;border-radius:50%;background:${c}"></i>`).join('')}<span style="margin-left:12px;font:600 18px Inter;color:#5A625C">tonys-pizza.com</span></div>
+  <div class="hero" style="position:relative;padding:22px;min-height:150px">${hero}</div>
+  <div style="padding:0 22px 22px;display:flex;flex-direction:column;gap:10px">${[90,70,80].map(w=>`<i style="display:block;height:14px;width:${w}%;border-radius:7px;background:#C8D0CA"></i>`).join('')}</div></div>`;
+const OLD=`<div class="oldh" style="font:900 40px Mont">Welcome to Tony's</div><div style="font:600 24px Inter;color:#3A403C;margin-top:6px">Our story since 1998 · Menu · Locations</div>`;
+const NEW=`<div style="display:flex;align-items:center;gap:18px"><span style="font-size:80px">🍕</span><div><div style="font:900 44px Mont;line-height:1.05">50% off pizza tonight</div><div style="font:600 22px Inter;color:#3A403C;margin-top:4px">Order in 2 taps · ends 11pm</div></div></div>`;
+const vStep=mk(`<div class="scene"><div class="abs sc3" style="left:60px;right:60px;top:690px;height:700px;padding:30px;${CARD}">
+  <div style="display:flex;align-items:center;gap:16px"><span class="tile" style="width:56px;height:56px;border-radius:15px;font-size:30px">🍕</span><span class="mono st-h" style="font-size:22px;color:#8E9890"></span></div>
+  <div class="s1" style="position:absolute;left:30px;right:30px;top:110px">${AD('ad1')}
+    <div class="ck1" style="margin-top:20px;display:flex;flex-direction:column;gap:12px">${[['Offer','50% off'],['Price','$9.99 pizza'],['Words','"pizza tonight"']].map(([k,v])=>`<div class="cr" style="display:flex;justify-content:space-between;padding:16px 22px;border-radius:18px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16)"><span class="mono" style="font-size:24px;color:#AEB7B0">${k.toUpperCase()}</span><span style="font:800 32px Inter">${v}</span></div>`).join('')}</div>
+    <div class="pg1" style="margin-top:20px">${PAGE('pgA',OLD)}</div>
+    <div class="miss" style="position:absolute;right:20px;top:330px;opacity:0">${PILL('✕ Promise not at the top',false)}</div></div>
+  <div class="s2" style="position:absolute;left:30px;right:30px;top:110px">
+    <div class="chip" style="position:absolute;left:0;right:0;top:0;margin:0 auto;width:fit-content;padding:16px 26px;border-radius:18px;background:#22E06F;color:#030403;font:900 36px Mont;z-index:3">50% off pizza tonight</div>
+    <div style="margin-top:110px">${PAGE('pgB',OLD)}</div>
+    <div style="margin-top:18px;display:flex;justify-content:center;gap:14px">${['same words','same offer','same picture'].map(x=>`<span class="tk" style="opacity:0">${PILL('✓ '+x,true)}</span>`).join('')}</div></div>
+  <div class="s3" style="position:absolute;left:30px;right:30px;top:110px;height:540px">
+    <div style="position:absolute;left:0;top:160px;width:340px">${AD('ad3')}</div>
+    <div class="hp" style="position:absolute;right:0;top:20px;width:420px;padding:26px;border-radius:24px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.2)"><div class="mono" style="font-size:20px;color:#8E9890">HOME PAGE</div><div style="font:800 32px Inter;margin-top:6px">Welcome to Tony's</div><i class="hx" style="position:absolute;left:-10px;right:-10px;top:50%;height:8px;border-radius:4px;background:#F5F8F6;transform:rotate(-8deg) scaleX(0)"></i></div>
+    <div class="dp" style="position:absolute;right:0;top:300px;width:420px;padding:26px;border-radius:24px;background:rgba(34,224,111,.14);border:3px solid #22E06F"><div class="mono" style="font-size:20px;color:var(--lime)">PIZZA DEAL PAGE</div><div style="font:800 32px Inter;margin-top:6px">🍕 50% off pizza tonight</div></div>
+    <svg class="abs" width="960" height="540" style="left:0;top:0;overflow:visible"><path class="ah" d="M340 250 C380 170 380 110 420 90" stroke="#8A938C" stroke-width="7" fill="none" stroke-dasharray="400" stroke-dashoffset="400"/><path class="ad" d="M340 280 C380 340 380 360 420 370" stroke="#22E06F" stroke-width="9" fill="none" stroke-dasharray="400" stroke-dashoffset="400"/></svg></div>
+</div></div>`);
+scenesEl.appendChild(vStep);
+for(let i=0;i<3;i++) $('#prog').appendChild(mk('<div class="seg"><i></i></div>'));
+function rStep(t,el){const T=t+ST('f1a')-.12;
+  const step=T<ST('f2a')-.12?0:T<ST('f3a')-.12?1:2;
+  $('.st-h',el).textContent=['STEP 1 · FIND THE PROMISE · EXAMPLE','STEP 2 · PUT IT AT THE TOP · EXAMPLE','STEP 3 · ONE AD, ONE PAGE · EXAMPLE'][step];
+  ['.s1','.s2','.s3'].forEach((c,i)=>$(c,el).style.display=step===i?'block':'none');
+  if(step===0){$('.ul',$('.ad1',el)).style.width=(eo(P(T,W('f1a',/^promise/)-.05,.4))*100)+'%';
+    const pageOn=T>=ST('f1b')-.12; $('.ck1',el).style.display=pageOn?'none':'flex'; $('.pg1',el).style.display=pageOn?'block':'none';
+    const cues=[W('f1a',/^offer/),W('f1a',/^price/),W('f1a',/^words/)]; $$('.cr',el).forEach((r,i)=>rise(r,T,cues[i]-.1,.3,20));
+    if(pageOn) rise($('.pg1',el),T,ST('f1b')-.1,.35,30); pop($('.miss',el),T,W('f1b',/^promise/)-.05,.4,.6);}
+  if(step===1){const c=W('f2a',/^copy/); const m=eio(P(T,c,.9)); const chip=$('.chip',el); chip.style.top=lerp(0,150,m)+'px'; chip.style.opacity=m<1?1:0;
+    $('.hero',$('.pgB',el)).innerHTML=m>=1?NEW:OLD;
+    const tc=[ST('f2b'),W('f2b',/^same/),W('f2b',/^same/,1)]; $$('.tk',el).forEach((k,i)=>pop(k,T,tc[i]-.05,.35,.6));}
+  if(step===2){const one=W('f3a',/^One/); rise($('.ad3',el),T,one-.2,.35,20); rise($('.hp',el),T,one,.3,20); rise($('.dp',el),T,W('f3a',/^one/)-.05,.3,20);
+    $('.ad',el).style.strokeDashoffset=400*(1-eo(P(T,W('f3a',/^page/)-.1,.5)));
+    $('.ah',el).style.strokeDashoffset=400*(1-eo(P(T,W('f3b',/^send/),.5))); $('.hx',el).style.transform=`rotate(-8deg) scaleX(${eo(P(T,W('f3b',/^home/),.3))})`;
+    $('.hp',el).style.opacity=T>W('f3b',/^page/)+.2?.45:$('.hp',el).style.opacity;}
+}
+
+/* ---------- V5: payoff, a pizza shop that sells pizza ---------- */
+const vPay=mk(`<div class="scene">${SHOP('🍕 🍕<br>🍕 🍕')}<div class="abs sold" style="left:0;right:0;top:1395px;margin:0 auto;width:fit-content;padding:12px 26px;border-radius:999px;background:#22E06F;color:#030403;font:900 38px Mont;opacity:0">🛒 sales: <span class="sv">0</span></div></div>`);
+scenesEl.appendChild(vPay);
+function rPay(t,el){const T=t+ST('y1')-.12; rise($('.shop',el),t,0,.35,30);
+  const ins=W('y1',/^inside/); const win=$('.win',el); win.style.opacity=T>=ins-.1?1:.15; $('.win',el).style.boxShadow=T>=W('y1',/^pizza/,1)?'0 0 50px rgba(34,224,111,.5)':'none';
+  const st0=W('y1',/^People/); walkers(el,T,[0,1,2,3,4].map(i=>({t0:st0-.4+i*.35,inT:.8,stay:true})));
+  const by=W('y1',/^buy/); pop($('.sold',el),T,st0,.35,.6); $('.sv',el).textContent=Math.round(5*eo(P(T,st0+.4,by-st0+.4)));}
+
+/* ---------- recap ---------- */
+const RC=[['Find the one promise in your ad',/^Find/],['Put it at the top of your page',/^Put/],['One ad, one page',/^One/]];
+const vRec=mk(`<div class="scene"><div class="abs" style="left:70px;right:70px;top:720px;display:flex;flex-direction:column;gap:22px">${RC.map(([x])=>`<div class="rr" style="display:flex;align-items:center;gap:22px;padding:30px;border-radius:26px;border:2px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06)"><span class="rb" style="flex:none;width:60px;height:60px;border-radius:16px;border:4px solid #8A938C;display:flex;align-items:center;justify-content:center"></span><span style="font:800 38px Inter">${x}</span></div>`).join('')}</div></div>`);
+scenesEl.appendChild(vRec);
+function rRec(t,el){const T=t+ST('r1')-.12; $$('.rr',el).forEach((r,i)=>{rise(r,t,.1+i*.1,.35,30); const on=T>=W('r1',RC[i][1])-.05; const b=$('.rb',r);
+  b.style.borderColor=on?'#22E06F':'#8A938C'; b.style.background=on?'#22E06F':'transparent'; b.innerHTML=on?TICK(36):''; r.style.borderColor=on?'rgba(34,224,111,.6)':'rgba(255,255,255,.16)';});}
+
+/* ---------- CTA ---------- */
+const ANG=['Find the promise','Put it on top','One ad, one page','Check it weekly'];
+const vCta=mk(`<div class="scene">
+  <div class="abs mono c-t" style="top:300px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">SEND THIS TO A MARKETER</div>
+  <div class="abs" style="left:110px;right:110px;top:380px;display:grid;grid-template-columns:1fr 1fr;gap:18px">${ANG.map((a,i)=>`<div class="c-g ghost" style="border-radius:28px;padding:18px 24px;display:flex;align-items:center;gap:18px"><span class="tile" style="width:60px;height:60px;border-radius:16px;font:700 24px Mono">${String(i+1).padStart(2,'0')}</span><span style="font:800 32px Inter">${a}</span></div>`).join('')}</div>
+  <div class="abs c-f" style="top:900px;left:0;right:0;text-align:center;font:900 100px Mont;letter-spacing:-.03em">Follow for more</div>
+  <div class="abs c-s" style="top:1030px;left:40px;right:40px;text-align:center;font-family:ISerif;font-size:66px;color:#D8E0DA">send it to someone with clicks but no sales</div>
+  <div class="abs c-b pill" style="top:1200px;left:0;right:0;margin:0 auto;width:fit-content;padding:24px 70px;font-size:44px;font-weight:900;background:var(--lime);color:#030403">Follow</div>
+  <div class="abs c-m" style="left:640px;top:1320px;opacity:0">${CUR}</div></div>`);
+scenesEl.appendChild(vCta);
+function rCta(t,el){rise($('.c-t',el),t,0,.3,20); $$('.c-g',el).forEach((g2,i)=>pop(g2,t,.1+i*.08,.35,.6));
+  rise($('.c-f',el),t,.5,.4,30); rise($('.c-s',el),t,.7,.4,30); pop($('.c-b',el),t,.9,.4,.6);
+  const tap=2.2; const m=$('.c-m',el); m.style.opacity=clamp(P(t,1.3,.2)); m.style.transform=`translate(${(1-eo(P(t,1.3,.8)))*200}px,${(1-eo(P(t,1.3,.8)))*160}px) scale(${t>tap&&t<tap+.15?.85:1})`;
+  const b=$('.c-b',el); if(t>=tap){b.innerHTML='Following ✓'; b.style.background='rgba(255,255,255,.12)'; b.style.color='#fff'; b.style.border='2px solid rgba(255,255,255,.3)';}}
+
+const VL=[
+  {el:vAd,a:0,b:ST('k1')-.12,r:rAd},
+  {el:vShop,a:ST('k1')-.12,b:ST('f0')-.12,r:rShop},
+  {el:vFix,a:ST('f0')-.12,b:ST('f1a')-.12,r:rFix},
+  {el:vStep,a:ST('f1a')-.12,b:ST('y1')-.12,r:rStep},
+  {el:vPay,a:ST('y1')-.12,b:ST('r1')-.12,r:rPay},
+  {el:vRec,a:ST('r1')-.12,b:ST('c1')-.12,r:rRec},
+  {el:vCta,a:ST('c1')-.12,b:END+1,r:rCta},
+];
+const PAYA=ST('y1')-.12;
+const PS=[ST('f1a')-.12,ST('f2a')-.12,ST('f3a')-.12,ST('y1')-.12];
+const NOCAP=['r1','c1'];
+
+/* captions */
+const capWords=[];
+S.forEach(s=>s.words.forEach((w,k)=>{const nx=s.words[k+1];capWords.push({w:w.w.replace(/[.,]$/,''),s:w.s,e:nx?nx.s:s.start+s.dur,seg:s.key,brk:/[.,!?]$/.test(w.w)});}));
+const chunks=[];let cur=[];
+capWords.forEach((w,i)=>{cur.push(w);const nx=capWords[i+1];if(cur.length>=3||w.brk||!nx||nx.seg!==w.seg){chunks.push(cur);cur=[];}});
+function renderBg(t){
+  st($('#b1'),{left:`${300+Math.sin(t*.35)*180}px`,top:`${200+Math.cos(t*.28)*160}px`});
+  st($('#b2'),{left:`${500+Math.cos(t*.3)*200}px`,top:`${1300+Math.sin(t*.4)*180}px`});
+  st($('#b3'),{left:`${100+Math.sin(t*.5+1)*120}px`,top:`${900+Math.cos(t*.45)*200}px`});
+  st($('#grid'),{transform:`translateY(${(t*30)%90}px)`});
+}
+const cuts=VL.map(v=>v.a).filter(x=>x>0);
+window.seek=function(t){
+  renderBg(t);
+  HL.forEach((h,i)=>{const b=i+1<HL.length?HL[i+1].a:END+1; const el=hlEls[i]; const vis=t>=h.a&&t<b; el.style.display=vis?'block':'none'; if(!vis)return;
+    if($('.h-l',el)) rise($('.h-l',el),t-h.a,0,.25,16);
+    $$('.h-w',el).forEach(x=>{const at=+x.dataset.at; const p=eo5(P(t,Math.max(h.a,at-.06),.25)); st(x,{opacity:p,transform:`scale(${lerp(1.2,1,p)})`,filter:`blur(${(1-p)*10}px)`});});
+    if($('.h-n',el)) $('.h-n',el).textContent='+'+Math.round(340*eo(P(t,W('p1',/^three/)-.05,1.2)))+'%';
+  });
+  VL.forEach(v=>{const vis=t>=v.a&&t<v.b; v.el.style.display=vis?'block':'none'; if(!vis)return; const lt=t-v.a;
+    if(v.a>0){const p=eo5(P(lt,0,.3)); st(v.el,{transform:`scale(${lerp(1.05,1,p)})`,opacity:p});} v.r(lt,v.el);});
+  [...$('#prog').children].forEach((s,i)=>{s.firstChild.style.width=`${clamp((t-PS[i])/(PS[i+1]-PS[i]))*100}%`;});
+  st($('#prog'),{opacity:t<PS[0]-.2?0:t<PS[0]+.2?eo(P(t,PS[0]-.2,.4)):(t>PS[3]?1-eo(P(t,PS[3],.3)):1)});
+  const cap=$('#cap'); const ch=chunks.find(c=>t>=c[0].s-.05&&t<c[c.length-1].e+.08);
+  if(!ch||NOCAP.includes(ch[0].seg)){cap.innerHTML='';} else {
+    const pin=eo5(P(t,ch[0].s-.05,.18));
+    cap.innerHTML=ch.map(w=>{const on=t>=w.s&&t<w.e+.05; return `<span style="color:${on?'#22E06F':'#fff'};transform:scale(${on?1.08:1})">${w.w}</span>`}).join(' ');
+    st(cap,{transform:`translateY(${(1-pin)*30}px) scale(${lerp(.9,1,pin)})`,opacity:pin});
+  }
+  let fl=0, wy=-2400; cuts.forEach(c=>{const d=Math.abs(t-c); if(d<.08) fl=Math.max(fl,(1-d/.08)*.3);});
+  const pw=PAYA; if(Math.abs(t-pw)<.21){wy=lerp(1920,-2400,eio((t-pw+.21)/.42));}
+  $('#flash').style.opacity=fl; $('#wipe').style.top=`${wy}px`;
+  return true;
+};
+window.__ready=document.fonts.ready.then(()=>true);
+</script></body></html>

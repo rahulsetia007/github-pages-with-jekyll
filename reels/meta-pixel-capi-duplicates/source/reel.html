@@ -1,0 +1,275 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- Meta Pixel + Conversions API duplicates: two cashiers, one customer (house teaching style). Pain, Poke, Fix, Payoff, Recap, CTA. -->
+<style>
+@font-face{font-family:Inter;src:url(fonts/Inter.ttf);font-weight:100 900}
+@font-face{font-family:Mont;src:url(fonts/Montserrat.ttf);font-weight:100 900}
+@font-face{font-family:Mono;src:url(fonts/SpaceMono-Bold.ttf)}
+@font-face{font-family:ISerif;src:url(fonts/InstrumentSerif-Italic.ttf);font-style:normal;font-weight:400}
+:root{
+  --ink:#030403; --ink2:#0A0D0B; --line:rgba(255,255,255,.08);
+  --text:#F5F8F6; --muted:#8A938C; --lime:#22E06F; --violet:#0E7A3C; --deep:#06331A;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ink)}
+body{font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+#stage{position:absolute;inset:0;overflow:hidden}
+.bg{position:absolute;inset:-200px}
+.blob{position:absolute;border-radius:50%;filter:blur(140px);opacity:.42}
+.grid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:90px 90px;-webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 45%,#000 30%,transparent 80%);opacity:.55}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse 85% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.65) 100%);pointer-events:none}
+.scene{position:absolute;inset:0;will-change:transform,filter,opacity}
+.abs{position:absolute}
+.mono{font-family:Mono,monospace;letter-spacing:.04em}
+#prog{position:absolute;top:118px;left:90px;right:90px;display:flex;gap:12px}
+#prog .seg{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
+#prog .seg i{display:block;height:100%;width:0;background:var(--lime);border-radius:8px;box-shadow:0 0 18px var(--lime)}
+.card{position:absolute;left:90px;width:900px;border-radius:44px;background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.14);box-shadow:0 40px 120px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.18);backdrop-filter:blur(30px);overflow:hidden}
+.pill{display:inline-flex;align-items:center;gap:12px;padding:14px 26px;border-radius:999px;font-weight:700;font-size:30px}
+.title{font-family:Mont;font-weight:900;font-size:128px;line-height:.92;letter-spacing:-.035em}
+.sub{font-size:44px;font-weight:500;color:#C8D0CA;line-height:1.25}
+.sub b{color:var(--lime);font-weight:800}
+.bar{height:22px;border-radius:12px;background:rgba(255,255,255,.14)}
+#cap{position:absolute;left:60px;right:60px;top:1500px;text-align:center;font-family:Mont;font-weight:900;font-size:66px;line-height:1.1;letter-spacing:-.01em;text-transform:uppercase}
+#cap span{display:inline-block;margin:0 10px;text-shadow:0 6px 30px rgba(0,0,0,.7)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;mix-blend-mode:overlay}
+#wipe{position:absolute;left:0;right:0;height:2400px;top:-2400px;background:var(--lime)}
+.ghost{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.16)}
+.tile{display:inline-flex;align-items:center;justify-content:center;flex:none;background:#fff;color:#030403;font-family:Mont;font-weight:900;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+</style></head>
+<body><div id="stage">
+  <div class="bg" id="bg">
+    <div class="blob" id="b1" style="width:900px;height:900px;background:var(--violet)"></div>
+    <div class="blob" id="b2" style="width:800px;height:800px;background:var(--deep)"></div>
+    <div class="blob" id="b3" style="width:600px;height:600px;background:var(--lime);opacity:.18"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div id="scenes"></div>
+  <div id="prog"></div>
+  <div id="cap"></div>
+  <div id="wipe"></div>
+  <div id="flash"></div>
+  <div class="vig"></div>
+</div>
+<script>
+const D = window.__DATA__;
+const $ = (s,el=document)=>el.querySelector(s);
+const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-clamp(t),3);
+const eo5=t=>1-Math.pow(1-clamp(t),5);
+const eio=t=>{t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+const back=t=>{t=clamp(t);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
+const P=(t,a,d)=>clamp((t-a)/d);
+function st(el,o){for(const k in o) el.style[k]=o[k];}
+function pop(el,t,a,d=.45,from=.6){const p=P(t,a,d);st(el,{opacity:clamp(p*3),transform:`scale(${lerp(from,1,back(p))})`});}
+function rise(el,t,a,d=.5,dy=60){const p=eo(P(t,a,d));st(el,{opacity:p,transform:`translateY(${(1-p)*dy}px)`,filter:`blur(${(1-p)*10}px)`});}
+function typed(el,txt,t,a,cps=26){const n=Math.floor(clamp((t-a)*cps,0,txt.length));el.textContent=txt.slice(0,n);return n<txt.length;}
+function mk(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
+const scenesEl=$('#scenes');
+
+/* ---------- content: teaching shots (house delivery). Each visual stays up and changes state on the spoken words. ---------- */
+const S=D.segs, segBy=Object.fromEntries(S.map(s=>[s.key,s]));
+const W=(seg,re,n=0)=>{const ws=segBy[seg].words.filter(x=>re.test(x.w));return ws[n]?ws[n].s:null;};
+const ST=k=>segBy[k].start;
+const END=D.end;
+let _gid=0;
+const LT=(svg,size,r)=>{const id='g'+(++_gid);return `<span class="tile" style="width:${size}px;height:${size}px;border-radius:${r}px;padding:${Math.round(size*.17)}px;background:#fff">${svg.replace(/igg/g,id)}</span>`;};
+const LOGO_G=`<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0081FB" d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303zm10.16 2.053c1.147 0 2.188.758 2.992 1.999 1.132 1.748 1.647 4.195 1.647 6.4 0 1.548-.368 2.9-1.839 2.9-.58 0-1.027-.23-1.664-1.004-.496-.601-1.343-1.878-2.832-4.358l-.617-1.028a44.908 44.908 0 0 0-1.255-1.98c.07-.109.141-.224.211-.327 1.12-1.667 2.118-2.602 3.358-2.602zm-10.201.553c1.265 0 2.058.791 2.675 1.446.307.327.737.871 1.234 1.579l-1.02 1.566c-.757 1.163-1.882 3.017-2.837 4.338-1.191 1.649-1.81 1.817-2.486 1.817-.524 0-1.038-.237-1.383-.794-.263-.426-.464-1.13-.464-2.046 0-2.221.63-4.535 1.66-6.088.454-.687.964-1.226 1.533-1.533a2.264 2.264 0 0 1 1.088-.285z"/></svg>`;
+const DOC=`<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M6 2h8l5 5v15H6z" fill="none" stroke="#030403" stroke-width="2.2" stroke-linejoin="round"/><path d="M14 2v5h5M9 12h7M9 16h7" stroke="#030403" stroke-width="2.2"/></svg>`;
+const TICK=(s=34,c='#030403')=>`<svg width="${s}" height="${s}" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const CARD='background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.16);border-radius:40px';
+
+/* ---------- headline: the spoken words, each blurs in when it is said ---------- */
+const g=(txt,at,lime)=>`<span class="h-w" data-at="${at}" style="display:inline-block;${lime?'color:var(--lime)':''}">${txt}</span>`;
+const L=t=>`<b style="color:var(--lime)">${t}</b>`;
+const HL=[
+  {a:0, lead:'meta says', size:120, big:g('20 SALES.',W('p1',/^twenty/),1)+'<br>'+g('YOUR STORE:',W('p1',/^store/))+' '+g('10.',W('p1',/^ten/))},
+  {a:ST('p2')-.12, lead:'your setup might be', size:116, big:g('COUNTING',W('p2',/^counting/))+'<br>'+g('EVERY SALE',W('p2',/^every/))+' '+g('TWICE.',W('p2',/^twice/),1)},
+  {a:ST('k1')-.12, lead:'picture', size:116, big:g('TWO CASHIERS',W('k1',/^cashiers/),1)+'<br>'+g('ONE CUSTOMER.',W('k1',/^customer/)), sub:g('one at the door,',W('k1',/^One/))+' '+g('one at the till.',W('k1',/^one/))},
+  {a:ST('k2')-.12, lead:'your meta pixel and conversions API', size:120, big:g('BOTH',W('k2',/^can/))+' '+g('COUNT IT.',W('k2',/^same/),1), sub:g('meta learns from sales that '+L('never happened.'),W('k2',/^Then/))},
+  {a:ST('f0')-.12, lead:"here's how to", size:150, big:g('CHECK.',W('f0',/^check/),1), sub:g('3 steps.',W('f0',/^Three/))},
+  {a:ST('f1a')-.12, lead:'step one · open events manager', size:120, big:g('PURCHASE',W('f1a',/^Purchase/),1)+'<br>'+g('EVENT.',W('f1a',/^event/))},
+  {a:ST('f1b')-.12, lead:'see where it comes from', size:110, big:g('BROWSER,',W('f1b',/^browser/))+' '+g('SERVER,',W('f1b',/^server/))+'<br>'+g('OR BOTH?',W('f1b',/^both/),1)},
+  {a:ST('f2a')-.12, lead:"step two · if it's both, check", size:100, big:g('DEDUPLI-<br>CATION.',W('f2a',/^deduplication/),1)},
+  {a:ST('f2b')-.12, lead:'both need the same', size:140, big:g('EVENT ID.',W('f2b',/^event/),1), sub:g('so meta counts the sale '+L('once.'),W('f2b',/^so/))},
+  {a:ST('f3a')-.12, lead:'step three · compare a week', size:104, big:g('META',W('f3a',/^Meta/))+' '+g('VS',W('f3a',/^with/))+'<br>'+g('REAL ORDERS.',W('f3a',/^orders/),1)},
+  {a:ST('f3b')-.12, lead:'meta way higher?', size:116, big:g('FIX THE',W('f3b',/^fix/))+'<br>'+g('EVENT ID.',W('f3b',/^event/),1), sub:g('ask your developer, or your store\'s app.',W('f3b',/^ask/))},
+  {a:ST('y1')-.12, lead:'now one sale', size:120, big:g('COUNTS ONCE.',W('y1',/^counts/),1), sub:g('meta learns from '+L('real buyers, not ghosts.'),W('y1',/^And/))},
+  {a:ST('r1')-.12, lead:'recap · save this', size:92, big:g('SOURCE.',W('r1',/^source/))+' '+g('DEDUPE.',W('r1',/^deduplication/))+'<br>'+g('COMPARE.',W('r1',/^Compare/),1)},
+  {a:ST('c1')-.12, cta:true},
+];
+const hlEls=HL.map(h=>{const e=mk(`<div class="scene">${h.cta?'':`<div class="abs" style="top:210px;left:30px;right:30px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+  ${h.lead?`<div class="h-l mono" style="font-size:38px;color:#AEB7B0;text-transform:lowercase">${h.lead}</div>`:''}
+  <div class="h-b" style="font:900 ${h.size||118}px/.95 Mont;letter-spacing:-.035em;text-transform:uppercase">${h.big}</div>
+  ${h.sub?`<div class="h-s" style="font:700 44px Inter;color:#C8D0CA">${h.sub}</div>`:''}</div>`}</div>`);scenesEl.appendChild(e);return e;});
+
+const CUR=`<svg width="70" height="70" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#fff" stroke="#030403" stroke-width="1.5"/></svg>`;
+const PERSON=(c,s)=>`<svg width="${s}" height="${s}" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="${c}"/><circle cx="20" cy="15" r="7" fill="#030403" opacity=".55"/><path d="M8 34 C10 24 30 24 32 34" fill="#030403" opacity=".55"/></svg>`;
+const STORE=`<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M3 9l2-5h14l2 5M4 9h16v11H4z" fill="none" stroke="#030403" stroke-width="2.2" stroke-linejoin="round"/><path d="M9 20v-6h6v6" stroke="#030403" stroke-width="2.2" fill="none"/></svg>`;
+const RECEIPT=(id,col,w)=>`<div class="rc" style="width:${w||190}px;padding:16px 16px 22px;background:#F5F8F6;color:#030403;border-radius:10px 10px 0 0;clip-path:polygon(0 0,100% 0,100% 92%,90% 100%,80% 92%,70% 100%,60% 92%,50% 100%,40% 92%,30% 100%,20% 92%,10% 100%,0 92%);font:800 22px Inter">
+  <div class="mono" style="font-size:16px;color:#5A625C">PURCHASE</div><div style="font:900 34px Mont">$58</div><div class="rid mono" style="margin-top:6px;font-size:18px;color:${col||'#030403'}">${id}</div></div>`;
+
+/* ---------- V1: 20 vs 10 (pain) ---------- */
+const vCmp=mk(`<div class="scene"><div class="abs cc" style="left:60px;right:60px;top:700px;display:grid;grid-template-columns:1fr 1fr;gap:24px">
+  <div class="ca" style="padding:30px;${CARD}"><div style="display:flex;align-items:center;gap:14px">${LT(LOGO_G,56,15)}<div><div style="font:800 30px Inter">Meta</div><div class="mono" style="font-size:18px;color:#8E9890">PURCHASES · EXAMPLE</div></div></div><div class="cav" style="margin-top:30px;font:900 200px Mont;line-height:1;color:var(--lime)">0</div></div>
+  <div class="cb" style="padding:30px;${CARD}"><div style="display:flex;align-items:center;gap:14px">${LT(STORE,56,15)}<div><div style="font:800 30px Inter">Your store</div><div class="mono" style="font-size:18px;color:#8E9890">REAL ORDERS</div></div></div><div class="cbv" style="margin-top:30px;font:900 200px Mont;line-height:1">0</div></div></div>
+  <div class="abs pill cg" style="top:1190px;left:0;right:0;margin:0 auto;width:fit-content;background:#F5F8F6;color:#030403;font-size:36px;font-weight:900;opacity:0">10 sales that never happened?</div>
+  <div class="abs pill cx" style="top:1290px;left:0;right:0;margin:0 auto;width:fit-content;background:var(--lime);color:#030403;font-size:36px;font-weight:900;box-shadow:0 0 40px rgba(34,224,111,.6);opacity:0">×2 COUNTED TWICE?</div></div>`);
+scenesEl.appendChild(vCmp);
+function rCmp(t,el){const T=t; rise($('.ca',el),T,0,.35,40); rise($('.cb',el),T,.1,.35,40);
+  $('.cav',el).textContent=Math.round(20*eo(P(T,.1,W('p1',/^twenty/)+.4))); $('.cbv',el).textContent=Math.round(10*eo(P(T,W('p1',/^store/)-.2,W('p1',/^ten/)-W('p1',/^store/)+.4)));
+  pop($('.cg',el),T,W('p1',/^ten/)+.3,.4,.6); pop($('.cx',el),T,W('p2',/^twice/)-.1,.45,.6);
+  const tw=T>=W('p2',/^twice/)-.1; $('.ca',el).style.borderColor=tw?'#22E06F':'rgba(255,255,255,.16)';}
+
+/* ---------- V2: two cashiers, one customer (poke) ---------- */
+const vCash=mk(`<div class="scene"><div class="abs kc" style="left:40px;right:40px;top:660px;height:760px;${CARD};overflow:hidden">
+  <div class="abs mono" style="left:34px;top:28px;font-size:22px;color:#8E9890">ONE PURCHASE · EXAMPLE</div>
+  <div class="abs kcnt" style="right:34px;top:20px;display:flex;align-items:center;gap:12px;padding:10px 20px;border-radius:999px;background:rgba(3,4,3,.6);border:1.5px solid rgba(255,255,255,.2)">${LT(LOGO_G,40,11)}<span style="font:900 40px Mont">Meta: <b class="kv" style="color:var(--lime)">0</b></span></div>
+  <div class="abs cust" style="left:40px;top:560px">${PERSON('#22E06F',120)}</div>
+  ${[0,1].map(i=>`<div class="abs csh" data-i="${i}" style="left:${i?640:330}px;top:150px;width:290px;text-align:center">
+    <div style="font-size:120px;line-height:1">🧾</div>
+    <div style="margin-top:6px;padding:10px 14px;border-radius:16px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);font:800 28px Inter">${i?'Conversions API':'Meta Pixel'}<div class="mono" style="font-size:18px;color:#AEB7B0">${i?'SERVER · THE TILL':'BROWSER · THE DOOR'}</div></div>
+    <div class="rcw" style="margin:18px auto 0;width:190px;opacity:0">${RECEIPT('event ID: none')}</div></div>`).join('')}
+  <div class="abs gh" style="left:0;right:0;bottom:30px;text-align:center;font-size:70px;opacity:0">👻 👻 👻</div></div></div>`);
+scenesEl.appendChild(vCash);
+function rCash(t,el){const T=t+ST('k1')-.12; rise($('.kc',el),t,0,.35,40);
+  $$('.csh',el).forEach((c,i)=>pop(c,T,W('k1',/^cashiers/)-.1+i*.2,.4,.6));
+  const walk=eo(P(T,W('k1',/^customer/)-.3,1.6)); $('.cust',el).style.left=lerp(40,820,walk)+'px';
+  const r1=W('k1',/^door/), r2=W('k1',/^till/); const rc=$$('.rcw',el);
+  [r1,r2].forEach((r,i)=>{const p=eo(P(T,r-.1,.4)); rc[i].style.opacity=p; rc[i].style.transform=`translateY(${(1-p)*-40}px)`;});
+  $('.kv',el).textContent=(T>=r2?2:T>=r1?1:0); $('.kcnt',el).style.borderColor=T>=r2?'#22E06F':'rgba(255,255,255,.2)';
+  pop($('.gh',el),T,W('k2',/^never/)-.1,.45,.5);
+  if(T>=W('k2',/^Your/)-.1){ $$('.csh',el).forEach(c=>c.style.boxShadow='none'); }}
+
+/* ---------- V3: 3 steps ---------- */
+const STEPS=['Check the source','Check deduplication','Compare with real orders'];
+const vFix=mk(`<div class="scene"><div class="abs" style="left:90px;right:90px;top:720px;display:flex;flex-direction:column;gap:22px">${STEPS.map((x,i)=>`<div class="fs" style="display:flex;align-items:center;gap:24px;padding:30px 32px;border-radius:28px;${CARD}"><span class="tile" style="width:80px;height:80px;border-radius:22px;font:900 40px Mont">${i+1}</span><span style="font:800 44px Inter">${x}</span></div>`).join('')}</div></div>`);
+scenesEl.appendChild(vFix);
+function rFix(t,el){const T=t+ST('f0')-.12; $$('.fs',el).forEach((c,i)=>pop(c,T,W('f0',/^Three/)-.05+i*.15,.4,.6));}
+
+/* ---------- V4: steps card ---------- */
+const CHIP=(c,txt)=>`<span class="${c} pill" style="background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.25);font-size:30px;font-weight:900;color:#AEB7B0">${txt}</span>`;
+const vStep=mk(`<div class="scene"><div class="abs sc3" style="left:60px;right:60px;top:690px;height:680px;padding:32px;${CARD}">
+  <div style="display:flex;align-items:center;gap:16px">${LT(LOGO_G,56,15)}<span class="mono st-h" style="font-size:22px;color:#8E9890"></span></div>
+  <div class="s1" style="position:absolute;left:32px;right:32px;top:120px">
+    <div class="mono" style="font-size:22px;color:#AEB7B0">EVENTS MANAGER · EXAMPLE</div>
+    ${['PageView','AddToCart','Purchase'].map(n=>`<div class="ev${n==='Purchase'?' evp':''}" style="margin-top:14px;display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-radius:20px;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.14)"><span style="font:800 34px Inter">${n}</span><span class="mono" style="font-size:20px;color:#8E9890">${n==='Purchase'?'EVENT':''}</span></div>`).join('')}
+    <div class="cn" style="margin-top:26px"><div class="mono" style="font-size:22px;color:#AEB7B0;margin-bottom:12px">CONNECTION METHOD</div><div style="display:flex;gap:14px">${CHIP('chb','Browser')}${CHIP('chs','Server')}</div></div></div>
+  <div class="s2" style="position:absolute;left:32px;right:32px;top:120px">
+    <div class="mono d-lb" style="font-size:22px;color:#AEB7B0">PIXEL + CONVERSIONS API · SAME PURCHASE</div>
+    <div style="position:relative;margin-top:20px;height:320px">
+      <div class="r-a abs" style="left:120px;top:0">${RECEIPT('ID: #1042','#030403',220)}</div>
+      <div class="r-b abs" style="left:500px;top:0">${RECEIPT('ID: <b class="rbid">#88d1</b>','#030403',220)}</div>
+      <div class="r-x abs mono" style="left:0;right:0;top:250px;text-align:center;font-size:28px;color:#F5F8F6">≠ different IDs → counted twice</div></div>
+    <div class="dl pill" style="background:var(--lime);color:#030403;font-size:32px;font-weight:900;opacity:0">same event name + same event ID</div></div>
+  <div class="s3" style="position:absolute;left:32px;right:32px;top:120px">
+    <div class="mono" style="font-size:22px;color:#AEB7B0">LAST 7 DAYS · EXAMPLE</div>
+    <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div style="padding:22px;border-radius:22px;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.16)"><div style="display:flex;align-items:center;gap:10px">${LT(LOGO_G,40,11)}<span style="font:800 28px Inter">Meta</span></div><div class="mv" style="font:900 110px Mont;color:var(--lime)">140</div></div>
+      <div style="padding:22px;border-radius:22px;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.16)"><div style="display:flex;align-items:center;gap:10px">${LT(STORE,40,11)}<span style="font:800 28px Inter">Real orders</span></div><div style="font:900 110px Mont">72</div></div></div>
+    <div class="gp pill" style="margin-top:22px;background:#F5F8F6;color:#030403;font-size:30px;font-weight:900;opacity:0">Way higher → ask your developer or store app</div></div>
+</div></div>`);
+scenesEl.appendChild(vStep);
+for(let i=0;i<3;i++) $('#prog').appendChild(mk('<div class="seg"><i></i></div>'));
+function rStep(t,el){const T=t+ST('f1a')-.12;
+  const step=T<ST('f2a')-.12?0:T<ST('f3a')-.12?1:2;
+  $('.st-h',el).textContent=['STEP 1 · THE SOURCE','STEP 2 · DEDUPLICATION','STEP 3 · COMPARE'][step];
+  ['.s1','.s2','.s3'].forEach((c,i)=>$(c,el).style.display=step===i?'block':'none');
+  if(step===0){$$('.ev',el).forEach((e,i)=>rise(e,T,W('f1a',/^Events/)-.1+i*.12,.3,20)); const ep=$('.evp',el); const on=T>=W('f1a',/^Purchase/)-.05;
+    ep.style.borderColor=on?'#22E06F':'rgba(255,255,255,.14)'; ep.style.background=on?'rgba(34,224,111,.12)':'rgba(255,255,255,.06)';
+    rise($('.cn',el),T,ST('f1b')-.1,.3,20);
+    const lit=(c,at)=>{const x=$(c,el); const o=T>=at-.05; x.style.background=o?'#22E06F':'rgba(255,255,255,.1)'; x.style.color=o?'#030403':'#AEB7B0'; x.style.borderColor=o?'#22E06F':'rgba(255,255,255,.25)';};
+    lit('.chb',W('f1b',/^browser/)); lit('.chs',W('f1b',/^server/)); if(T>=W('f1b',/^both/)-.05){$('.cn',el).style.transform=`scale(${1+Math.sin(clamp((T-W('f1b',/^both/))/.3)*Math.PI)*.06})`;}}
+  if(step===1){const ra=$('.r-a',el), rb=$('.r-b',el); pop(ra,T,ST('f2a')-.05,.35,.7); pop(rb,T,ST('f2a')+.1,.35,.7);
+    const fix=W('f2b',/^event/); const m=eio(P(T,W('f2b',/^once/)-.6,.7));
+    $('.rbid',el).textContent=T>=fix?'#1042':'#88d1'; $('.rbid',el).style.color=T>=fix?'#0E7A3C':'#030403';
+    $('.r-x',el).textContent=T>=fix?'= same ID → counted once':'≠ different IDs → counted twice'; $('.r-x',el).style.color=T>=fix?'#22E06F':'#F5F8F6';
+    ra.style.left=lerp(120,310,m)+'px'; rb.style.left=lerp(500,310,m)+'px'; rb.style.opacity=m>.9?1-((m-.9)*10):rb.style.opacity;
+    pop($('.dl',el),T,W('f2b',/^same/)-.05,.4,.6);}
+  if(step===2){const mv=$('.mv',el); const ok=T>=W('f3b',/^fix/); mv.textContent=ok?Math.round(lerp(140,75,eo(P(T,W('f3b',/^fix/),.8)))):'140';
+    rise($('.gp',el),T,W('f3b',/^ask/)-.1,.35,20);}
+}
+
+/* ---------- V5: payoff ---------- */
+const vPay=mk(`<div class="scene"><div class="abs pc" style="left:60px;right:60px;top:690px;padding:32px;${CARD}">
+  <div style="display:flex;justify-content:center;align-items:center;gap:30px">${PERSON('#22E06F',110)}<span style="font:900 60px Mont;color:#AEB7B0">→</span><div class="one">${RECEIPT('ID: #1042','#0E7A3C',220)}</div></div>
+  <div style="margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div style="padding:22px;border-radius:22px;background:rgba(34,224,111,.1);border:2px solid rgba(34,224,111,.6)"><div style="display:flex;align-items:center;gap:10px">${LT(LOGO_G,40,11)}<span style="font:800 28px Inter">Meta</span></div><div style="font:900 100px Mont;color:var(--lime)">10</div></div>
+    <div style="padding:22px;border-radius:22px;background:rgba(34,224,111,.1);border:2px solid rgba(34,224,111,.6)"><div style="display:flex;align-items:center;gap:10px">${LT(STORE,40,11)}<span style="font:800 28px Inter">Your store</span></div><div style="font:900 100px Mont">10</div></div></div>
+  <div class="pg" style="margin-top:20px;text-align:center;font:800 34px Inter;opacity:0"><span style="text-decoration:line-through;color:#8A938C">👻 👻 👻</span> → 🛍️ real buyers</div></div></div>`);
+scenesEl.appendChild(vPay);
+function rPay(t,el){const T=t+ST('y1')-.12; rise($('.pc',el),t,0,.35,30); pop($('.one',el),T,W('y1',/^once/)-.1,.45,.6); rise($('.pg',el),T,W('y1',/^real/)-.1,.35,20);}
+
+/* ---------- recap ---------- */
+const RC=[['Check the source: browser, server, or both',/^source/],['Check deduplication: same event ID',/^deduplication/],['Compare with real orders',/^Compare/]];
+const vRec=mk(`<div class="scene"><div class="abs" style="left:70px;right:70px;top:720px;display:flex;flex-direction:column;gap:22px">${RC.map(([x])=>`<div class="rr" style="display:flex;align-items:center;gap:22px;padding:28px;border-radius:26px;border:2px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06)"><span class="rb" style="flex:none;width:60px;height:60px;border-radius:16px;border:4px solid #8A938C;display:flex;align-items:center;justify-content:center"></span><span style="font:800 36px Inter">${x}</span></div>`).join('')}</div></div>`);
+scenesEl.appendChild(vRec);
+function rRec(t,el){const T=t+ST('r1')-.12; $$('.rr',el).forEach((r,i)=>{rise(r,t,.1+i*.1,.35,30); const on=T>=W('r1',RC[i][1])-.05; const b=$('.rb',r);
+  b.style.borderColor=on?'#22E06F':'#8A938C'; b.style.background=on?'#22E06F':'transparent'; b.innerHTML=on?TICK(36):''; r.style.borderColor=on?'rgba(34,224,111,.6)':'rgba(255,255,255,.16)';});}
+
+/* ---------- CTA ---------- */
+const ANG=['Check the source','Check dedupe','Compare orders','Fix the event ID'];
+const vCta=mk(`<div class="scene">
+  <div class="abs mono c-t" style="top:300px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">SEND THIS TO A META ADVERTISER</div>
+  <div class="abs" style="left:110px;right:110px;top:380px;display:grid;grid-template-columns:1fr 1fr;gap:18px">${ANG.map((a,i)=>`<div class="c-g ghost" style="border-radius:28px;padding:18px 24px;display:flex;align-items:center;gap:18px"><span class="tile" style="width:60px;height:60px;border-radius:16px;font:700 24px Mono">${String(i+1).padStart(2,'0')}</span><span style="font:800 32px Inter">${a}</span></div>`).join('')}</div>
+  <div class="abs c-f" style="top:900px;left:0;right:0;text-align:center;font:900 100px Mont;letter-spacing:-.03em">Follow for more</div>
+  <div class="abs c-s" style="top:1030px;left:0;right:0;text-align:center;font-family:ISerif;font-size:54px;color:#D8E0DA">send it to someone who trusts their numbers</div>
+  <div class="abs c-b pill" style="top:1180px;left:0;right:0;margin:0 auto;width:fit-content;padding:24px 70px;font-size:44px;font-weight:900;background:var(--lime);color:#030403">Follow</div>
+  <div class="abs c-m" style="left:640px;top:1300px;opacity:0">${CUR}</div></div>`);
+scenesEl.appendChild(vCta);
+function rCta(t,el){rise($('.c-t',el),t,0,.3,20); $$('.c-g',el).forEach((g2,i)=>pop(g2,t,.1+i*.08,.35,.6));
+  rise($('.c-f',el),t,.5,.4,30); rise($('.c-s',el),t,.7,.4,30); pop($('.c-b',el),t,.9,.4,.6);
+  const tap=2.2; const m=$('.c-m',el); m.style.opacity=clamp(P(t,1.3,.2)); m.style.transform=`translate(${(1-eo(P(t,1.3,.8)))*200}px,${(1-eo(P(t,1.3,.8)))*160}px) scale(${t>tap&&t<tap+.15?.85:1})`;
+  const b=$('.c-b',el); if(t>=tap){b.innerHTML='Following ✓'; b.style.background='rgba(255,255,255,.12)'; b.style.color='#fff'; b.style.border='2px solid rgba(255,255,255,.3)';}}
+
+const VL=[
+  {el:vCmp,a:0,b:ST('k1')-.12,r:rCmp},
+  {el:vCash,a:ST('k1')-.12,b:ST('f0')-.12,r:rCash},
+  {el:vFix,a:ST('f0')-.12,b:ST('f1a')-.12,r:rFix},
+  {el:vStep,a:ST('f1a')-.12,b:ST('y1')-.12,r:rStep},
+  {el:vPay,a:ST('y1')-.12,b:ST('r1')-.12,r:rPay},
+  {el:vRec,a:ST('r1')-.12,b:ST('c1')-.12,r:rRec},
+  {el:vCta,a:ST('c1')-.12,b:END+1,r:rCta},
+];
+const PAYA=ST('y1')-.12;
+const PS=[ST('f1a')-.12,ST('f2a')-.12,ST('f3a')-.12,ST('y1')-.12];
+const NOCAP=['r1','c1'];
+
+/* captions */
+const capWords=[];
+S.forEach(s=>s.words.forEach((w,k)=>{const nx=s.words[k+1];capWords.push({w:w.w.replace(/[.,]$/,''),s:w.s,e:nx?nx.s:s.start+s.dur,seg:s.key,brk:/[.,!?]$/.test(w.w)});}));
+const chunks=[];let cur=[];
+capWords.forEach((w,i)=>{cur.push(w);const nx=capWords[i+1];if(cur.length>=3||w.brk||!nx||nx.seg!==w.seg){chunks.push(cur);cur=[];}});
+function renderBg(t){
+  st($('#b1'),{left:`${300+Math.sin(t*.35)*180}px`,top:`${200+Math.cos(t*.28)*160}px`});
+  st($('#b2'),{left:`${500+Math.cos(t*.3)*200}px`,top:`${1300+Math.sin(t*.4)*180}px`});
+  st($('#b3'),{left:`${100+Math.sin(t*.5+1)*120}px`,top:`${900+Math.cos(t*.45)*200}px`});
+  st($('#grid'),{transform:`translateY(${(t*30)%90}px)`});
+}
+const cuts=VL.map(v=>v.a).filter(x=>x>0);
+window.seek=function(t){
+  renderBg(t);
+  HL.forEach((h,i)=>{const b=i+1<HL.length?HL[i+1].a:END+1; const el=hlEls[i]; const vis=t>=h.a&&t<b; el.style.display=vis?'block':'none'; if(!vis)return;
+    if($('.h-l',el)) rise($('.h-l',el),t-h.a,0,.25,16);
+    $$('.h-w',el).forEach(x=>{const at=+x.dataset.at; const p=eo5(P(t,Math.max(h.a,at-.06),.25)); st(x,{opacity:p,transform:`scale(${lerp(1.2,1,p)})`,filter:`blur(${(1-p)*10}px)`});});
+    if($('.h-n',el)) $('.h-n',el).textContent='+'+Math.round(340*eo(P(t,W('p1',/^three/)-.05,1.2)))+'%';
+  });
+  VL.forEach(v=>{const vis=t>=v.a&&t<v.b; v.el.style.display=vis?'block':'none'; if(!vis)return; const lt=t-v.a;
+    if(v.a>0){const p=eo5(P(lt,0,.3)); st(v.el,{transform:`scale(${lerp(1.05,1,p)})`,opacity:p});} v.r(lt,v.el);});
+  [...$('#prog').children].forEach((s,i)=>{s.firstChild.style.width=`${clamp((t-PS[i])/(PS[i+1]-PS[i]))*100}%`;});
+  st($('#prog'),{opacity:t<PS[0]-.2?0:t<PS[0]+.2?eo(P(t,PS[0]-.2,.4)):(t>PS[3]?1-eo(P(t,PS[3],.3)):1)});
+  const cap=$('#cap'); const ch=chunks.find(c=>t>=c[0].s-.05&&t<c[c.length-1].e+.08);
+  if(!ch||NOCAP.includes(ch[0].seg)){cap.innerHTML='';} else {
+    const pin=eo5(P(t,ch[0].s-.05,.18));
+    cap.innerHTML=ch.map(w=>{const on=t>=w.s&&t<w.e+.05; return `<span style="color:${on?'#22E06F':'#fff'};transform:scale(${on?1.08:1})">${w.w}</span>`}).join(' ');
+    st(cap,{transform:`translateY(${(1-pin)*30}px) scale(${lerp(.9,1,pin)})`,opacity:pin});
+  }
+  let fl=0, wy=-2400; cuts.forEach(c=>{const d=Math.abs(t-c); if(d<.08) fl=Math.max(fl,(1-d/.08)*.3);});
+  const pw=PAYA; if(Math.abs(t-pw)<.21){wy=lerp(1920,-2400,eio((t-pw+.21)/.42));}
+  $('#flash').style.opacity=fl; $('#wipe').style.top=`${wy}px`;
+  return true;
+};
+window.__ready=document.fonts.ready.then(()=>true);
+</script></body></html>

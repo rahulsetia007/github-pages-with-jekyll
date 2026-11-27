@@ -1,0 +1,289 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- Funnel bottleneck: find the leak in your funnel (pipe metaphor), house teaching style. Pain, Poke, Fix, Payoff, Recap, CTA. -->
+<style>
+@font-face{font-family:Inter;src:url(fonts/Inter.ttf);font-weight:100 900}
+@font-face{font-family:Mont;src:url(fonts/Montserrat.ttf);font-weight:100 900}
+@font-face{font-family:Mono;src:url(fonts/SpaceMono-Bold.ttf)}
+@font-face{font-family:ISerif;src:url(fonts/InstrumentSerif-Italic.ttf);font-style:normal;font-weight:400}
+:root{
+  --ink:#030403; --ink2:#0A0D0B; --line:rgba(255,255,255,.08);
+  --text:#F5F8F6; --muted:#8A938C; --lime:#22E06F; --violet:#0E7A3C; --deep:#06331A;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ink)}
+body{font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+#stage{position:absolute;inset:0;overflow:hidden}
+.bg{position:absolute;inset:-200px}
+.blob{position:absolute;border-radius:50%;filter:blur(140px);opacity:.42}
+.grid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:90px 90px;-webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 45%,#000 30%,transparent 80%);opacity:.55}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse 85% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.65) 100%);pointer-events:none}
+.scene{position:absolute;inset:0;will-change:transform,filter,opacity}
+.abs{position:absolute}
+.mono{font-family:Mono,monospace;letter-spacing:.04em}
+#prog{position:absolute;top:118px;left:90px;right:90px;display:flex;gap:12px}
+#prog .seg{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
+#prog .seg i{display:block;height:100%;width:0;background:var(--lime);border-radius:8px;box-shadow:0 0 18px var(--lime)}
+.card{position:absolute;left:90px;width:900px;border-radius:44px;background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.14);box-shadow:0 40px 120px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.18);backdrop-filter:blur(30px);overflow:hidden}
+.pill{display:inline-flex;align-items:center;gap:12px;padding:14px 26px;border-radius:999px;font-weight:700;font-size:30px}
+.title{font-family:Mont;font-weight:900;font-size:128px;line-height:.92;letter-spacing:-.035em}
+.sub{font-size:44px;font-weight:500;color:#C8D0CA;line-height:1.25}
+.sub b{color:var(--lime);font-weight:800}
+.bar{height:22px;border-radius:12px;background:rgba(255,255,255,.14)}
+#cap{position:absolute;left:60px;right:60px;top:1500px;text-align:center;font-family:Mont;font-weight:900;font-size:66px;line-height:1.1;letter-spacing:-.01em;text-transform:uppercase}
+#cap span{display:inline-block;margin:0 10px;text-shadow:0 6px 30px rgba(0,0,0,.7)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;mix-blend-mode:overlay}
+#wipe{position:absolute;left:0;right:0;height:2400px;top:-2400px;background:var(--lime)}
+.ghost{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.16)}
+.tile{display:inline-flex;align-items:center;justify-content:center;flex:none;background:#fff;color:#030403;font-family:Mont;font-weight:900;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+</style></head>
+<body><div id="stage">
+  <div class="bg" id="bg">
+    <div class="blob" id="b1" style="width:900px;height:900px;background:var(--violet)"></div>
+    <div class="blob" id="b2" style="width:800px;height:800px;background:var(--deep)"></div>
+    <div class="blob" id="b3" style="width:600px;height:600px;background:var(--lime);opacity:.18"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div id="scenes"></div>
+  <div id="prog"></div>
+  <div id="cap"></div>
+  <div id="wipe"></div>
+  <div id="flash"></div>
+  <div class="vig"></div>
+</div>
+<script>
+const D = window.__DATA__;
+const $ = (s,el=document)=>el.querySelector(s);
+const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-clamp(t),3);
+const eo5=t=>1-Math.pow(1-clamp(t),5);
+const eio=t=>{t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+const back=t=>{t=clamp(t);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
+const P=(t,a,d)=>clamp((t-a)/d);
+function st(el,o){for(const k in o) el.style[k]=o[k];}
+function pop(el,t,a,d=.45,from=.6){const p=P(t,a,d);st(el,{opacity:clamp(p*3),transform:`scale(${lerp(from,1,back(p))})`});}
+function rise(el,t,a,d=.5,dy=60){const p=eo(P(t,a,d));st(el,{opacity:p,transform:`translateY(${(1-p)*dy}px)`,filter:`blur(${(1-p)*10}px)`});}
+function typed(el,txt,t,a,cps=26){const n=Math.floor(clamp((t-a)*cps,0,txt.length));el.textContent=txt.slice(0,n);return n<txt.length;}
+function mk(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
+const scenesEl=$('#scenes');
+
+/* ---------- content: teaching shots (house delivery). Each visual stays up and changes state on the spoken words. ---------- */
+const S=D.segs, segBy=Object.fromEntries(S.map(s=>[s.key,s]));
+const W=(seg,re,n=0)=>{const ws=segBy[seg].words.filter(x=>re.test(x.w));return ws[n]?ws[n].s:null;};
+const ST=k=>segBy[k].start;
+const END=D.end;
+let _gid=0;
+const LT=(svg,size,r)=>{const id='g'+(++_gid);return `<span class="tile" style="width:${size}px;height:${size}px;border-radius:${r}px;padding:${Math.round(size*.17)}px;background:#fff">${svg.replace(/igg/g,id)}</span>`;};
+const LOGO_G=`<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M3 9h12a4 4 0 0 1 4 4v3" stroke="#030403" stroke-width="2.6" fill="none"/><circle cx="19" cy="20" r="1.8" fill="#22E06F"/><rect x="5" y="5" width="6" height="3" rx="1" fill="#030403"/></svg>`;
+const DOC=`<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M6 2h8l5 5v15H6z" fill="none" stroke="#030403" stroke-width="2.2" stroke-linejoin="round"/><path d="M14 2v5h5M9 12h7M9 16h7" stroke="#030403" stroke-width="2.2"/></svg>`;
+const TICK=(s=34,c='#030403')=>`<svg width="${s}" height="${s}" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const CARD='background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.16);border-radius:40px';
+
+/* ---------- headline: the spoken words, each blurs in when it is said ---------- */
+const g=(txt,at,lime)=>`<span class="h-w" data-at="${at}" style="display:inline-block;${lime?'color:var(--lime)':''}">${txt}</span>`;
+const L=t=>`<b style="color:var(--lime)">${t}</b>`;
+const HL=[
+  {a:0, lead:'you keep fixing your ads, but', size:130, big:g('SALES',W('p1',/^sales/))+' '+g("DON'T",W('p1',/^don't/))+'<br>'+g('MOVE.',W('p1',/^move/),1)},
+  {a:ST('p2')-.12, lead:'you might be fixing the', size:104, big:g('WRONG PART',W('p2',/^wrong/),1)+'<br>'+g('OF YOUR FUNNEL.',W('p2',/^funnel/))},
+  {a:ST('k1')-.12, lead:'picture a pipe. one joint has a', size:150, big:g('BIG LEAK.',W('k1',/^big/),1)},
+  {a:ST('k2')-.12, lead:'turning up the tap', size:130, big:g("DOESN'T",W('k2',/^doesn't/))+' '+g('HELP.',W('k2',/^help/),1), sub:g('more ad budget just '+L('leaks out faster.'),W('k2',/^More/))},
+  {a:ST('f0')-.12, lead:"here's how to find the", size:170, big:g('LEAK.',W('f0',/^leak/),1), sub:g('3 steps.',W('f0',/^Three/))},
+  {a:ST('f1a')-.12, lead:'step one · write down', size:130, big:g('EACH',W('f1a',/^each/))+' '+g('STEP.',W('f1a',/^step\./),1)},
+  {a:ST('f1b')-.12, lead:'use', size:116, big:g("LAST MONTH'S",W('f1b',/^last/))+'<br>'+g('NUMBERS.',W('f1b',/^numbers/),1)},
+  {a:ST('f2a')-.12, lead:'step two', size:170, big:g('DIVIDE.',W('f2a',/^Divide/),1), sub:g('each step by '+L('the one before it.'),W('f2a',/^each/))},
+  {a:ST('f2c')-.12, lead:'carts to sales is just', size:210, big:g('10%',W('f2c',/^ten/),1), sub:g("that's "+L('your leak.'),W('f2c',/^That's/))},
+  {a:ST('f3a')-.12, lead:'step three', size:124, big:g('FIX ONLY',W('f3a',/^Fix/))+'<br>'+g('THAT STEP.',W('f3a',/^that/),1)},
+  {a:ST('f3b')-.12, lead:"here, that's", size:150, big:g('CHECKOUT.',W('f3b',/^checkout/),1)},
+  {a:ST('y1')-.12, lead:'now every dollar you spend', size:120, big:g('MAKES IT',W('y1',/^makes/))+'<br>'+g('ALL THE WAY.',W('y1',/^all/),1), sub:g('through the pipe.',W('y1',/^through/))},
+  {a:ST('r1')-.12, lead:'recap · save this', size:100, big:g('WRITE.',W('r1',/^Write/))+' '+g('DIVIDE.',W('r1',/^Divide/))+'<br>'+g('FIX THE LEAK.',W('r1',/^Fix/),1)},
+  {a:ST('c1')-.12, cta:true},
+];
+const hlEls=HL.map(h=>{const e=mk(`<div class="scene">${h.cta?'':`<div class="abs" style="top:210px;left:30px;right:30px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+  ${h.lead?`<div class="h-l mono" style="font-size:38px;color:#AEB7B0;text-transform:lowercase">${h.lead}</div>`:''}
+  <div class="h-b" style="font:900 ${h.size||118}px/.95 Mont;letter-spacing:-.035em;text-transform:uppercase">${h.big}</div>
+  ${h.sub?`<div class="h-s" style="font:700 44px Inter;color:#C8D0CA">${h.sub}</div>`:''}</div>`}</div>`);scenesEl.appendChild(e);return e;});
+
+const CUR=`<svg width="70" height="70" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#fff" stroke="#030403" stroke-width="1.5"/></svg>`;
+const STAMP=(txt)=>`<div class="stamp" style="position:absolute;left:0;right:0;margin:0 auto;width:fit-content;padding:12px 30px;border:8px solid #F5F8F6;border-radius:20px;font:900 64px Mont;color:#F5F8F6;background:rgba(3,4,3,.85);transform:rotate(-7deg);opacity:0">${txt}</div>`;
+function stampAt(el,T,at){const p=P(T,at-.05,.25); st(el,{opacity:clamp(p*3),transform:`rotate(-7deg) scale(${lerp(1.8,1,eo5(p))})`});}
+
+/* ---------- the pipe: tap on the left, 4 joints, a leak at Carts -> Sales, a sales cup on the right ---------- */
+const JX=[150,370,590,810], LEAKX=700, ND=16;
+const PIPE=(cls)=>`<svg class="${cls}" width="1000" height="460" viewBox="0 0 1000 460" style="display:block;overflow:visible">
+  <g class="tap"><rect x="10" y="150" width="70" height="80" rx="14" fill="#5A625C"/><rect x="38" y="110" width="14" height="44" fill="#8A938C"/>
+    <g class="knob" style="transform-origin:45px 104px"><rect x="10" y="96" width="70" height="16" rx="8" fill="#C8D0CA"/></g>
+    <text x="45" y="270" text-anchor="middle" font-family="Mono" font-size="20" fill="#AEB7B0">AD BUDGET</text></g>
+  <rect x="80" y="150" width="840" height="80" rx="14" fill="#2A302C" stroke="#5A625C" stroke-width="4"/>
+  <line class="fa" x1="84" y1="190" x2="${LEAKX}" y2="190" stroke="#22E06F" stroke-width="40" stroke-linecap="round" stroke-dasharray="34 18"/>
+  <line class="fb" x1="${LEAKX}" y1="190" x2="916" y2="190" stroke="#22E06F" stroke-width="40" stroke-linecap="round" stroke-dasharray="34 18" opacity=".25"/>
+  ${JX.map((x,i)=>`<rect x="${x-16}" y="136" width="32" height="108" rx="8" fill="#8A938C"/><text x="${x}" y="116" text-anchor="middle" font-family="Inter" font-weight="800" font-size="34" fill="#F5F8F6">${['Clicks','Visits','Carts','Sales'][i]}</text>`).join('')}
+  <rect class="patch" x="${LEAKX-55}" y="140" width="110" height="100" rx="10" fill="#22E06F" opacity="0"/>
+  <text class="patcht" x="${LEAKX}" y="198" text-anchor="middle" font-family="Mont" font-weight="900" font-size="28" fill="#030403" opacity="0">FIXED</text>
+  <g class="drops">${Array.from({length:ND},(_,i)=>`<circle class="dp" data-i="${i}" cx="${LEAKX}" cy="230" r="9" fill="#22E06F" opacity="0"/>`).join('')}</g>
+  <path class="spray" d="M${LEAKX-8} 228 L${LEAKX-70} 320 L${LEAKX+70} 320 L${LEAKX+8} 228Z" fill="#22E06F" opacity="0"/>
+  <rect x="${LEAKX-90}" y="400" width="180" height="16" rx="8" fill="#22E06F" class="puddle" opacity="0"/>
+  <g><rect x="905" y="230" width="90" height="120" rx="14" fill="none" stroke="#C8D0CA" stroke-width="5"/><rect class="cupw" x="910" y="345" width="80" height="0" rx="8" fill="#22E06F"/>
+    <circle class="sd" cx="950" cy="225" r="8" fill="#22E06F" opacity="0"/><text x="950" y="385" text-anchor="middle" font-family="Mono" font-size="20" fill="#AEB7B0">SALES</text>
+    <text class="sv" x="950" y="440" text-anchor="middle" font-family="Mont" font-weight="900" font-size="44" fill="#F5F8F6">20</text></g></svg>`;
+function pipeState(svg,T,o){ // o: {flow, leak 0..1, spray 0..1, tapRot, patched, sales, cupFill, fbOp}
+  if(!svg)return; const fl=o.flow||0;
+  svg.querySelector('.fa').setAttribute('stroke-dashoffset',-T*240*fl); svg.querySelector('.fa').setAttribute('opacity',o.flowOn??1);
+  const fb=svg.querySelector('.fb'); fb.setAttribute('stroke-dashoffset',-T*240*fl); fb.setAttribute('opacity',o.fbOp??.25);
+  svg.querySelector('.knob').style.transform=`rotate(${o.tapRot||0}deg)`;
+  const lk=o.leak||0; $$('.dp',svg).forEach(d=>{const i=+d.dataset.i; const ph=((T*(1.2+lk*1.4))+i/ND)%1; const sx=(Math.sin(i*12.9)*30)*(0.5+lk);
+    d.setAttribute('cy',236+ph*170); d.setAttribute('cx',LEAKX+sx*ph); d.setAttribute('opacity',lk>0?(1-ph)*Math.min(1,lk*1.5):0); d.setAttribute('r',6+lk*5);});
+  svg.querySelector('.spray').setAttribute('opacity',(o.spray||0)*.45);
+  svg.querySelector('.puddle').setAttribute('opacity',Math.min(1,lk)*.6); svg.querySelector('.puddle').setAttribute('width',180+lk*120); svg.querySelector('.puddle').setAttribute('x',LEAKX-90-lk*60);
+  const pt=o.patched||0; svg.querySelector('.patch').setAttribute('opacity',pt); svg.querySelector('.patcht').setAttribute('opacity',pt);
+  svg.querySelector('.sv').textContent=Math.round(o.sales??20); svg.querySelector('.cupw').setAttribute('height',(o.cupFill||0)*110); svg.querySelector('.cupw').setAttribute('y',345-(o.cupFill||0)*110);
+  const sd=svg.querySelector('.sd'); const sp=(T*(o.dripRate||.6))%1; sd.setAttribute('opacity',(o.drip??1)*(1-sp)); sd.setAttribute('cy',222+sp*110);
+}
+
+/* ---------- V1: tweaking ads, sales flat ---------- */
+const TW=['New creative','New headline','New audience','New button color'];
+const vDash=mk(`<div class="scene"><div class="abs dc" style="left:70px;right:70px;top:700px;padding:32px;${CARD}">
+  <div class="mono" style="font-size:22px;color:#8E9890">YOUR ADS THIS MONTH · EXAMPLE</div>
+  <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px">${TW.map(x=>`<div class="tw" style="display:flex;align-items:center;gap:14px;padding:18px 20px;border-radius:20px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16);opacity:0"><span class="tile" style="width:44px;height:44px;border-radius:12px;font-size:26px">✏️</span><span style="font:800 28px Inter">${x}</span></div>`).join('')}</div>
+  <div class="sl" style="margin-top:24px;display:flex;align-items:center;justify-content:space-between;padding:22px 26px;border-radius:22px;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.16)">
+    <div><div class="mono" style="font-size:20px;color:#8E9890">SALES</div><div class="sn" style="font:900 80px Mont">20</div></div>
+    <svg width="420" height="90" viewBox="0 0 420 90"><polyline points="0,50 70,48 140,52 210,49 280,51 350,50 420,50" fill="none" stroke="#8A938C" stroke-width="6" stroke-linecap="round"/></svg></div>
+  <div class="fn" style="margin-top:22px;display:flex;align-items:center;gap:18px;opacity:0">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px">${[['Ads',360,1],['Visits',290,0],['Carts',220,0],['Sales',150,0]].map(([l,w,on])=>`<div class="fr" style="width:${w}px;height:40px;border-radius:10px;background:${on?'#22E06F':'rgba(255,255,255,.14)'};color:${on?'#030403':'#fff'};display:flex;align-items:center;justify-content:center;font:800 22px Inter">${l}</div>`).join('')}</div>
+    <div style="font:800 30px/1.3 Inter">← you keep fixing <span style="color:var(--lime)">this</span><br><span style="color:#AEB7B0">the leak is lower down</span></div></div></div></div>`);
+scenesEl.appendChild(vDash);
+function rDash(t,el){const T=t; rise($('.dc',el),T,0,.35,40);
+  $$('.tw',el).forEach((w,i)=>pop(w,T,.15+i*.35,.35,.6));
+  const s0=W('p1',/^don't/); $('.sn',el).style.transform=T>s0&&T<s0+.5?`translateX(${Math.sin(T*70)*8}px)`:'none';
+  $('.sl',el).style.borderColor=T>=s0?'rgba(245,248,246,.6)':'rgba(255,255,255,.16)';
+  rise($('.fn',el),T,W('p2',/^funnel/)-.25,.4,24);}
+
+/* ---------- V2: the leaking pipe (poke) ---------- */
+const vPipe=mk(`<div class="scene"><div class="abs pc" style="left:40px;width:1000px;top:690px">${PIPE('pp')}</div>
+  <div class="abs" style="left:0;right:0;top:1240px">${STAMP('MORE BUDGET = MORE LEAK')}</div></div>`);
+scenesEl.appendChild(vPipe);
+function rPipe(t,el){const T=t+ST('k1')-.12; rise($('.pc',el),t,0,.4,40);
+  const fw=W('k1',/^water/), lk=W('k1',/^leak/), tp=W('k2',/^Turning/), fast=W('k2',/^leaks/);
+  const flow=clamp(P(T,fw-.2,.5))*(1+eio(P(T,tp,1.2))*1.2); const leak=eo(P(T,lk-.15,.4))*(1+eio(P(T,tp,1.2))*.6+eio(P(T,fast-.2,.5))*.4);
+  pipeState($('.pp',el),T,{flow,leak:Math.min(1.6,leak),spray:clamp(leak-.4),tapRot:-80*eio(P(T,tp,1.2)),sales:20+eo(P(T,tp,3))*1,cupFill:.2,fbOp:.18,drip:clamp(P(T,fw,.5)),dripRate:.45});
+  stampAt($('.stamp',el),T,fast);}
+
+/* ---------- V3: 3 steps ---------- */
+const STEPS=['Write down each step','Divide each by the one before','Fix the biggest leak first'];
+const vFix=mk(`<div class="scene"><div class="abs" style="left:90px;right:90px;top:720px;display:flex;flex-direction:column;gap:22px">${STEPS.map((x,i)=>`<div class="fs" style="display:flex;align-items:center;gap:24px;padding:30px 32px;border-radius:28px;${CARD}"><span class="tile" style="width:80px;height:80px;border-radius:22px;font:900 40px Mont">${i+1}</span><span style="font:800 42px Inter">${x}</span></div>`).join('')}</div></div>`);
+scenesEl.appendChild(vFix);
+function rFix(t,el){const T=t+ST('f0')-.12; $$('.fs',el).forEach((c,i)=>pop(c,T,W('f0',/^Three/)-.05+i*.15,.4,.6));}
+
+/* ---------- V4: steps card ---------- */
+const BX=[['Clicks','1,000',/^Clicks/,/^thousand/],['Visits','800',/^page/,/^visits/],['Carts','200',/^add/,/^carts/],['Sales','20',/^sales/,/^sales/]];
+const PCT=[['80%',/^visits/],['25%',/^carts/],['10%',/^sales/]];
+const vStep=mk(`<div class="scene"><div class="abs sc3" style="left:50px;right:50px;top:690px;height:680px;padding:30px;${CARD}">
+  <div style="display:flex;align-items:center;gap:16px"><span class="tile" style="width:56px;height:56px;border-radius:15px;font-size:32px">🚰</span><span class="mono st-h" style="font-size:22px;color:#8E9890"></span></div>
+  <div class="s12" style="position:absolute;left:30px;right:30px;top:130px">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">${BX.map(([l,v])=>`<div class="bx" style="text-align:center;padding:24px 8px;border-radius:24px;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.18)"><div style="font:800 30px Inter;color:#C8D0CA">${l}</div><div class="bn" style="font:900 56px Mont;margin-top:8px;opacity:0">${v}</div></div>`).join('')}</div>
+    <div style="margin-top:26px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:0 60px">${PCT.map(([p],i)=>`<div class="pc2" style="text-align:center;padding:18px 6px;border-radius:22px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);opacity:0"><div class="mono" style="font-size:20px;color:#AEB7B0">${['CLICKS→VISITS','VISITS→CARTS','CARTS→SALES'][i]}</div><div style="font:900 60px Mont">${PCT[i][0]}</div></div>`).join('')}</div>
+    <div class="abs" style="left:0;right:0;top:400px">${STAMP('YOUR LEAK')}</div></div>
+  <div class="s3" style="position:absolute;left:0;right:0;top:110px">
+    <div style="transform:scale(.88);transform-origin:50% 0;margin-left:-40px">${PIPE('ps')}</div>
+    <div class="abs" style="left:30px;right:30px;top:420px;display:flex;justify-content:center;gap:14px">${['Shipping costs','Payment options','Too many steps'].map(x=>`<span class="tg pill" style="background:#22E06F;color:#030403;font-size:25px;font-weight:900;white-space:nowrap;padding:12px 20px;opacity:0">✓ ${x}</span>`).join('')}</div></div>
+</div></div>`);
+scenesEl.appendChild(vStep);
+for(let i=0;i<3;i++) $('#prog').appendChild(mk('<div class="seg"><i></i></div>'));
+function rStep(t,el){const T=t+ST('f1a')-.12;
+  const step=T<ST('f2a')-.12?0:T<ST('f3a')-.12?1:2;
+  $('.st-h',el).textContent=['STEP 1 · LAST MONTH · EXAMPLE','STEP 2 · DIVIDE · EXAMPLE','STEP 3 · FIX THAT STEP · EXAMPLE'][step];
+  $('.s12',el).style.display=step<2?'block':'none'; $('.s3',el).style.display=step===2?'block':'none';
+  if(step<2){$$('.bx',el).forEach((b,i)=>{pop(b,T,W('f1a',BX[i][2])-.08,.35,.6); const n=$('.bn',b);
+      const shown=T>=W('f1b',/^numbers/)-.1; n.style.opacity=shown?1:0;
+      const say=step===1?W('f2b',BX[i][3]):null; b.style.borderColor=say&&T>=say-.1&&T<say+.6?'#22E06F':'rgba(255,255,255,.18)';});
+    const leak=W('f2c',/^Carts/);
+    $$('.pc2',el).forEach((p,i)=>{if(step===0){p.style.opacity=0;return;} pop(p,T,W('f2b',PCT[i][1])+.1,.35,.6);
+      const hot=i===2&&T>=leak-.05; p.style.background=hot?'#22E06F':'rgba(255,255,255,.08)'; p.style.color=hot?'#030403':'#fff'; p.style.borderColor=hot?'#22E06F':'rgba(255,255,255,.18)';
+      if(i===2&&hot) p.style.transform=`scale(${1.05+.03*Math.sin(T*8)})`;});
+    stampAt($('.stamp',el),T,W('f2c',/^That's/));}
+  if(step===2){const fx=W('f3a',/^Fix/); const pt=eo(P(T,fx,.4));
+    pipeState($('.ps',el),T,{flow:1,leak:1.2*(1-pt),spray:.6*(1-pt),tapRot:0,patched:pt,sales:20,cupFill:.2,fbOp:lerp(.2,1,pt),dripRate:.6});
+    $$('.tg',el).forEach((g2,i)=>pop(g2,T,W('f3b',[/^Shipping/,/^payment/,/^too/][i])-.08,.35,.6));}
+}
+
+/* ---------- V5: payoff, full flow ---------- */
+const vPay=mk(`<div class="scene"><div class="abs pc" style="left:40px;width:1000px;top:690px">${PIPE('py')}</div>
+  <div class="abs pn pill" style="top:1210px;left:0;right:0;margin:0 auto;width:fit-content;background:var(--lime);color:#030403;font-size:34px;font-weight:900;opacity:0;box-shadow:0 0 40px rgba(34,224,111,.6)">💵 Every dollar makes it through</div></div>`);
+scenesEl.appendChild(vPay);
+function rPay(t,el){const T=t+ST('y1')-.12; rise($('.pc',el),t,0,.35,30);
+  const c=eo(P(T,W('y1',/^makes/)-.2,2.2));
+  pipeState($('.py',el),T,{flow:1.3,leak:0,spray:0,tapRot:0,patched:1,sales:lerp(20,48,c),cupFill:lerp(.2,.95,c),fbOp:1,dripRate:1.4});
+  pop($('.pn',el),T,W('y1',/^through/)-.1,.4,.6);}
+
+/* ---------- V6: recap ---------- */
+const RC=[['Write down each step (last month)',/^Write/],['Divide each step by the one before',/^Divide/],['Fix the biggest leak first',/^Fix/]];
+const vRec=mk(`<div class="scene"><div class="abs" style="left:70px;right:70px;top:720px;display:flex;flex-direction:column;gap:22px">${RC.map(([x])=>`<div class="rr" style="display:flex;align-items:center;gap:22px;padding:30px;border-radius:26px;border:2px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06)"><span class="rb" style="flex:none;width:60px;height:60px;border-radius:16px;border:4px solid #8A938C;display:flex;align-items:center;justify-content:center"></span><span style="font:800 36px Inter">${x}</span></div>`).join('')}</div></div>`);
+scenesEl.appendChild(vRec);
+function rRec(t,el){const T=t+ST('r1')-.12; $$('.rr',el).forEach((r,i)=>{rise(r,t,.1+i*.1,.35,30); const on=T>=W('r1',RC[i][1])-.05; const b=$('.rb',r);
+  b.style.borderColor=on?'#22E06F':'#8A938C'; b.style.background=on?'#22E06F':'transparent'; b.innerHTML=on?TICK(36):''; r.style.borderColor=on?'rgba(34,224,111,.6)':'rgba(255,255,255,.16)';});}
+
+/* ---------- V7: CTA ---------- */
+const ANG=['Write down the steps','Divide','Find the lowest %','Fix that first'];
+const vCta=mk(`<div class="scene">
+  <div class="abs mono c-t" style="top:300px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">SEND THIS TO A MARKETER</div>
+  <div class="abs" style="left:110px;right:110px;top:380px;display:grid;grid-template-columns:1fr 1fr;gap:18px">${ANG.map((a,i)=>`<div class="c-g ghost" style="border-radius:28px;padding:18px 24px;display:flex;align-items:center;gap:18px"><span class="tile" style="width:60px;height:60px;border-radius:16px;font:700 24px Mono">${String(i+1).padStart(2,'0')}</span><span style="font:800 30px Inter">${a}</span></div>`).join('')}</div>
+  <div class="abs c-f" style="top:900px;left:0;right:0;text-align:center;font:900 100px Mont;letter-spacing:-.03em">Follow for more</div>
+  <div class="abs c-s" style="top:1030px;left:0;right:0;text-align:center;font-family:ISerif;font-size:72px;color:#D8E0DA">send it to someone raising their budget</div>
+  <div class="abs c-b pill" style="top:1180px;left:0;right:0;margin:0 auto;width:fit-content;padding:24px 70px;font-size:44px;font-weight:900;background:var(--lime);color:#030403">Follow</div>
+  <div class="abs c-m" style="left:640px;top:1300px;opacity:0">${CUR}</div></div>`);
+scenesEl.appendChild(vCta);
+function rCta(t,el){rise($('.c-t',el),t,0,.3,20); $$('.c-g',el).forEach((g2,i)=>pop(g2,t,.1+i*.08,.35,.6));
+  rise($('.c-f',el),t,.5,.4,30); rise($('.c-s',el),t,.7,.4,30); pop($('.c-b',el),t,.9,.4,.6);
+  const tap=2.2; const m=$('.c-m',el); m.style.opacity=clamp(P(t,1.3,.2)); m.style.transform=`translate(${(1-eo(P(t,1.3,.8)))*200}px,${(1-eo(P(t,1.3,.8)))*160}px) scale(${t>tap&&t<tap+.15?.85:1})`;
+  const b=$('.c-b',el); if(t>=tap){b.innerHTML='Following ✓'; b.style.background='rgba(255,255,255,.12)'; b.style.color='#fff'; b.style.border='2px solid rgba(255,255,255,.3)';}}
+
+const VL=[
+  {el:vDash,a:0,b:ST('k1')-.12,r:rDash},
+  {el:vPipe,a:ST('k1')-.12,b:ST('f0')-.12,r:rPipe},
+  {el:vFix,a:ST('f0')-.12,b:ST('f1a')-.12,r:rFix},
+  {el:vStep,a:ST('f1a')-.12,b:ST('y1')-.12,r:rStep},
+  {el:vPay,a:ST('y1')-.12,b:ST('r1')-.12,r:rPay},
+  {el:vRec,a:ST('r1')-.12,b:ST('c1')-.12,r:rRec},
+  {el:vCta,a:ST('c1')-.12,b:END+1,r:rCta},
+];
+const PAYA=ST('y1')-.12;
+const PS=[ST('f1a')-.12,ST('f2a')-.12,ST('f3a')-.12,ST('y1')-.12];
+const NOCAP=['r1','c1'];
+
+/* captions */
+const capWords=[];
+S.forEach(s=>s.words.forEach((w,k)=>{const nx=s.words[k+1];capWords.push({w:w.w.replace(/[.,]$/,''),s:w.s,e:nx?nx.s:s.start+s.dur,seg:s.key,brk:/[.,!?]$/.test(w.w)});}));
+const chunks=[];let cur=[];
+capWords.forEach((w,i)=>{cur.push(w);const nx=capWords[i+1];if(cur.length>=3||w.brk||!nx||nx.seg!==w.seg){chunks.push(cur);cur=[];}});
+function renderBg(t){
+  st($('#b1'),{left:`${300+Math.sin(t*.35)*180}px`,top:`${200+Math.cos(t*.28)*160}px`});
+  st($('#b2'),{left:`${500+Math.cos(t*.3)*200}px`,top:`${1300+Math.sin(t*.4)*180}px`});
+  st($('#b3'),{left:`${100+Math.sin(t*.5+1)*120}px`,top:`${900+Math.cos(t*.45)*200}px`});
+  st($('#grid'),{transform:`translateY(${(t*30)%90}px)`});
+}
+const cuts=VL.map(v=>v.a).filter(x=>x>0);
+window.seek=function(t){
+  renderBg(t);
+  HL.forEach((h,i)=>{const b=i+1<HL.length?HL[i+1].a:END+1; const el=hlEls[i]; const vis=t>=h.a&&t<b; el.style.display=vis?'block':'none'; if(!vis)return;
+    if($('.h-l',el)) rise($('.h-l',el),t-h.a,0,.25,16);
+    $$('.h-w',el).forEach(x=>{const at=+x.dataset.at; const p=eo5(P(t,Math.max(h.a,at-.06),.25)); st(x,{opacity:p,transform:`scale(${lerp(1.2,1,p)})`,filter:`blur(${(1-p)*10}px)`});});
+    if($('.h-n',el)) $('.h-n',el).textContent='+'+Math.round(340*eo(P(t,W('p1',/^three/)-.05,1.2)))+'%';
+  });
+  VL.forEach(v=>{const vis=t>=v.a&&t<v.b; v.el.style.display=vis?'block':'none'; if(!vis)return; const lt=t-v.a;
+    if(v.a>0){const p=eo5(P(lt,0,.3)); st(v.el,{transform:`scale(${lerp(1.05,1,p)})`,opacity:p});} v.r(lt,v.el);});
+  [...$('#prog').children].forEach((s,i)=>{s.firstChild.style.width=`${clamp((t-PS[i])/(PS[i+1]-PS[i]))*100}%`;});
+  st($('#prog'),{opacity:t<PS[0]-.2?0:t<PS[0]+.2?eo(P(t,PS[0]-.2,.4)):(t>PS[3]?1-eo(P(t,PS[3],.3)):1)});
+  const cap=$('#cap'); const ch=chunks.find(c=>t>=c[0].s-.05&&t<c[c.length-1].e+.08);
+  if(!ch||NOCAP.includes(ch[0].seg)){cap.innerHTML='';} else {
+    const pin=eo5(P(t,ch[0].s-.05,.18));
+    cap.innerHTML=ch.map(w=>{const on=t>=w.s&&t<w.e+.05; return `<span style="color:${on?'#22E06F':'#fff'};transform:scale(${on?1.08:1})">${w.w}</span>`}).join(' ');
+    st(cap,{transform:`translateY(${(1-pin)*30}px) scale(${lerp(.9,1,pin)})`,opacity:pin});
+  }
+  let fl=0, wy=-2400; cuts.forEach(c=>{const d=Math.abs(t-c); if(d<.08) fl=Math.max(fl,(1-d/.08)*.3);});
+  const pw=PAYA; if(Math.abs(t-pw)<.21){wy=lerp(1920,-2400,eio((t-pw+.21)/.42));}
+  $('#flash').style.opacity=fl; $('#wipe').style.top=`${wy}px`;
+  return true;
+};
+window.__ready=document.fonts.ready.then(()=>true);
+</script></body></html>
