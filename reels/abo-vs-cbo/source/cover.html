@@ -1,0 +1,59 @@
+<!doctype html><html><head><meta charset="utf-8">
+<!-- ABO vs CBO cover (hook layout from the style guide). Text kept inside the 4:5 grid crop (y 285-1635). -->
+<style>
+@font-face{font-family:Inter;src:url(fonts/Inter.ttf);font-weight:100 900}
+@font-face{font-family:Mont;src:url(fonts/Montserrat.ttf);font-weight:100 900}
+@font-face{font-family:Mono;src:url(fonts/SpaceMono-Bold.ttf)}
+@font-face{font-family:ISerif;src:url(fonts/InstrumentSerif-Italic.ttf);font-style:normal;font-weight:400}
+:root{
+  --ink:#030403; --ink2:#0A0D0B; --line:rgba(255,255,255,.08);
+  --text:#F5F8F6; --muted:#8A938C; --lime:#22E06F; --violet:#0E7A3C; --deep:#06331A;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ink)}
+body{font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+#stage{position:absolute;inset:0;overflow:hidden}
+.bg{position:absolute;inset:-200px}
+.blob{position:absolute;border-radius:50%;filter:blur(140px);opacity:.42}
+.grid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:90px 90px;-webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 45%,#000 30%,transparent 80%);opacity:.55}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse 85% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.65) 100%);pointer-events:none}
+.scene{position:absolute;inset:0;will-change:transform,filter,opacity}
+.abs{position:absolute}
+.mono{font-family:Mono,monospace;letter-spacing:.04em}
+#prog{position:absolute;top:118px;left:90px;right:90px;display:flex;gap:12px}
+#prog .seg{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
+#prog .seg i{display:block;height:100%;width:0;background:var(--lime);border-radius:8px;box-shadow:0 0 18px var(--lime)}
+.card{position:absolute;left:90px;width:900px;border-radius:44px;background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.14);box-shadow:0 40px 120px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.18);backdrop-filter:blur(30px);overflow:hidden}
+.pill{display:inline-flex;align-items:center;gap:12px;padding:14px 26px;border-radius:999px;font-weight:700;font-size:30px}
+.title{font-family:Mont;font-weight:900;font-size:128px;line-height:.92;letter-spacing:-.035em}
+.sub{font-size:44px;font-weight:500;color:#C8D0CA;line-height:1.25}
+.sub b{color:var(--lime);font-weight:800}
+.bar{height:22px;border-radius:12px;background:rgba(255,255,255,.14)}
+#cap{position:absolute;left:60px;right:60px;top:1500px;text-align:center;font-family:Mont;font-weight:900;font-size:66px;line-height:1.1;letter-spacing:-.01em;text-transform:uppercase}
+#cap span{display:inline-block;margin:0 10px;text-shadow:0 6px 30px rgba(0,0,0,.7)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;mix-blend-mode:overlay}
+#wipe{position:absolute;left:0;right:0;height:2400px;top:-2400px;background:var(--lime)}
+.ghost{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.16)}
+.tile{display:inline-flex;align-items:center;justify-content:center;flex:none;background:#fff;color:#030403;font-family:Mont;font-weight:900;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+</style><style>
+.tile{display:inline-flex}
+.giant{font:900 470px/.82 Mont;letter-spacing:-.05em;background:linear-gradient(180deg,#F5F8F6 15%,#22E06F 85%);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 0 60px rgba(34,224,111,.45))}
+</style></head><body><div id="stage">
+<div class="bg"><div class="blob" style="width:900px;height:900px;background:var(--violet);left:250px;top:150px"></div>
+<div class="blob" style="width:800px;height:800px;background:var(--deep);left:400px;top:1300px"></div>
+<div class="blob" style="width:600px;height:600px;background:var(--lime);opacity:.18;left:200px;top:800px"></div></div>
+<div class="grid"></div>
+<div class="abs" style="left:0;right:0;top:320px;display:flex;flex-direction:column;align-items:center;text-align:center">
+  <div class="mono" style="font-size:36px;color:var(--lime)">META ADS · WHERE YOUR BUDGET GOES</div>
+  <div class="giant" style="margin-top:26px">90%</div>
+  <div style="margin-top:4px;font-family:ISerif;font-size:76px;color:#D8E0DA">of your budget on one ad set?</div>
+  <div style="margin-top:30px;font:900 150px/.92 Mont;letter-spacing:-.035em">ABO <span style="color:var(--lime)">vs</span> CBO</div>
+  <div style="margin-top:40px;display:flex;gap:18px;align-items:flex-end;height:150px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="font:900 40px Mont;color:#22E06F">$90</span><i style="display:block;width:150px;height:96px;border-radius:14px 14px 6px 6px;background:linear-gradient(#22E06F,#0E7A3C)"></i></div><div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="font:900 40px Mont;color:#fff">$5</span><i style="display:block;width:150px;height:12px;border-radius:14px 14px 6px 6px;background:#5A625C"></i></div><div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="font:900 40px Mont;color:#fff">$5</span><i style="display:block;width:150px;height:12px;border-radius:14px 14px 6px 6px;background:#5A625C"></i></div>
+  </div>
+  <div style="margin-top:34px;display:flex;gap:16px">
+    <span class="pill ghost" style="font-size:32px;padding:14px 24px">ABO · you decide</span>
+    <span class="pill" style="font-size:32px;padding:10px 24px 10px 12px;background:rgba(34,224,111,.15);border:1.5px solid rgba(34,224,111,.6)"><span class="tile" style="width:48px;height:48px;border-radius:13px;padding:8px"><svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#0081FB" d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303zm10.16 2.053c1.147 0 2.188.758 2.992 1.999 1.132 1.748 1.647 4.195 1.647 6.4 0 1.548-.368 2.9-1.839 2.9-.58 0-1.027-.23-1.664-1.004-.496-.601-1.343-1.878-2.832-4.358l-.617-1.028a44.908 44.908 0 0 0-1.255-1.98c.07-.109.141-.224.211-.327 1.12-1.667 2.118-2.602 3.358-2.602zm-10.201.553c1.265 0 2.058.791 2.675 1.446.307.327.737.871 1.234 1.579l-1.02 1.566c-.757 1.163-1.882 3.017-2.837 4.338-1.191 1.649-1.81 1.817-2.486 1.817-.524 0-1.038-.237-1.383-.794-.263-.426-.464-1.13-.464-2.046 0-2.221.63-4.535 1.66-6.088.454-.687.964-1.226 1.533-1.533a2.264 2.264 0 0 1 1.088-.285z"/></svg></span>CBO · Meta decides</span>
+  </div>
+  <div class="pill" style="margin-top:40px;background:var(--lime);color:#030403;font-size:32px;font-weight:900;padding:14px 30px"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z" fill="#030403"/></svg>SAVE THIS</div>
+</div><div class="vig"></div></div></body></html>

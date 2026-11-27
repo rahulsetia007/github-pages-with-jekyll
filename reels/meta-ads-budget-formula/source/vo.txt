@@ -1,0 +1,14 @@
+p1|Running Meta ads, but getting clicks and no sales?|0.3
+p2|It might not be your ad.|0.25
+p3|It might be your budget.|0.6
+k1|Meta needs about fifty conversions a week, per ad set, to learn who buys.|0.3
+k2|Below that, your ad set gets stuck in learning limited. And Meta says those ad sets pay about twenty eight percent more per sale.|0.6
+f0|Here's the formula. Three steps.|0.5
+f1|Step one. Find your cost per result. Say it's twenty dollars a sale.|0.5
+f2a|Step two. Multiply by fifty, then divide by seven.|0.3
+f2b|Twenty times fifty is a thousand. Divided by seven, that's about a hundred and forty three dollars a day.|0.6
+f3a|Step three. Can't afford that? Run one ad set, not five.|0.3
+f3b|Or optimize for add to cart. At five dollars each, you only need about thirty six dollars a day.|0.6
+y1|Now your ad set gets enough data to learn. And your cost per sale stops jumping around.|0.6
+r1|Cost per result. Times fifty, divided by seven. Too high? Fewer ad sets, or an earlier event.|0.6
+c1|Comment BUDGET, and I'll send you the formula.|0.3

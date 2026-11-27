@@ -1,0 +1,15 @@
+p1|You're running five ad sets.|0.25
+p2|Each one gets about twelve sales a week.|0.3
+p3|Meta says that's costing you.|0.5
+k1|Ad sets under fifty conversions a week pay about twenty eight percent more per purchase.|0.3
+k2|And every edit you make this week can push them back into learning, right before Black Friday.|0.6
+f0|Here's the fix. Three steps, before Friday.|0.5
+f1a|Step one. Do the math.|0.25
+f1b|Weekly budget, divided by your cost per purchase times fifty.|0.3
+f1c|That's how many ad sets you can really afford.|0.6
+f2|Step two. Merge down to that number today, so they finish learning before the sale.|0.6
+f3a|Step three. Schedule your Black Friday budget now, with budget scheduling.|0.3
+f3b|Then don't touch anything until Tuesday.|0.6
+y1|Now every ad set gets enough sales to learn. And your budget goes up on Friday, all by itself.|0.6
+r1|Do the math. Merge. Schedule, then hands off.|0.6
+c1|Comment BFCM, and I'll send you the checklist.|0.3

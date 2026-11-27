@@ -1,0 +1,14 @@
+p1|People start filling in your form, and then they quit.|0.3
+p2|Every extra box is a reason to leave.|0.6
+k1|Think of your form like a front door. Each field is another lock.|0.3
+k2|Add enough locks, and people give up before they get in. And you paid to bring them to that door.|0.6
+f0|Here's how to cut the locks. Three steps.|0.5
+f1a|Step one. List every field on your form.|0.25
+f1b|For each one, ask, do I need this before my first reply?|0.6
+f2a|Step two. Cut everything that's a no.|0.25
+f2b|Company size, budget, how did you hear about us. Ask those later.|0.6
+f3a|Step three. Keep only what you need to reply. Usually a name, an email or phone, and one question.|0.3
+f3b|Then send yourself a test lead, and time how long it takes.|0.6
+y1|Now your door has one lock. More people walk in, from the same ad spend.|0.6
+r1|List the fields. Cut the nice to haves. Keep what you need to reply.|0.6
+c1|Send this to someone whose form is way too long.|0.3

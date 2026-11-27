@@ -1,0 +1,14 @@
+p1|Your report says conversions went up three hundred and forty percent.|0.3
+p2|Then your client asks one question.|0.25
+p3|Where's that number from?|0.6
+k1|You don't have an answer.|0.3
+k2|And now they doubt every other number in the report.|0.6
+f0a|Google just made a free tool that catches this, before you hit send.|0.3
+f0b|It's called Deep Review. You get two free reviews a week.|0.6
+f1|Step one. Sign in with Google, and upload your report.|0.5
+f2a|Step two. It reads it like a strict research reviewer.|0.3
+f2b|It flags weak claims, missing sources, and gaps in your logic.|0.6
+f3|Step three. Fix what it found, and double check it yourself.|0.6
+y1|Now every number has a source, and your client stops asking questions.|0.6
+r1|Upload. Review. Fix, and double check.|0.6
+c1|Send this to someone who writes client reports.|0.3

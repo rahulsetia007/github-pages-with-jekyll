@@ -1,0 +1,9 @@
+pain|Still checking your search terms by hand, every week? Here's how AI finds your wasted Google Ads spend in five minutes!
+poke|Junk searches hide in hundreds of rows. Jobs. Free. D I Y. And every week you miss them, they keep eating your budget.
+fix0|You need one export, and one prompt.
+fix1|Step one. In Google Ads, download your search terms report as a C S V.
+fix2|Step two. Upload it to ChatGPT with this prompt. It finds the junk, and groups it by theme.
+fix3|Step three. Check the list yourself, then add the negatives. One wrong negative can block real customers.
+payoff|Five minutes later, the junk is blocked, and your budget goes to real buyers!
+recap|Download the report. Run the prompt. Check, then add negatives.
+cta|Comment Audit, and I'll send you the exact prompt.

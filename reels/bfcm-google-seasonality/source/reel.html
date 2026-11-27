@@ -1,0 +1,279 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- BFCM #2: don't press the Google Ads seasonality adjustment button (house teaching style). Pain, Poke, Fix, Payoff, Recap, CTA. -->
+<style>
+@font-face{font-family:Inter;src:url(fonts/Inter.ttf);font-weight:100 900}
+@font-face{font-family:Mont;src:url(fonts/Montserrat.ttf);font-weight:100 900}
+@font-face{font-family:Mono;src:url(fonts/SpaceMono-Bold.ttf)}
+@font-face{font-family:ISerif;src:url(fonts/InstrumentSerif-Italic.ttf);font-style:normal;font-weight:400}
+:root{
+  --ink:#030403; --ink2:#0A0D0B; --line:rgba(255,255,255,.08);
+  --text:#F5F8F6; --muted:#8A938C; --lime:#22E06F; --violet:#0E7A3C; --deep:#06331A;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ink)}
+body{font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+#stage{position:absolute;inset:0;overflow:hidden}
+.bg{position:absolute;inset:-200px}
+.blob{position:absolute;border-radius:50%;filter:blur(140px);opacity:.42}
+.grid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:90px 90px;-webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 45%,#000 30%,transparent 80%);opacity:.55}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse 85% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.65) 100%);pointer-events:none}
+.scene{position:absolute;inset:0;will-change:transform,filter,opacity}
+.abs{position:absolute}
+.mono{font-family:Mono,monospace;letter-spacing:.04em}
+#prog{position:absolute;top:118px;left:90px;right:90px;display:flex;gap:12px}
+#prog .seg{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
+#prog .seg i{display:block;height:100%;width:0;background:var(--lime);border-radius:8px;box-shadow:0 0 18px var(--lime)}
+.card{position:absolute;left:90px;width:900px;border-radius:44px;background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.14);box-shadow:0 40px 120px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.18);backdrop-filter:blur(30px);overflow:hidden}
+.pill{display:inline-flex;align-items:center;gap:12px;padding:14px 26px;border-radius:999px;font-weight:700;font-size:30px}
+.title{font-family:Mont;font-weight:900;font-size:128px;line-height:.92;letter-spacing:-.035em}
+.sub{font-size:44px;font-weight:500;color:#C8D0CA;line-height:1.25}
+.sub b{color:var(--lime);font-weight:800}
+.bar{height:22px;border-radius:12px;background:rgba(255,255,255,.14)}
+#cap{position:absolute;left:60px;right:60px;top:1500px;text-align:center;font-family:Mont;font-weight:900;font-size:66px;line-height:1.1;letter-spacing:-.01em;text-transform:uppercase}
+#cap span{display:inline-block;margin:0 10px;text-shadow:0 6px 30px rgba(0,0,0,.7)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;mix-blend-mode:overlay}
+#wipe{position:absolute;left:0;right:0;height:2400px;top:-2400px;background:var(--lime)}
+.ghost{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.16)}
+.tile{display:inline-flex;align-items:center;justify-content:center;flex:none;background:#fff;color:#030403;font-family:Mont;font-weight:900;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+</style></head>
+<body><div id="stage">
+  <div class="bg" id="bg">
+    <div class="blob" id="b1" style="width:900px;height:900px;background:var(--violet)"></div>
+    <div class="blob" id="b2" style="width:800px;height:800px;background:var(--deep)"></div>
+    <div class="blob" id="b3" style="width:600px;height:600px;background:var(--lime);opacity:.18"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div id="scenes"></div>
+  <div id="prog"></div>
+  <div id="cap"></div>
+  <div id="wipe"></div>
+  <div id="flash"></div>
+  <div class="vig"></div>
+</div>
+<script>
+const D = window.__DATA__;
+const $ = (s,el=document)=>el.querySelector(s);
+const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-clamp(t),3);
+const eo5=t=>1-Math.pow(1-clamp(t),5);
+const eio=t=>{t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+const back=t=>{t=clamp(t);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
+const P=(t,a,d)=>clamp((t-a)/d);
+function st(el,o){for(const k in o) el.style[k]=o[k];}
+function pop(el,t,a,d=.45,from=.6){const p=P(t,a,d);st(el,{opacity:clamp(p*3),transform:`scale(${lerp(from,1,back(p))})`});}
+function rise(el,t,a,d=.5,dy=60){const p=eo(P(t,a,d));st(el,{opacity:p,transform:`translateY(${(1-p)*dy}px)`,filter:`blur(${(1-p)*10}px)`});}
+function typed(el,txt,t,a,cps=26){const n=Math.floor(clamp((t-a)*cps,0,txt.length));el.textContent=txt.slice(0,n);return n<txt.length;}
+function mk(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
+const scenesEl=$('#scenes');
+
+/* ---------- content: teaching shots (house delivery). Each visual stays up and changes state on the spoken words. ---------- */
+const S=D.segs, segBy=Object.fromEntries(S.map(s=>[s.key,s]));
+const W=(seg,re,n=0)=>{const ws=segBy[seg].words.filter(x=>re.test(x.w));return ws[n]?ws[n].s:null;};
+const ST=k=>segBy[k].start;
+const END=D.end;
+let _gid=0;
+const LT=(svg,size,r)=>{const id='g'+(++_gid);return `<span class="tile" style="width:${size}px;height:${size}px;border-radius:${r}px;padding:${Math.round(size*.17)}px;background:#fff">${svg.replace(/igg/g,id)}</span>`;};
+const LOGO_G=`<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><line x1="56" y1="150" x2="102" y2="56" stroke="#FBBC04" stroke-width="46" stroke-linecap="round"/><line x1="102" y1="56" x2="148" y2="150" stroke="#4285F4" stroke-width="46" stroke-linecap="round"/><circle cx="56" cy="150" r="25" fill="#34A853"/></svg>`;
+const DOC=`<svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M6 2h8l5 5v15H6z" fill="none" stroke="#030403" stroke-width="2.2" stroke-linejoin="round"/><path d="M14 2v5h5M9 12h7M9 16h7" stroke="#030403" stroke-width="2.2"/></svg>`;
+const TICK=(s=34,c='#030403')=>`<svg width="${s}" height="${s}" viewBox="0 0 26 26"><path d="M4 14l6 6L22 6" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const CARD='background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.16);border-radius:40px';
+
+/* ---------- headline: the spoken words, each blurs in when it is said ---------- */
+const g=(txt,at,lime)=>`<span class="h-w" data-at="${at}" style="display:inline-block;${lime?'color:var(--lime)':''}">${txt}</span>`;
+const L=t=>`<b style="color:var(--lime)">${t}</b>`;
+const HL=[
+  {a:0, lead:'over', size:150, big:g('5,000',W('p1',/^five/),1)+'<br>'+g('ACCOUNTS',W('p1',/^accounts/)), sub:g('tried one '+L('Black Friday trick.'),W('p1',/^tried/))},
+  {a:ST('p2')-.12, lead:'and it made their', size:120, big:g('CLICKS',W('p2',/^clicks/))+'<br>'+g('COST MORE.',W('p2',/^cost/),1)},
+  {a:ST('p3')-.12, size:112, big:g("DON'T PRESS",ST('p3'))+'<br>'+g('THIS BUTTON.',W('p3',/^button/),1)},
+  {a:ST('k1')-.12, lead:"it's called a", size:96, big:g('SEASONALITY',W('k1',/^seasonality/))+'<br>'+g('ADJUSTMENT.',W('k1',/^adjustment/),1), sub:g('it tells Google to '+L('bid higher.'),W('k1',/^It$/))},
+  {a:ST('k2')-.12, lead:'accounts that used it saw click costs rise', size:210, big:g('2×',W('k2',/^twice/),1), sub:g("as much as accounts that didn't.",W('k2',/^as/))},
+  {a:ST('f0')-.12, lead:"here's what to do instead", size:150, big:g('3 STEPS',W('f0',/^Three/),1), sub:g('before Friday.',W('f0',/^before/))},
+  {a:ST('f1a')-.12, lead:'step one · search for', size:96, big:g('SEASONALITY',W('f1a',/^seasonality/))+'<br>'+g('ADJUSTMENTS',W('f1a',/^adjustments/),1)},
+  {a:ST('f1b')-.12, lead:'one set for black friday?', size:140, big:g('REMOVE IT.',W('f1b',/^remove/),1)},
+  {a:ST('f2a')-.12, lead:'step two · let', size:100, big:g('SMART BIDDING',W('f2a',/^Smart/),1)+'<br>'+g('DO ITS JOB.',W('f2a',/^do/))},
+  {a:ST('f2b')-.12, lead:'google says it already accounts for', size:130, big:g('HOLIDAYS.',W('f2b',/^holidays/),1)},
+  {a:ST('f3a')-.12, lead:'step three · put that energy into', size:140, big:g('YOUR',W('f3a',/^your/))+' '+g('OFFER.',W('f3a',/^offer/),1)},
+  {a:ST('f3b')-.12, lead:'add a black friday', size:110, big:g('PROMOTION',W('f3b',/^promotion/),1)+'<br>'+g('ASSET.',W('f3b',/^asset/)), sub:g('so your discount shows '+L('right in the ad.'),W('f3b',/^so/))},
+  {a:ST('y1')-.12, lead:'now google bids on', size:120, big:g('REAL DEMAND.',W('y1',/^real/),1), sub:g('and shoppers see your deal '+L('before they click.'),W('y1',/^And/))},
+  {a:ST('r1')-.12, lead:'recap · save this', size:100, big:g('REMOVE.',W('r1',/^Remove/))+' '+g('TRUST.',W('r1',/^Trust/))+'<br>'+g('PROMOTE.',W('r1',/^Promote/),1)},
+  {a:ST('c1')-.12, cta:true},
+];
+const hlEls=HL.map(h=>{const e=mk(`<div class="scene">${h.cta?'':`<div class="abs" style="top:220px;left:30px;right:30px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+  ${h.lead?`<div class="h-l mono" style="font-size:38px;color:#AEB7B0;text-transform:lowercase">${h.lead}</div>`:''}
+  <div class="h-b" style="font:900 ${h.size||118}px/.95 Mont;letter-spacing:-.035em;text-transform:uppercase">${h.big}</div>
+  ${h.sub?`<div class="h-s" style="font:700 46px Inter;color:#C8D0CA">${h.sub}</div>`:''}</div>`}</div>`);scenesEl.appendChild(e);return e;});
+
+const CUR=`<svg width="70" height="70" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#fff" stroke="#030403" stroke-width="1.5"/></svg>`;
+const STAMP=(txt)=>`<div class="stamp" style="position:absolute;left:0;right:0;margin:0 auto;width:fit-content;padding:14px 34px;border:8px solid #F5F8F6;border-radius:20px;font:900 70px Mont;color:#F5F8F6;background:rgba(3,4,3,.8);transform:rotate(-7deg);opacity:0">${txt}</div>`;
+function stampAt(el,T,at){const p=P(T,at-.05,.25); st(el,{opacity:clamp(p*3),transform:`rotate(-7deg) scale(${lerp(1.8,1,eo5(p))})`});}
+
+/* ---------- V1a: 5,000 accounts, click cost goes up ---------- */
+const vDots=mk(`<div class="scene"><div class="abs dc" style="left:70px;right:70px;top:720px;padding:32px;${CARD}">
+  <div style="display:flex;align-items:center;gap:16px">${LT(LOGO_G,56,15)}<span class="mono" style="font-size:22px;color:#8E9890">GOOGLE ADS ACCOUNTS · BLACK FRIDAY</span></div>
+  <div style="margin-top:24px;display:grid;grid-template-columns:repeat(20,1fr);gap:10px">${Array.from({length:100},()=>`<i class="dd" style="display:block;aspect-ratio:1;border-radius:50%;background:#22E06F;opacity:0"></i>`).join('')}</div>
+  <div style="margin-top:26px;display:flex;align-items:center;justify-content:space-between"><span class="mono" style="font-size:24px;color:#AEB7B0">AVG. COST PER CLICK</span><span class="dcp" style="font:900 54px Mont">$1.00</span></div>
+  <div style="margin-top:10px;height:22px;border-radius:11px;background:rgba(255,255,255,.1);overflow:hidden"><i class="dcb" style="display:block;height:100%;width:40%;background:#8A938C"></i></div></div></div>`);
+scenesEl.appendChild(vDots);
+function rDots(t,el){const T=t; rise($('.dc',el),T,0,.35,40);
+  $$('.dd',el).forEach((d,i)=>{d.style.opacity=clamp((T-.15-i*.016)/.15);});
+  const c=eo(P(T,W('p2',/^clicks/),.9)); $('.dcp',el).textContent='$'+(1+.5*c).toFixed(2); $('.dcb',el).style.width=lerp(40,80,c)+'%'; $('.dcb',el).style.background=c>.1?'#F5F8F6':'#8A938C';
+  $$('.dd',el).forEach(d=>{if(c>.1) d.style.background='#F5F8F6';});
+}
+/* ---------- V1b: the button ---------- */
+const vBtn=mk(`<div class="scene"><div class="abs bc" style="left:120px;right:120px;top:760px;padding:40px;${CARD};text-align:center">
+  <div class="mono" style="font-size:22px;color:#8E9890">GOOGLE ADS · EXAMPLE</div>
+  <div class="bb" style="margin:34px auto 0;width:fit-content;padding:30px 50px;border-radius:999px;background:#22E06F;color:#030403;font:900 50px Mont;box-shadow:0 0 50px rgba(34,224,111,.6)">+ Seasonality adjustment</div></div>
+  <div class="abs bcur" style="left:700px;top:1010px;opacity:0">${CUR}</div>
+  <div class="abs" style="left:0;right:0;top:880px">${STAMP('✕ DON\'T')}</div></div>`);
+scenesEl.appendChild(vBtn);
+function rBtn(t,el){const T=t+ST('p3')-.12; pop($('.bc',el),t,0,.35,.8);
+  const cu=$('.bcur',el); const mv=eo(P(t,.1,.7)); cu.style.opacity=clamp(P(t,.1,.2)); cu.style.transform=`translate(${(1-mv)*180}px,${(1-mv)*160}px)`;
+  stampAt($('.stamp',el),T,W('p3',/^button/));}
+/* ---------- V1c: what it does ---------- */
+const vAdj=mk(`<div class="scene"><div class="abs ajc" style="left:70px;right:70px;top:720px;padding:34px;${CARD}">
+  <div style="display:flex;align-items:center;gap:16px">${LT(LOGO_G,56,15)}<span class="mono" style="font-size:22px;color:#8E9890">SEASONALITY ADJUSTMENT · EXAMPLE</span></div>
+  ${[['Name','Black Friday'],['Dates','Nov 27 – Nov 30'],['Conversion rate change','+50%']].map(([k,v],i)=>`<div class="aj" style="margin-top:${i?14:26}px;display:flex;justify-content:space-between;align-items:center;padding:22px 26px;border-radius:22px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16)"><span style="font:700 30px Inter;color:#AEB7B0">${k}</span><span style="font:900 ${i===2?56:38}px ${i===2?'Mont':'Inter'};color:${i===2?'var(--lime)':'#fff'}">${v}</span></div>`).join('')}
+  <div class="ajb pill" style="margin-top:22px;background:#F5F8F6;color:#030403;font-size:32px;font-weight:900;opacity:0">↑ Google bids higher on every click</div></div></div>`);
+scenesEl.appendChild(vAdj);
+function rAdj(t,el){const T=t+ST('k1')-.12; rise($('.ajc',el),t,0,.35,40); $$('.aj',el).forEach((r,i)=>rise(r,t,.15+i*.15,.3,20)); pop($('.ajb',el),T,W('k1',/^bid/)-.05,.4,.6);}
+/* ---------- V1d: 2x ---------- */
+const vBars=mk(`<div class="scene"><div class="abs brc" style="left:70px;right:70px;top:720px;padding:34px;${CARD}">
+  <div class="mono" style="font-size:22px;color:#8E9890">RISE IN COST PER CLICK · BLACK FRIDAY WEEK</div>
+  <div style="margin-top:20px;height:380px;display:flex;align-items:flex-end;justify-content:center;gap:90px">
+   ${[['Without it','1×','#8A938C',.5],['With it','2×','#F5F8F6',1]].map(([l,v,c,h])=>`<div style="display:flex;flex-direction:column;align-items:center;gap:12px;height:100%;justify-content:flex-end"><span class="bv" style="font:900 60px Mont;color:${c};opacity:0">${v}</span><i class="bbar" data-h="${h}" style="display:block;width:200px;height:0;border-radius:18px 18px 6px 6px;background:${c}"></i><span style="font:800 32px Inter">${l}</span></div>`).join('')}</div>
+  <div class="mono" style="margin-top:22px;font-size:18px;color:#8E9890">SOURCE: OPTMYZR STUDY, 5,000+ ACCOUNTS PER YEAR, BFCM 2022–2024</div></div></div>`);
+scenesEl.appendChild(vBars);
+function rBars(t,el){const T=t+ST('k2')-.12; rise($('.brc',el),t,0,.35,40);
+  const bs=$$('.bbar',el); const a0=W('k2',/^rise/), a1=W('k2',/^twice/);
+  bs.forEach((b,i)=>{const p=eo(P(T,i?a1-.1:a0,.6)); b.style.height=(+b.dataset.h*300*p)+'px'; b.previousElementSibling.style.opacity=p>.3?1:0;});}
+
+/* ---------- V2: the 3 steps ---------- */
+const STEPS=['Remove the adjustment','Let Smart Bidding work','Promote your offer'];
+const vFix=mk(`<div class="scene"><div class="abs" style="left:90px;right:90px;top:720px;display:flex;flex-direction:column;gap:22px">${STEPS.map((x,i)=>`<div class="fs" style="display:flex;align-items:center;gap:24px;padding:30px 32px;border-radius:28px;${CARD}"><span class="tile" style="width:80px;height:80px;border-radius:22px;font:900 40px Mont">${i+1}</span><span style="font:800 44px Inter">${x}</span></div>`).join('')}</div></div>`);
+scenesEl.appendChild(vFix);
+function rFix(t,el){const T=t+ST('f0')-.12; $$('.fs',el).forEach((c,i)=>pop(c,T,W('f0',/^Three/)-.05+i*.15,.4,.6));}
+
+/* ---------- V3: steps card ---------- */
+const AD=(promo)=>`<div style="padding:26px;border-radius:24px;background:#F5F8F6;color:#030403;text-align:left">
+  <div style="font:700 22px Inter;color:#3A403C"><b>Sponsored</b> · yourstore.com</div>
+  <div style="margin-top:8px;font:800 36px Inter;color:#1a3fb0">Winter Jackets | Free Shipping</div>
+  <div style="margin-top:8px;font:500 26px/1.35 Inter;color:#3A403C">Warm, waterproof jackets for every day. Easy returns.</div>
+  <div class="pr" style="margin-top:14px;display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:14px;background:#E3F9EC;font:800 28px Inter;${promo?'':'opacity:0'}">🏷 Black Friday: 30% off jackets <span style="font:600 22px Inter;color:#3A403C">· Ends Nov 30</span></div></div>`;
+const vStep=mk(`<div class="scene"><div class="abs sc3" style="left:60px;right:60px;top:690px;height:660px;padding:32px;${CARD}">
+  <div style="display:flex;align-items:center;gap:16px">${LT(LOGO_G,56,15)}<span class="mono st-h" style="font-size:22px;color:#8E9890"></span></div>
+  <div class="s1" style="position:absolute;left:32px;right:32px;top:120px">
+    <div style="display:flex;align-items:center;gap:16px;padding:22px 26px;border-radius:999px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.3)"><span style="font-size:34px">🔍</span><span class="q" style="font:700 34px Inter"></span><i class="qc" style="display:inline-block;width:3px;height:36px;background:#fff"></i></div>
+    <div class="r1" style="margin-top:26px;padding:24px 26px;border-radius:22px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.18)">
+      <div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font:800 34px Inter">Black Friday</div><div style="font:600 26px Inter;color:#AEB7B0">Nov 27 – Nov 30 · +50%</div></div>
+      <span class="rm pill" style="background:#F5F8F6;color:#030403;font-size:28px;font-weight:900">Remove</span></div></div>
+    <div class="rok" style="margin-top:22px;font:800 32px Inter;color:var(--lime);opacity:0">✓ Removed. Bids go back to normal.</div>
+    <div class="abs s1cur" style="left:640px;top:200px;opacity:0">${CUR}</div></div>
+  <div class="s2" style="position:absolute;left:32px;right:32px;top:120px">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:22px 26px;border-radius:22px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16)"><span style="font:800 32px Inter">Bid strategy</span><span style="font:800 30px Inter;color:var(--lime)">Smart Bidding ✓</span></div>
+    <div style="margin-top:20px;display:grid;grid-template-columns:repeat(9,1fr);gap:8px">${['M','T','W','T','F','S','S','M','T'].map((d,i)=>`<div class="cd" style="text-align:center;padding:16px 0;border-radius:14px;background:${i>=4&&i<=7?'rgba(34,224,111,.18)':'rgba(255,255,255,.06)'};border:1.5px solid ${i>=4&&i<=7?'rgba(34,224,111,.6)':'rgba(255,255,255,.12)'}"><div style="font:700 22px Inter;color:#AEB7B0">${d}</div><div style="font:900 30px Mont">${23+i>30?23+i-30:23+i}</div></div>`).join('')}</div>
+    <div class="sbok" style="margin-top:24px;padding:22px 26px;border-radius:22px;background:rgba(34,224,111,.12);border:2px solid rgba(34,224,111,.6);font:800 32px Inter;opacity:0">✓ Black Friday demand: already in the model</div></div>
+  <div class="s3" style="position:absolute;left:32px;right:32px;top:120px">${AD(false)}</div>
+</div></div>`);
+scenesEl.appendChild(vStep);
+for(let i=0;i<3;i++) $('#prog').appendChild(mk('<div class="seg"><i></i></div>'));
+function rStep(t,el){const T=t+ST('f1a')-.12;
+  const step=T<ST('f2a')-.12?0:T<ST('f3a')-.12?1:2;
+  $('.st-h',el).textContent=['STEP 1 · REMOVE IT · EXAMPLE','STEP 2 · SMART BIDDING · EXAMPLE','STEP 3 · PROMOTION ASSET · EXAMPLE'][step];
+  ['.s1','.s2','.s3'].forEach((c,i)=>$(c,el).style.display=step===i?'block':'none');
+  if(step===0){typed($('.q',el),'seasonality adjustments',T,W('f1a',/^seasonality/)-.1,20); $('.qc',el).style.opacity=Math.floor(T*3)%2;
+    rise($('.r1',el),T,W('f1b',/^If/)-.1,.35,30); const rm=W('f1b',/^remove/);
+    const cu=$('.s1cur',el); const mv=eo(P(T,rm-.7,.6)); cu.style.opacity=clamp(P(T,rm-.7,.2))*(1-clamp(P(T,rm+.6,.3))); cu.style.transform=`translate(${(1-mv)*120}px,${(1-mv)*200}px) scale(${T>rm&&T<rm+.15?.85:1})`;
+    const done=T>=rm+.15; $('.r1',el).style.opacity=done?lerp(1,.35,P(T,rm+.15,.3)):$('.r1',el).style.opacity; $('.r1',el).style.textDecoration=done?'line-through':'none'; rise($('.rok',el),T,rm+.25,.3,16);}
+  if(step===1){$$('.cd',el).forEach((c,i)=>rise(c,T-(ST('f2a')-.12),.1+i*.05,.3,16)); pop($('.sbok',el),T,W('f2b',/^already/)-.05,.4,.6);}
+  if(step===2){const pr=$('.pr',el); const p=eo(P(T,W('f3b',/^promotion/)-.1,.4)); pr.style.opacity=p; pr.style.transform=`translateY(${(1-p)*30}px)`;
+    pr.style.boxShadow=T>=W('f3b',/^discount/)?`0 0 0 ${3+3*Math.sin(T*8)}px rgba(34,224,111,.7)`:'none';}
+}
+
+/* ---------- V4: payoff ---------- */
+const vPay=mk(`<div class="scene"><div class="abs pc" style="left:60px;right:60px;top:690px;padding:32px;${CARD}">
+  ${AD(true)}
+  <div style="margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div style="padding:20px 22px;border-radius:22px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16)"><div class="mono" style="font-size:20px;color:#8E9890">CLICKS</div><div class="pk" style="font:900 56px Mont;color:var(--lime)">+0%</div></div>
+    <div style="padding:20px 22px;border-radius:22px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16)"><div class="mono" style="font-size:20px;color:#8E9890">COST PER CLICK</div><div class="pcp" style="font:900 56px Mont">steady</div></div></div>
+  <div class="mono" style="margin-top:14px;font-size:18px;color:#8E9890">ILLUSTRATIVE EXAMPLE</div></div></div>`);
+scenesEl.appendChild(vPay);
+function rPay(t,el){const T=t+ST('y1')-.12; rise($('.pc',el),t,0,.35,30);
+  $('.pk',el).textContent='+'+Math.round(60*eo(P(T,W('y1',/^real/),1.4)))+'%';
+  const pr=$('.pr',el); pr.style.boxShadow=T>=W('y1',/^deal/)-.05?`0 0 0 ${3+3*Math.sin(T*8)}px rgba(34,224,111,.7)`:'none';}
+
+/* ---------- V5: recap ---------- */
+const RC=[['Remove the seasonality adjustment',/^Remove/],['Trust Smart Bidding',/^Trust/],['Promote the offer: promotion asset',/^Promote/]];
+const vRec=mk(`<div class="scene"><div class="abs" style="left:70px;right:70px;top:720px;display:flex;flex-direction:column;gap:22px">${RC.map(([x])=>`<div class="rr" style="display:flex;align-items:center;gap:22px;padding:30px;border-radius:26px;border:2px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06)"><span class="rb" style="flex:none;width:60px;height:60px;border-radius:16px;border:4px solid #8A938C;display:flex;align-items:center;justify-content:center"></span><span style="font:800 38px Inter">${x}</span></div>`).join('')}</div></div>`);
+scenesEl.appendChild(vRec);
+function rRec(t,el){const T=t+ST('r1')-.12; $$('.rr',el).forEach((r,i)=>{rise(r,t,.1+i*.1,.35,30); const on=T>=W('r1',RC[i][1])-.05; const b=$('.rb',r);
+  b.style.borderColor=on?'#22E06F':'#8A938C'; b.style.background=on?'#22E06F':'transparent'; b.innerHTML=on?TICK(36):''; r.style.borderColor=on?'rgba(34,224,111,.6)':'rgba(255,255,255,.16)';});}
+
+/* ---------- V6: CTA ---------- */
+const ANG=['Remove adjustment','Trust Smart Bidding','Promotion asset','Hands off bids'];
+const vCta=mk(`<div class="scene">
+  <div class="abs mono c-t" style="top:300px;left:0;right:0;text-align:center;font-size:34px;color:var(--lime)">SEND THIS TO A GOOGLE ADS USER</div>
+  <div class="abs" style="left:110px;right:110px;top:380px;display:grid;grid-template-columns:1fr 1fr;gap:18px">${ANG.map((a,i)=>`<div class="c-g ghost" style="border-radius:28px;padding:18px 24px;display:flex;align-items:center;gap:18px"><span class="tile" style="width:60px;height:60px;border-radius:16px;font:700 24px Mono">${String(i+1).padStart(2,'0')}</span><span style="font:800 32px Inter">${a}</span></div>`).join('')}</div>
+  <div class="abs c-f" style="top:900px;left:0;right:0;text-align:center;font:900 100px Mont;letter-spacing:-.03em">Follow for more</div>
+  <div class="abs c-s" style="top:1030px;left:0;right:0;text-align:center;font-family:ISerif;font-size:76px;color:#D8E0DA">simple Google &amp; Meta ads fixes</div>
+  <div class="abs c-b pill" style="top:1180px;left:0;right:0;margin:0 auto;width:fit-content;padding:24px 70px;font-size:44px;font-weight:900;background:var(--lime);color:#030403">Follow</div>
+  <div class="abs c-m" style="left:640px;top:1300px;opacity:0">${CUR}</div></div>`);
+scenesEl.appendChild(vCta);
+function rCta(t,el){rise($('.c-t',el),t,0,.3,20); $$('.c-g',el).forEach((g2,i)=>pop(g2,t,.1+i*.08,.35,.6));
+  rise($('.c-f',el),t,.5,.4,30); rise($('.c-s',el),t,.7,.4,30); pop($('.c-b',el),t,.9,.4,.6);
+  const tap=2.2; const m=$('.c-m',el); m.style.opacity=clamp(P(t,1.3,.2)); m.style.transform=`translate(${(1-eo(P(t,1.3,.8)))*200}px,${(1-eo(P(t,1.3,.8)))*160}px) scale(${t>tap&&t<tap+.15?.85:1})`;
+  const b=$('.c-b',el); if(t>=tap){b.innerHTML='Following ✓'; b.style.background='rgba(255,255,255,.12)'; b.style.color='#fff'; b.style.border='2px solid rgba(255,255,255,.3)';}}
+
+const VL=[
+  {el:vDots,a:0,b:ST('p3')-.12,r:rDots},
+  {el:vBtn,a:ST('p3')-.12,b:ST('k1')-.12,r:rBtn},
+  {el:vAdj,a:ST('k1')-.12,b:ST('k2')-.12,r:rAdj},
+  {el:vBars,a:ST('k2')-.12,b:ST('f0')-.12,r:rBars},
+  {el:vFix,a:ST('f0')-.12,b:ST('f1a')-.12,r:rFix},
+  {el:vStep,a:ST('f1a')-.12,b:ST('y1')-.12,r:rStep},
+  {el:vPay,a:ST('y1')-.12,b:ST('r1')-.12,r:rPay},
+  {el:vRec,a:ST('r1')-.12,b:ST('c1')-.12,r:rRec},
+  {el:vCta,a:ST('c1')-.12,b:END+1,r:rCta},
+];
+const PAYA=ST('y1')-.12;
+const PS=[ST('f1a')-.12,ST('f2a')-.12,ST('f3a')-.12,ST('y1')-.12];
+const NOCAP=['r1','c1'];
+
+/* captions */
+const capWords=[];
+S.forEach(s=>s.words.forEach((w,k)=>{const nx=s.words[k+1];capWords.push({w:w.w.replace(/[.,]$/,''),s:w.s,e:nx?nx.s:s.start+s.dur,seg:s.key,brk:/[.,!?]$/.test(w.w)});}));
+const chunks=[];let cur=[];
+capWords.forEach((w,i)=>{cur.push(w);const nx=capWords[i+1];if(cur.length>=3||w.brk||!nx||nx.seg!==w.seg){chunks.push(cur);cur=[];}});
+function renderBg(t){
+  st($('#b1'),{left:`${300+Math.sin(t*.35)*180}px`,top:`${200+Math.cos(t*.28)*160}px`});
+  st($('#b2'),{left:`${500+Math.cos(t*.3)*200}px`,top:`${1300+Math.sin(t*.4)*180}px`});
+  st($('#b3'),{left:`${100+Math.sin(t*.5+1)*120}px`,top:`${900+Math.cos(t*.45)*200}px`});
+  st($('#grid'),{transform:`translateY(${(t*30)%90}px)`});
+}
+const cuts=VL.map(v=>v.a).filter(x=>x>0);
+window.seek=function(t){
+  renderBg(t);
+  HL.forEach((h,i)=>{const b=i+1<HL.length?HL[i+1].a:END+1; const el=hlEls[i]; const vis=t>=h.a&&t<b; el.style.display=vis?'block':'none'; if(!vis)return;
+    if($('.h-l',el)) rise($('.h-l',el),t-h.a,0,.25,16);
+    $$('.h-w',el).forEach(x=>{const at=+x.dataset.at; const p=eo5(P(t,Math.max(h.a,at-.06),.25)); st(x,{opacity:p,transform:`scale(${lerp(1.2,1,p)})`,filter:`blur(${(1-p)*10}px)`});});
+    if($('.h-n',el)) $('.h-n',el).textContent='+'+Math.round(340*eo(P(t,W('p1',/^three/)-.05,1.2)))+'%';
+  });
+  VL.forEach(v=>{const vis=t>=v.a&&t<v.b; v.el.style.display=vis?'block':'none'; if(!vis)return; const lt=t-v.a;
+    if(v.a>0){const p=eo5(P(lt,0,.3)); st(v.el,{transform:`scale(${lerp(1.05,1,p)})`,opacity:p});} v.r(lt,v.el);});
+  [...$('#prog').children].forEach((s,i)=>{s.firstChild.style.width=`${clamp((t-PS[i])/(PS[i+1]-PS[i]))*100}%`;});
+  st($('#prog'),{opacity:t<PS[0]-.2?0:t<PS[0]+.2?eo(P(t,PS[0]-.2,.4)):(t>PS[3]?1-eo(P(t,PS[3],.3)):1)});
+  const cap=$('#cap'); const ch=chunks.find(c=>t>=c[0].s-.05&&t<c[c.length-1].e+.08);
+  if(!ch||NOCAP.includes(ch[0].seg)){cap.innerHTML='';} else {
+    const pin=eo5(P(t,ch[0].s-.05,.18));
+    cap.innerHTML=ch.map(w=>{const on=t>=w.s&&t<w.e+.05; return `<span style="color:${on?'#22E06F':'#fff'};transform:scale(${on?1.08:1})">${w.w}</span>`}).join(' ');
+    st(cap,{transform:`translateY(${(1-pin)*30}px) scale(${lerp(.9,1,pin)})`,opacity:pin});
+  }
+  let fl=0, wy=-2400; cuts.forEach(c=>{const d=Math.abs(t-c); if(d<.08) fl=Math.max(fl,(1-d/.08)*.3);});
+  const pw=PAYA; if(Math.abs(t-pw)<.21){wy=lerp(1920,-2400,eio((t-pw+.21)/.42));}
+  $('#flash').style.opacity=fl; $('#wipe').style.top=`${wy}px`;
+  return true;
+};
+window.__ready=document.fonts.ready.then(()=>true);
+</script></body></html>

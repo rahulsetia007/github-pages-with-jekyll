@@ -1,0 +1,10 @@
+pain|Your ads report fifty trials this week. Billing shows four paying customers. Here's a five minute Monday routine that tells you exactly what to do next!
+poke|Because Google and Meta count every trial as a win. So you scale the campaign with the most signups, and the fewest buyers.
+fix0|Every Monday, paste one export into Claude, and get one call per campaign. Scale it, fix it, hold it, or get more data.
+fix1|Step one. Download spend, signups, and billing for the week, by campaign.
+fix2|Step two. Ask Claude for cost per paying customer, and trial to paid rate, for each campaign.
+fix3|Step three. Make the call. Under your target cost? Scale it. Trials up, but buyers flat? Fix the funnel.
+fix4|Fewer than ten buyers? Hold, it's too early. Ads and billing don't match? Get more data. Fix your tracking first.
+payoff|Now every campaign gets one clear call, every Monday. And your budget follows paying customers, not trials!
+recap|Download the numbers. Get cost per paying customer. Make one call per campaign.
+cta|Comment SaaS, and I'll send you the prompt and the decision rules.

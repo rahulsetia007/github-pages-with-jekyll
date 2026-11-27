@@ -1,0 +1,9 @@
+pain|Google Ads says forty leads. Your inbox says twelve. Here's how to find out which number is lying, and fix it!
+poke|Because Google bids on those fake leads. So it hunts for more people like them. And you scale a campaign that isn't working.
+fix0|It's usually one lead, counted two or three times. Here's the fix.
+fix1|Step one. Go to Goals, then Conversions. Keep one real lead action as primary, like your form submit.
+fix2|Step two. Set thank you page views to secondary. That's the same lead, counted again.
+fix3|Step three. For lead actions, switch Count from Every, to One!
+payoff|Now Google Ads says twelve. Your inbox says twelve. And Google bids for real leads only!
+recap|One primary action. Duplicates on secondary. Count set to one.
+cta|Send this to someone who trusts their Google Ads dashboard.

@@ -1,0 +1,14 @@
+p1|Meta says twenty sales. Your store says ten.|0.3
+p2|Your setup might be counting every sale twice.|0.6
+k1|Picture two cashiers ringing up the same customer. One at the door, and one at the till.|0.3
+k2|Your Meta Pixel and your Conversions API can do the same thing. Then Meta learns from sales that never happened.|0.6
+f0|Here's how to check. Three steps.|0.5
+f1a|Step one. Open Events Manager, and click your Purchase event.|0.25
+f1b|See if it comes from the browser, the server, or both.|0.6
+f2a|Step two. If it's both, check deduplication.|0.25
+f2b|Both need to send the same event ID, so Meta counts the sale once.|0.6
+f3a|Step three. Compare a week of purchases in Meta with your real orders.|0.25
+f3b|If Meta is way higher, ask your developer, or your store's app, to fix the event ID.|0.6
+y1|Now one sale counts once. And Meta learns from real buyers, not ghosts.|0.6
+r1|Check the source. Check deduplication. Compare with real orders.|0.6
+c1|Send this to someone who trusts their Meta numbers a little too much.|0.3

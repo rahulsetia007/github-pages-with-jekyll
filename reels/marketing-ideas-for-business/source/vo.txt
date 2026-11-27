@@ -1,0 +1,14 @@
+p1|Out of marketing ideas for your business?|0.3
+p2|You might be digging in the wrong place.|0.6
+k1|Most owners keep digging for new strangers, with new ads, every single week.|0.3
+k2|But the gold is already in your backyard. Your customers. And you walk right past it.|0.6
+f0|Here are three ideas you can run this week. Each one starts with a customer.|0.5
+f1a|Idea one. Their questions.|0.25
+f1b|Write down the ten questions customers ask you most. Ask ChatGPT to turn each one into a short video script.|0.6
+f2a|Idea two. Their words.|0.25
+f2b|Ask for a review right after a happy moment. Then put the best line in your next ad.|0.6
+f3a|Idea three. Their friends.|0.25
+f3b|Give happy customers a simple reason to refer a friend. Like, give twenty dollars, get twenty dollars.|0.6
+y1|Now you have a month of content, real proof in your ads, and new customers who already trust you.|0.6
+r1|Their questions. Their words. Their friends.|0.6
+c1|Comment IDEAS, and I'll send you the ChatGPT prompt for idea one.|0.3

@@ -1,0 +1,8 @@
+hook|Meta now grades how different your ads look. And a low score could be holding your ad set back.
+how|It's called creative diversity. It shows up at the ad set level, and tells you how visually varied your images and videos are.
+bad|And no, it's not about using more creators. Five people in the same kind of ad still looks the same.
+good|It's about different styles. Product shot, comparison, UGC, lifestyle, before and after.
+e1|Meta's bet: an ad set with a real mix has a better chance to perform than one full of product shots.
+find|To check yours, open Ads Manager, go to Ad sets, then Columns, and search creative diversity.
+e2|It's still estimated and in development. So test it, and watch your own cost per result.
+cta|Comment DIVERSITY, and I'll send you Meta's official update.

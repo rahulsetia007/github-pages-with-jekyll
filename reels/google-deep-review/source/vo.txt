@@ -1,0 +1,9 @@
+pain|Your client report probably has a mistake in it. You just can't see it. Here's the free Google tool that finds it, before your client does!
+poke|One wrong number, or one claim with no proof, and your client stops trusting everything else you send.
+fix0|It's called Deep Review. Google just opened it to everyone, with two free reviews a week.
+fix1|Step one. Sign in with your Google account, and upload your document.
+fix2|Step two. It was built for research papers, so it's strict. It flags weak claims, missing evidence, and gaps in your logic.
+fix3|Step three. Read the report, fix what matters, and always double check it yourself.
+payoff|Now your report goes out clean, and your client trusts every number in it!
+recap|Upload it. Read the report. Fix it, and double check.
+cta|Send this to someone who writes client reports.

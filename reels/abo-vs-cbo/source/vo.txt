@@ -1,0 +1,8 @@
+p1|Meta spent ninety dollars on one ad set.|0.25
+p2|And five dollars on the others.|0.2
+p3|Why?|0.5
+c1|Because of CBO. Campaign budget.|0.3
+c2|You give Meta one budget, and Meta decides where it goes.|0.5
+a1|ABO is the opposite.|0.25
+a2|You set the budget on each ad set, yourself.|0.5
+k1|Use the wrong one, and two of your ads never get enough money to prove themselves.|0.6

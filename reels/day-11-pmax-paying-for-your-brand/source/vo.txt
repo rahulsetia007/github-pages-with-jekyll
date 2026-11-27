@@ -1,0 +1,9 @@
+pain|You might be paying Google for customers who were already looking for you. Here's how to check if Performance Max is doing it!
+poke|Someone searches your business name. Your ad shows up first. They click, and you pay. But they were going to find you anyway.
+fix0|Performance Max can bid on your own brand name. Here's how to check.
+fix1|Step one. Open the campaign's search terms. Look for your brand name in the list.
+fix2|Step two. Open channel performance, and see how much went to Search.
+fix3|Step three. In campaign settings, add a brand exclusion for your own name, if that fits your goals.
+payoff|Now your budget goes to new customers, not people who already know you!
+recap|Check search terms. Check channels. Exclude your brand.
+cta|Comment P Max, and I'll send you the full checklist.

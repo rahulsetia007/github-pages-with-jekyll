@@ -1,0 +1,8 @@
+hook|Your Google Ads might be showing to people in other cities. And you're paying for every click.
+how|The default location setting can include people who are just interested in your area, even if they live far away.
+bad|So someone hours away searches plumber Toronto, clicks your ad, and can never hire you.
+good|For a local business, switch to Presence. People actually in, or regularly in, your area.
+find|Open your campaign, go to Settings, then Locations, then Location options.
+e1|Check it in every campaign. Each one has its own setting.
+e2|Selling to visitors, like a hotel? Then the default can make sense.
+cta|Check this setting today. Send this to a local business owner.
