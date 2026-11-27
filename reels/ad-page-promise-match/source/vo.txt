@@ -1,0 +1,14 @@
+p1|Getting clicks, but nobody buys?|0.3
+p2|Your ad might be making a promise your page doesn't keep.|0.6
+k1|Picture a shop sign that says pizza. You walk in, and they sell shoes.|0.3
+k2|You walk straight out. That's what your visitors do, and you already paid for the click.|0.6
+f0|Here's the fix. Three steps.|0.5
+f1a|Step one. Write down the one promise in your ad. The offer, the price, the words.|0.3
+f1b|Then open your page, and look at the top. Can you see that same promise, right away?|0.6
+f2a|Step two. If not, copy your ad's headline to the top of your page.|0.25
+f2b|Same words, same offer, same picture.|0.6
+f3a|Step three. One ad, one page.|0.25
+f3b|If your ad is about one product, don't send people to your home page.|0.6
+y1|Now the sign says pizza, and inside, there's pizza. People stay, and they buy.|0.6
+r1|Find the promise. Put it at the top. One ad, one page.|0.6
+c1|Send this to someone whose ads get clicks but no sales.|0.3

@@ -1,0 +1,15 @@
+p1|You keep fixing your ads, but sales don't move.|0.3
+p2|You might be fixing the wrong part of your funnel.|0.6
+k1|Picture a pipe with water flowing through it. One joint has a big leak.|0.3
+k2|Turning up the tap doesn't help. More ad budget just leaks out faster.|0.6
+f0|Here's how to find the leak. Three steps.|0.5
+f1a|Step one. Write down each step. Clicks, page visits, add to carts, and sales.|0.3
+f1b|Use last month's numbers.|0.6
+f2a|Step two. Divide each step by the one before it.|0.25
+f2b|A thousand clicks. Eight hundred visits. Two hundred carts. Twenty sales.|0.3
+f2c|Carts to sales is just ten percent. That's your leak.|0.6
+f3a|Step three. Fix only that step first.|0.25
+f3b|Here, that's checkout. Shipping costs, payment options, and too many steps.|0.6
+y1|Now every dollar you spend makes it all the way through the pipe.|0.6
+r1|Write down the steps. Divide. Fix the biggest leak first.|0.6
+c1|Send this to someone who keeps raising their ad budget.|0.3

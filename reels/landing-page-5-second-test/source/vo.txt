@@ -1,0 +1,14 @@
+p1|People click your ad, land on your page, and leave in seconds.|0.3
+p2|Your page might be failing the five second test.|0.6
+k1|Think of a shop window. You glance for a few seconds, then you walk in, or you walk past.|0.3
+k2|Your landing page is that window. If it's unclear, you paid for a click that walked right past.|0.6
+f0|Here's the five second test. Three checks.|0.5
+f1a|Check one. Is it clear?|0.25
+f1b|Show your page to a friend for five seconds. Can they say what you sell, and who it's for?|0.6
+f2a|Check two. Is there proof?|0.25
+f2b|A review, a number, or a real customer, near the top. If not, add one.|0.6
+f3a|Check three. Is there friction?|0.25
+f3b|You want one obvious button. Remove the menus, pop ups, and extra links that pull people away.|0.6
+y1|Now people get it in five seconds, believe it, and know exactly what to click.|0.6
+r1|Clear. Proof. No friction. Test it in five seconds.|0.6
+c1|Send this to someone whose page gets clicks but no leads.|0.3
