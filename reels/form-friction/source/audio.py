@@ -44,7 +44,7 @@ music = music + (pad * .5 + bl * .55 + arp) * side; music /= np.max(np.abs(music
 # sfx: whoosh + sub hit on each scene change, pops for list rows, tap for Follow
 sfx = np.zeros(N)
 _w=lambda k,p,n=0:[w['s'] for w in S[k]['words'] if w['w'].startswith(p)][n]
-starts = [S[k]['start'] - .12 for k in ['k1', 'f1a', 'y1', 'r1', 'c1']]
+starts = [S[k]['start'] - .12 for k in ['k1', 'f0', 'f1a', 'y1', 'r1', 'c1']]
 for b in starts:
     l = int(.45 * sr); et = np.arange(l) / sr; x = rng.standard_normal(l); out = np.zeros(l); C = 9
     for j in range(C):
@@ -58,42 +58,36 @@ def tick(at, f=1500, g=.25):
 def wt(seg, pre):
     return next((w['s'] for w in S[seg]['words'] if w['w'].startswith(pre)), None)
 st0 = lambda k: S[k]['start'] - .18
-# PAIN: swipe ticks while the feed scrolls
-for k in range(6): tick(.2 + k * .7, 1400, .12)
+# PAIN: typing, then the quit
+for k in range(14): tick(.3 + k * .07, 3000 + (k % 3) * 300, .05)
 hl2 = int(.5 * sr); ht2 = np.arange(hl2) / sr
 thud = np.sin(2 * np.pi * (60 * ht2 + 60 * (1 - np.exp(-ht2 * 25)) / 25)) * np.exp(-ht2 * 8)
-place(sfx, thud, wt('p2', 'stops'), .35)
-# POKE: claim tags pop, cash ticks
-for pre in ['quality', 'fast', 'best']:
-    c = wt('k2', pre)
-    if c: tick(c, 2200, .2)
-pay = wt('k2', 'pay')
-for k in range(6): tick(pay + k * .2, 3200, .12)
-# the purple cow: brake whoosh + a soft synthesized moo
-tp = wt('f0a', 'purple')
-ml = int(1.1 * sr); mt = np.arange(ml) / sr
-f = 150 - 40 * np.clip(mt / 1.1, 0, 1)
-ph = 2 * np.pi * np.cumsum(f) / sr
-moo = (np.sin(ph) + .5 * np.sin(2 * ph) + .25 * np.sin(3 * ph)) * np.sin(np.pi * np.clip(mt / 1.1, 0, 1)) ** 1.5
-moo = sosfilt(butter(2, [200, 1200], 'bandpass', fs=sr, output='sos'), moo)
-place(sfx, moo / np.max(np.abs(moo)), tp + .3, .5)
-tick(wt('f0a', 'tell'), 2600, .25); tick(wt('f0b', 'Seth'), 2200, .22)
-# steps
-w0 = wt('f1a', 'Write')
-for k in range(4): tick(w0 + k * .25, 1800 + k * 150, .15)
-c0 = wt('f1b', 'Cross')
-for k in range(4): tick(c0 + k * .12, 900, .18)
-tick(wt('f2a', 'Ask'), 2400, .2); tick(wt('f2b', 'replies'), 900, .22); tick(wt('f2b', 'Replies'), 3000, .3)
-f1 = wt('f3a', 'first')
-for k in range(12): tick(f1 + k * .05, 3000 + (k % 3) * 300, .05)
-s0 = wt('f3b', 'spread')
-for k in range(6): tick(s0 + .1 + k * .12, 2000 + k * 150, .15)
-# PAYOFF: feed brakes on your ad, saves and shares count
-place(sfx, thud, wt('y1', 'purple') + .3, .3)
-r0 = wt('y1', 'remember')
-for k in range(8): tick(r0 + k * .15, 2400 + (k % 2) * 400, .1)
+place(sfx, thud, wt('p1', 'quit'), .4)
+a, b = wt('p2', 'Every'), wt('p2', 'leave')
+for k in range(8): tick(a + k * (b - a) / 8, 1600 + k * 100, .1)
+# POKE: locks click on, person rattles the door, coin
+a, b = wt('k1', 'Each'), wt('k1', 'lock')
+for k in range(8): tick(a + k * (b - a) / 7, 900, .22)
+for k in range(5): tick(wt('k2', 'people') + k * .08, 700, .12)
+tick(wt('k2', 'paid'), 3200, .25); tick(wt('k2', 'paid') + .08, 4000, .2)
+# FIX
+th = wt('f0', 'Three')
+for k in range(3): tick(th + k * .15, 2200 + k * 200, .2)
+l0 = wt('f1a', 'List')
+for k in range(8): tick(l0 + k * .12, 1800 + k * 80, .1)
+d0 = wt('f1b', 'do')
+for k in range(8): tick(d0 + k * .18, 2600, .1)
+for c in [wt('f2a', 'Cut') + .2, wt('f2b', 'Company'), wt('f2b', 'Company') + .3, wt('f2b', 'budget'), wt('f2b', 'how')]:
+    tick(c, 900, .22)
+s0 = wt('f3b', 'time')
+for k in range(10): tick(s0 + k * .12, 3400, .07)
+# PAYOFF: unlock, door opens, people walk in
+tick(wt('y1', 'lock'), 2800, .3)
+place(sfx, thud, wt('y1', 'lock') + .4, .25)
+m = wt('y1', 'More')
+for k in range(5): tick(m + k * .35 + .9, 2000 + k * 150, .15)
 # RECAP
-for pre in ['Cross', 'Find', 'Lead']:
+for pre in ['List', 'Cut', 'Keep']:
     c = wt('r1', pre)
     if c: tick(c, 2600, .22); tick(c + .06, 3300, .16)
 tick(S['c1']['start'] - .12 + 2.2, 2200, .35)

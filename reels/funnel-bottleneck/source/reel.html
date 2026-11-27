@@ -106,7 +106,7 @@ const hlEls=HL.map(h=>{const e=mk(`<div class="scene">${h.cta?'':`<div class="ab
   ${h.sub?`<div class="h-s" style="font:700 44px Inter;color:#C8D0CA">${h.sub}</div>`:''}</div>`}</div>`);scenesEl.appendChild(e);return e;});
 
 const CUR=`<svg width="70" height="70" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#fff" stroke="#030403" stroke-width="1.5"/></svg>`;
-const STAMP=(txt)=>`<div class="stamp" style="position:absolute;left:0;right:0;margin:0 auto;width:fit-content;padding:12px 30px;border:8px solid #F5F8F6;border-radius:20px;font:900 64px Mont;color:#F5F8F6;background:rgba(3,4,3,.85);transform:rotate(-7deg);opacity:0">${txt}</div>`;
+const STAMP=(txt)=>`<div class="stamp" style="position:absolute;left:0;right:0;margin:0 auto;width:fit-content;padding:12px 30px;border:8px solid #F5F8F6;border-radius:20px;font:900 52px Mont;color:#F5F8F6;background:rgba(3,4,3,.85);transform:rotate(-7deg);opacity:0">${txt}</div>`;
 function stampAt(el,T,at){const p=P(T,at-.05,.25); st(el,{opacity:clamp(p*3),transform:`rotate(-7deg) scale(${lerp(1.8,1,eo5(p))})`});}
 
 /* ---------- the pipe: tap on the left, 4 joints, a leak at Carts -> Sales, a sales cup on the right ---------- */
